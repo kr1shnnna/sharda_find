@@ -102,9 +102,35 @@ const getMyItems = async (req, res) => {
   }
 };
 
+const getItemById = async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id).populate(
+      "reportedBy",
+      "name email"
+    );
+
+    if (!item) {
+      return res.status(404).json({
+        message: "Item not found",
+      });
+    }
+
+    res.status(200).json({
+      item,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Unable to fetch item details",
+      error: error.message,
+    });
+  }
+};
+
+
 module.exports = {
   createItem,
   getItems,
   getMyItems,
+  getItemById,
 };
 
