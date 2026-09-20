@@ -7,6 +7,15 @@ const itemSchema = new mongoose.Schema(
       required: [true, "Item title is required"],
       trim: true,
     },
+
+    normalizedTitle: {
+      type: String,
+      required: true,
+    },
+    normalizedLocation: {
+      type: String,
+      required: true,
+    },
     description: {
       type: String,
       required: [true, "Item description is required"],
@@ -70,7 +79,7 @@ const itemSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Item = mongoose.model("Item", itemSchema);

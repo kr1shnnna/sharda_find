@@ -26,13 +26,45 @@ const createItem = async (req, res) => {
       });
     }
 
+    const normalizedTitle = title.trim().replace(/\s+/g, " ").toLowerCase();
+    const normalizedLocation = location
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+
+    const itemDateValue = new Date(itemDate);
+
+    if (Number.isNaN(itemDateValue.getTime())) {
+      return res.status(400).json({
+        message: "Please provide a valid item date",
+      });
+    }
+
+    const duplicateItem = await Item.findOne({
+      reportedBy: req.user._id,
+      type,
+      category,
+      normalizedTitle,
+      normalizedLocation,
+      itemDate: itemDateValue,
+      status: { $in: ["active", "claim-pending"] },
+    });
+
+    if (duplicateItem) {
+      return res.status(409).json({
+        message: "You already have an active post for this item.",
+      });
+    }
+
     const item = await Item.create({
       title,
+      normalizedTitle,
+      normalizedLocation,
       description,
       type,
       category,
       location,
-      itemDate,
+      itemDate: itemDateValue,
       returnMethod,
       pickupLocation,
       reportedBy: req.user._id,
@@ -49,6 +81,8 @@ const createItem = async (req, res) => {
     });
   }
 };
+
+
 
 const getItems = async (req, res) => {
   try {
