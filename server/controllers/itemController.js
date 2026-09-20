@@ -1,4 +1,5 @@
 const Item = require("../models/Item");
+const uploadToCloudinary = require("../utils/cloudinaryUpload");
 
 const createItem = async (req, res) => {
   try {
@@ -27,6 +28,7 @@ const createItem = async (req, res) => {
     }
 
     const normalizedTitle = title.trim().replace(/\s+/g, " ").toLowerCase();
+
     const normalizedLocation = location
       .trim()
       .replace(/\s+/g, " ")
@@ -56,6 +58,19 @@ const createItem = async (req, res) => {
       });
     }
 
+    const uploadResults = req.files?.length
+      ? await Promise.all(
+          req.files.map((file) =>
+            uploadToCloudinary(file, "sharda-find/items")
+          )
+        )
+      : [];
+
+    const images = uploadResults.map((result) => ({
+      url: result.secure_url,
+      publicId: result.public_id,
+    }));
+
     const item = await Item.create({
       title,
       normalizedTitle,
@@ -67,6 +82,7 @@ const createItem = async (req, res) => {
       itemDate: itemDateValue,
       returnMethod,
       pickupLocation,
+      images,
       reportedBy: req.user._id,
     });
 
@@ -81,8 +97,6 @@ const createItem = async (req, res) => {
     });
   }
 };
-
-
 
 const getItems = async (req, res) => {
   try {
@@ -159,7 +173,6 @@ const getItemById = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   createItem,
