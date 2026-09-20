@@ -22,6 +22,12 @@ const claimSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    evidenceImages: [
+      {
+        url: String,
+        publicId: String,
+      },
+    ],
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
@@ -46,3 +52,4 @@ const claimSchema = new mongoose.Schema(
 const Claim = mongoose.model("Claim", claimSchema);
 
 module.exports = Claim;
+

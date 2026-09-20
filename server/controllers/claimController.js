@@ -1,5 +1,6 @@
 const Claim = require("../models/Claim");
 const Item = require("../models/Item");
+const uploadToCloudinary = require("../utils/cloudinaryUpload");
 
 const createClaim = async (req, res) => {
   try {
@@ -43,11 +44,25 @@ const createClaim = async (req, res) => {
       });
     }
 
+    const uploadResults = req.files?.length
+      ? await Promise.all(
+          req.files.map((file) =>
+            uploadToCloudinary(file, "sharda-find/claim-evidence")
+          )
+        )
+      : [];
+
+    const evidenceImages = uploadResults.map((result) => ({
+      url: result.secure_url,
+      publicId: result.public_id,
+    }));
+
     const claim = await Claim.create({
       item: itemId,
       claimant: req.user._id,
       ownershipProof,
       message,
+      evidenceImages,
     });
 
     item.status = "claim-pending";
