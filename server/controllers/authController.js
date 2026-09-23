@@ -247,6 +247,161 @@ const verifyEmail = async (req, res) => {
   }
 };
 
+
+
+const resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "No account found with this email",
+      });
+    }
+
+    // Don't send another OTP if the email is already verified
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        message: "Email is already verified",
+      });
+    }
+
+    // Generate a new 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Hash the new OTP
+    const hashedOtp = await bcrypt.hash(otp, 10);
+
+    // New OTP expires after 10 minutes
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+    // Replace the old OTP
+    user.emailVerificationOtpHash = hashedOtp;
+    user.emailVerificationOtpExpires = otpExpires;
+
+    await user.save();
+
+    // Send the new OTP email
+    await sendEmail({
+      to: email,
+      subject: "Your new ShardaFind verification code",
+
+      html: `
+        <div style="
+          font-family: Arial, sans-serif;
+          background-color: #f4f6f8;
+          padding: 40px 20px;
+        ">
+          <div style="
+            max-width: 520px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+          ">
+
+            <h1 style="
+              margin: 0 0 8px;
+              color: #2563eb;
+              text-align: center;
+            ">
+              ShardaFind
+            </h1>
+
+            <p style="
+              text-align: center;
+              color: #666;
+              margin-bottom: 30px;
+            ">
+              Lost & Found Department
+            </p>
+
+            <h2 style="color: #222;">
+              Your new verification code
+            </h2>
+
+            <p style="color: #444;">
+              Hello ${user.name},
+            </p>
+
+            <p style="color: #444; line-height: 1.6;">
+              You requested a new verification code for your
+              ShardaFind account.
+            </p>
+
+            <div style="
+              background-color: #f1f5f9;
+              border-radius: 10px;
+              padding: 20px;
+              margin: 25px 0;
+              text-align: center;
+            ">
+              <span style="
+                font-size: 32px;
+                font-weight: bold;
+                letter-spacing: 8px;
+                color: #2563eb;
+              ">
+                ${otp}
+              </span>
+            </div>
+
+            <p style="
+              text-align: center;
+              color: #666;
+            ">
+              This code will expire in <strong>10 minutes</strong>.
+            </p>
+
+            <hr style="
+              border: none;
+              border-top: 1px solid #eee;
+              margin: 30px 0;
+            ">
+
+            <p style="
+              font-size: 13px;
+              color: #888;
+              line-height: 1.5;
+            ">
+              If you didn't request a new verification code,
+              you can safely ignore this email.
+            </p>
+
+            <p style="
+              font-size: 13px;
+              color: #888;
+              text-align: center;
+              margin-top: 25px;
+            ">
+              — ShardaFind Team
+            </p>
+
+          </div>
+        </div>
+      `,
+    });
+
+    res.status(200).json({
+      message: "A new verification OTP has been sent to your email",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Unable to resend verification OTP",
+      error: error.message,
+    });
+  }
+};
+
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -304,4 +459,5 @@ module.exports = {
   loginUser,
   getMyProfile,
   verifyEmail,
+  resendOtp,
 };
