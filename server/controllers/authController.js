@@ -1,4 +1,3 @@
-
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -167,8 +166,6 @@ const registerUser = async (req, res) => {
   }
 };
 
-
-
 const verifyEmail = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -182,7 +179,7 @@ const verifyEmail = async (req, res) => {
 
     // Find user and explicitly include the OTP hash
     const user = await User.findOne({ email }).select(
-      "+emailVerificationOtpHash"
+      "+emailVerificationOtpHash",
     );
 
     if (!user) {
@@ -199,10 +196,7 @@ const verifyEmail = async (req, res) => {
     }
 
     // Check whether an OTP exists
-    if (
-      !user.emailVerificationOtpHash ||
-      !user.emailVerificationOtpExpires
-    ) {
+    if (!user.emailVerificationOtpHash || !user.emailVerificationOtpExpires) {
       return res.status(400).json({
         message: "No verification OTP found. Please request a new OTP",
       });
@@ -218,7 +212,7 @@ const verifyEmail = async (req, res) => {
     // Compare entered OTP with stored hash
     const isOtpCorrect = await bcrypt.compare(
       otp,
-      user.emailVerificationOtpHash
+      user.emailVerificationOtpHash,
     );
 
     if (!isOtpCorrect) {
@@ -246,8 +240,6 @@ const verifyEmail = async (req, res) => {
     });
   }
 };
-
-
 
 const resendOtp = async (req, res) => {
   try {
@@ -425,6 +417,12 @@ const loginUser = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(401).json({
         message: "Invalid email or password",
+      });
+    }
+
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in",
       });
     }
 
