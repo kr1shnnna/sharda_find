@@ -29,10 +29,19 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    emailVerificationOtpHash: {
+      type: String,
+      select: false,
+    },
+
+    emailVerificationOtpExpires: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const User = mongoose.model("User", userSchema);
