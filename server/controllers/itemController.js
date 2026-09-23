@@ -1,3 +1,4 @@
+
 const Item = require("../models/Item");
 const uploadToCloudinary = require("../utils/cloudinaryUpload");
 
@@ -12,6 +13,7 @@ const createItem = async (req, res) => {
       itemDate,
       returnMethod,
       pickupLocation,
+      itemLocation,
     } = req.body;
 
     if (
@@ -27,7 +29,10 @@ const createItem = async (req, res) => {
       });
     }
 
-    const normalizedTitle = title.trim().replace(/\s+/g, " ").toLowerCase();
+    const normalizedTitle = title
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
 
     const normalizedLocation = location
       .trim()
@@ -82,6 +87,11 @@ const createItem = async (req, res) => {
       itemDate: itemDateValue,
       returnMethod,
       pickupLocation,
+
+      // A lost item is not physically held by the person who posted it.
+      // For a found item, the creator can specify where the item currently is.
+      itemLocation: type === "found" ? itemLocation : null,
+
       images,
       reportedBy: req.user._id,
     });
@@ -180,4 +190,3 @@ module.exports = {
   getMyItems,
   getItemById,
 };
-

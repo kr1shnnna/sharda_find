@@ -62,6 +62,13 @@ const itemSchema = new mongoose.Schema(
       enum: ["direct-return", "lost-found-department"],
       default: "lost-found-department",
     },
+
+    itemLocation: {
+      type: String,
+      enum: ["with-finder", "lost-found-department"],
+      default: null,
+    },
+
     pickupLocation: {
       type: String,
       default: "Lost & Found Department",
