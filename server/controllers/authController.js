@@ -167,6 +167,86 @@ const registerUser = async (req, res) => {
   }
 };
 
+
+
+const verifyEmail = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    // Check required fields
+    if (!email || !otp) {
+      return res.status(400).json({
+        message: "Email and OTP are required",
+      });
+    }
+
+    // Find user and explicitly include the OTP hash
+    const user = await User.findOne({ email }).select(
+      "+emailVerificationOtpHash"
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        message: "No account found with this email",
+      });
+    }
+
+    // Check if email is already verified
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        message: "Email is already verified",
+      });
+    }
+
+    // Check whether an OTP exists
+    if (
+      !user.emailVerificationOtpHash ||
+      !user.emailVerificationOtpExpires
+    ) {
+      return res.status(400).json({
+        message: "No verification OTP found. Please request a new OTP",
+      });
+    }
+
+    // Check whether OTP has expired
+    if (new Date() > user.emailVerificationOtpExpires) {
+      return res.status(400).json({
+        message: "OTP has expired. Please request a new OTP",
+      });
+    }
+
+    // Compare entered OTP with stored hash
+    const isOtpCorrect = await bcrypt.compare(
+      otp,
+      user.emailVerificationOtpHash
+    );
+
+    if (!isOtpCorrect) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    // Mark email as verified
+    user.isEmailVerified = true;
+
+    // Remove OTP after successful verification
+    user.emailVerificationOtpHash = undefined;
+    user.emailVerificationOtpExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Email verified successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Unable to verify email",
+      error: error.message,
+    });
+  }
+};
+
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -223,4 +303,5 @@ module.exports = {
   registerUser,
   loginUser,
   getMyProfile,
+  verifyEmail,
 };
