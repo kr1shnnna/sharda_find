@@ -81,7 +81,7 @@ const reviewClaim = async (req, res) => {
     claim.reviewNote = reviewNote || "";
 
     if (status === "approved") {
-      item.status = "returned";
+      item.status = "claim-pending";
     } else {
       item.status = "active";
     }
@@ -89,11 +89,17 @@ const reviewClaim = async (req, res) => {
     await item.save();
     await claim.save();
 
+    const responseMessage =
+      status === "approved"
+        ? "Your claim has been approved. Please visit the Lost & Found Department with your valid Sharda University ID to collect your item."
+        : "Your claim could not be verified based on the information provided.";
+
     res.status(200).json({
-      message: `Claim ${status} successfully`,
+      message: responseMessage,
       claim,
       item,
     });
+    
   } catch (error) {
     res.status(500).json({
       message: "Unable to review claim",
