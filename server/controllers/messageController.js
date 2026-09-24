@@ -179,8 +179,60 @@ const sendMessage = async (req, res) => {
 
 
 
+
+const getMessages = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    // 1. Find the conversation
+    const conversation = await Conversation.findById(
+      conversationId
+    );
+
+    if (!conversation) {
+      return res.status(404).json({
+        message: "Conversation not found",
+      });
+    }
+
+    // 2. Check that the user is a participant
+    const isParticipant = conversation.participants.some(
+      (participant) =>
+        participant.toString() === req.user._id.toString()
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({
+        message: "You are not part of this conversation",
+      });
+    }
+
+    // 3. Get messages
+    const messages = await Message.find({
+      conversation: conversation._id,
+    })
+      .populate("sender", "name email")
+      .sort({ createdAt: 1 });
+
+    return res.status(200).json({
+      count: messages.length,
+      messages,
+    });
+  } catch (error) {
+    console.error("Get messages error:", error);
+
+    return res.status(500).json({
+      message: "Unable to fetch messages",
+    });
+  }
+};
+
+
+
+
 module.exports = {
   getOrCreateConversation,
   sendMessage,
+  getMessages,
 };
 
