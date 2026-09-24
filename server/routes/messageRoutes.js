@@ -10,9 +10,10 @@ const { protect } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 router.get(
-  "/conversation/:claimId",
+  "/conversation/:itemId",
   protect,
   getOrCreateConversation
 );
 
 module.exports = router;
+

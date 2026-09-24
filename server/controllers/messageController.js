@@ -1,46 +1,98 @@
 
 const Conversation = require("../models/Conversation");
 const Claim = require("../models/Claim");
+const Item = require("../models/Item");
 
 const getOrCreateConversation = async (req, res) => {
   try {
-    const { claimId } = req.params;
+    const { itemId } = req.params;
 
-    const claim = await Claim.findById(claimId).populate("item");
+    // 1. Find the item
+    const item = await Item.findById(itemId);
 
-    if (!claim) {
+    if (!item) {
       return res.status(404).json({
-        message: "Claim not found",
+        message: "Item not found",
       });
     }
 
-    const poster = claim.item.reportedBy;
-    const claimant = claim.claimant;
+    let participants;
+    let claim = null;
 
-    // Only the item poster or claimant can access this conversation
-    if (
-      req.user._id.toString() !== poster.toString() &&
-      req.user._id.toString() !== claimant.toString()
-    ) {
+    // 2. LOST item workflow
+    if (item.type === "lost") {
+      // Someone must have reported finding the item
+      if (!item.foundBy) {
+        return res.status(400).json({
+          message: "No one has reported finding this item yet",
+        });
+      }
+
+      participants = [
+        item.reportedBy,
+        item.foundBy,
+      ];
+    }
+
+    // 3. FOUND item workflow
+    else if (item.type === "found") {
+      // Find the relevant claim
+      claim = await Claim.findOne({
+        item: item._id,
+        status: {
+          $in: ["pending", "approved"],
+        },
+      }).sort({ createdAt: -1 });
+
+      if (!claim) {
+        return res.status(400).json({
+          message: "No active claim exists for this item",
+        });
+      }
+
+      participants = [
+        item.reportedBy,
+        claim.claimant,
+      ];
+    }
+
+    // 4. Check whether the logged-in user is a participant
+    const isParticipant = participants.some(
+      (participant) =>
+        participant.toString() === req.user._id.toString()
+    );
+
+    if (!isParticipant) {
       return res.status(403).json({
         message: "You are not part of this conversation",
       });
     }
 
+    // 5. Look for an existing conversation
     let conversation = await Conversation.findOne({
-      claim: claim._id,
-    }).populate("participants", "name email");
+      item: item._id,
+      participants: {
+        $all: participants,
+      },
+    })
+      .populate("participants", "name email")
+      .populate("item", "title type category location")
+      .populate("claim");
 
+    // 6. Create conversation if it doesn't exist
     if (!conversation) {
       conversation = await Conversation.create({
-        item: claim.item._id,
-        claim: claim._id,
-        participants: [poster, claimant],
+        item: item._id,
+        claim: claim ? claim._id : null,
+        participants,
       });
 
       conversation = await Conversation.findById(
         conversation._id
-      ).populate("participants", "name email");
+      )
+        .populate("participants", "name email")
+        .populate("item", "title type category location")
+        .populate("claim");
     }
 
     return res.status(200).json({
@@ -51,7 +103,7 @@ const getOrCreateConversation = async (req, res) => {
     console.error("Get conversation error:", error);
 
     return res.status(500).json({
-      message: "Server error",
+      message: "Unable to get conversation",
     });
   }
 };
@@ -59,3 +111,4 @@ const getOrCreateConversation = async (req, res) => {
 module.exports = {
   getOrCreateConversation,
 };
+

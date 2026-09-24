@@ -109,6 +109,42 @@ const reviewClaim = async (req, res) => {
   }
 };
 
+
+
+const getAllHandovers = async (req, res) => {
+  try {
+    const filter = {};
+
+    // Optional status filter
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
+    const handovers = await Handover.find(filter)
+      .populate(
+        "item",
+        "title type category location images itemLocation status"
+      )
+      .populate("submittedBy", "name email")
+      .populate("reviewedBy", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      count: handovers.length,
+      handovers,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Unable to fetch handovers",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+
 const reviewHandover = async (req, res) => {
   try {
     const { status, note } = req.body;
@@ -184,4 +220,5 @@ module.exports = {
   getAllClaims,
   reviewClaim,
   reviewHandover,
+  getAllHandovers,
 };

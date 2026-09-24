@@ -12,8 +12,7 @@ const conversationSchema = new mongoose.Schema(
     claim: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Claim",
-      required: true,
-      unique: true,
+      default: null,
     },
 
     participants: [
@@ -41,3 +40,5 @@ const Conversation = mongoose.model(
 );
 
 module.exports = Conversation;
+
+
