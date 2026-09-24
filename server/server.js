@@ -12,6 +12,8 @@ const claimRoutes = require("./routes/claimRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const handoverRoutes = require("./routes/handoverRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+
 
 
 
@@ -35,6 +37,8 @@ app.use("/api/claims", claimRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/handovers", handoverRoutes);
+app.use("/api/notifications", notificationRoutes);
+
 
 
 

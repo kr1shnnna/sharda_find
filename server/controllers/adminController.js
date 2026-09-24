@@ -1,6 +1,7 @@
 const Claim = require("../models/Claim");
 const Item = require("../models/Item");
 const Handover = require("../models/Handover");
+const createNotification = require("../utils/createNotification");
 
 const getAllClaims = async (req, res) => {
   try {
@@ -90,6 +91,18 @@ const reviewClaim = async (req, res) => {
     await item.save();
     await claim.save();
 
+    await createNotification({
+      recipient: claim.claimant,
+      type: status === "approved" ? "claim-approved" : "claim-rejected",
+      title: status === "approved" ? "Claim Approved" : "Claim Rejected",
+      message:
+        status === "approved"
+          ? "Your claim has been approved. Please visit the Lost & Found Department with your valid Sharda University ID to collect your item."
+          : "Your claim could not be verified based on the information provided.",
+      item: item._id,
+      claim: claim._id,
+    });
+
     const responseMessage =
       status === "approved"
         ? "Your claim has been approved. Please visit the Lost & Found Department with your valid Sharda University ID to collect your item."
@@ -100,7 +113,6 @@ const reviewClaim = async (req, res) => {
       claim,
       item,
     });
-    
   } catch (error) {
     res.status(500).json({
       message: "Unable to review claim",
@@ -108,8 +120,6 @@ const reviewClaim = async (req, res) => {
     });
   }
 };
-
-
 
 const getAllHandovers = async (req, res) => {
   try {
@@ -123,7 +133,7 @@ const getAllHandovers = async (req, res) => {
     const handovers = await Handover.find(filter)
       .populate(
         "item",
-        "title type category location images itemLocation status"
+        "title type category location images itemLocation status",
       )
       .populate("submittedBy", "name email")
       .populate("reviewedBy", "name email")
@@ -140,10 +150,6 @@ const getAllHandovers = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 const reviewHandover = async (req, res) => {
   try {
@@ -213,8 +219,6 @@ const reviewHandover = async (req, res) => {
     });
   }
 };
-
-
 
 module.exports = {
   getAllClaims,

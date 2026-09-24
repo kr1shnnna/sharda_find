@@ -1,6 +1,7 @@
 const Claim = require("../models/Claim");
 const Item = require("../models/Item");
 const uploadToCloudinary = require("../utils/cloudinaryUpload");
+const createNotification = require("../utils/createNotification");
 
 const createClaim = async (req, res) => {
   try {
@@ -47,8 +48,8 @@ const createClaim = async (req, res) => {
     const uploadResults = req.files?.length
       ? await Promise.all(
           req.files.map((file) =>
-            uploadToCloudinary(file, "sharda-find/claim-evidence")
-          )
+            uploadToCloudinary(file, "sharda-find/claim-evidence"),
+          ),
         )
       : [];
 
@@ -68,8 +69,18 @@ const createClaim = async (req, res) => {
     item.status = "claim-pending";
     await item.save();
 
+    await createNotification({
+      recipient: item.reportedBy,
+      type: "claim-submitted",
+      title: "New Claim Submitted",
+      message: "Someone has submitted a claim for your found item.",
+      item: item._id,
+      claim: claim._id,
+    });
+
     res.status(201).json({
-      message: "Claim submitted successfully. The Lost & Found Department will review it.",
+      message:
+        "Claim submitted successfully. The Lost & Found Department will review it.",
       claim,
     });
   } catch (error) {
