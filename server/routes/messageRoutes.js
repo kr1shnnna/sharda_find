@@ -3,6 +3,7 @@ const express = require("express");
 
 const {
   getOrCreateConversation,
+  sendMessage,
 } = require("../controllers/messageController");
 
 const { protect } = require("../middleware/authMiddleware");
@@ -14,6 +15,15 @@ router.get(
   protect,
   getOrCreateConversation
 );
+
+
+router.post(
+  "/conversation/:conversationId",
+  protect,
+  sendMessage
+);
+
+
 
 module.exports = router;
 

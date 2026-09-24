@@ -2,6 +2,8 @@
 const Conversation = require("../models/Conversation");
 const Claim = require("../models/Claim");
 const Item = require("../models/Item");
+const Message = require("../models/Message");
+
 
 const getOrCreateConversation = async (req, res) => {
   try {
@@ -108,7 +110,77 @@ const getOrCreateConversation = async (req, res) => {
   }
 };
 
+
+
+const sendMessage = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const { text } = req.body;
+
+    // 1. Validate message text
+    if (!text || !text.trim()) {
+      return res.status(400).json({
+        message: "Message text is required",
+      });
+    }
+
+    // 2. Find the conversation
+    const conversation = await Conversation.findById(
+      conversationId
+    );
+
+    if (!conversation) {
+      return res.status(404).json({
+        message: "Conversation not found",
+      });
+    }
+
+    // 3. Check that the user is a participant
+    const isParticipant = conversation.participants.some(
+      (participant) =>
+        participant.toString() === req.user._id.toString()
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({
+        message: "You are not part of this conversation",
+      });
+    }
+
+    // 4. Create the message
+    const message = await Message.create({
+      conversation: conversation._id,
+      sender: req.user._id,
+      text: text.trim(),
+    });
+
+    // 5. Update the latest message
+    conversation.lastMessage = message.text;
+    await conversation.save();
+
+    // 6. Return the created message
+    const populatedMessage = await message.populate(
+      "sender",
+      "name email"
+    );
+
+    return res.status(201).json({
+      message: "Message sent successfully",
+      data: populatedMessage,
+    });
+  } catch (error) {
+    console.error("Send message error:", error);
+
+    return res.status(500).json({
+      message: "Unable to send message",
+    });
+  }
+};
+
+
+
 module.exports = {
   getOrCreateConversation,
+  sendMessage,
 };
 
