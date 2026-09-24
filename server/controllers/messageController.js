@@ -230,9 +230,68 @@ const getMessages = async (req, res) => {
 
 
 
+const markMessagesAsRead = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    // 1. Find the conversation
+    const conversation = await Conversation.findById(
+      conversationId
+    );
+
+    if (!conversation) {
+      return res.status(404).json({
+        message: "Conversation not found",
+      });
+    }
+
+    // 2. Check that the user is a participant
+    const isParticipant = conversation.participants.some(
+      (participant) =>
+        participant.toString() === req.user._id.toString()
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({
+        message: "You are not part of this conversation",
+      });
+    }
+
+    // 3. Mark messages from the other participant as read
+    const result = await Message.updateMany(
+      {
+        conversation: conversation._id,
+        sender: { $ne: req.user._id },
+        read: false,
+      },
+      {
+        $set: {
+          read: true,
+        },
+      }
+    );
+
+    return res.status(200).json({
+      message: "Messages marked as read",
+      updatedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error("Mark messages as read error:", error);
+
+    return res.status(500).json({
+      message: "Unable to mark messages as read",
+    });
+  }
+};
+
+
+
+
+
 module.exports = {
   getOrCreateConversation,
   sendMessage,
   getMessages,
+  markMessagesAsRead,
 };
 
