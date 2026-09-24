@@ -1,6 +1,7 @@
-
 const Handover = require("../models/Handover");
 const Item = require("../models/Item");
+const User = require("../models/User");
+const createNotification = require("../utils/createNotification");
 
 const reportHandover = async (req, res) => {
   try {
@@ -55,6 +56,21 @@ const reportHandover = async (req, res) => {
       status: "pending",
     });
 
+    // 7. Find the admin
+    const admin = await User.findOne({ role: "admin" });
+
+    // 8. Notify the admin
+    if (admin) {
+      await createNotification({
+        recipient: admin._id,
+        type: "handover-submitted",
+        title: "New Handover Request",
+        message:
+          "A finder has reported handing over an item to the Lost & Found Department.",
+        item: item._id,
+      });
+    }
+
     res.status(201).json({
       message:
         "Handover reported successfully. Waiting for Lost & Found Department confirmation.",
@@ -69,8 +85,95 @@ const reportHandover = async (req, res) => {
   }
 };
 
-module.exports = {
-  reportHandover,
+const reviewHandover = async (req, res) => {
+  try {
+    const { status, note } = req.body;
+
+    // 1. Validate the status
+    if (!["confirmed", "rejected"].includes(status)) {
+      return res.status(400).json({
+        message: "Status must be confirmed or rejected",
+      });
+    }
+
+    // 2. Find the handover
+    const handover = await Handover.findById(req.params.handoverId);
+
+    if (!handover) {
+      return res.status(404).json({
+        message: "Handover not found",
+      });
+    }
+
+    // 3. Prevent reviewing an already reviewed handover
+    if (handover.status !== "pending") {
+      return res.status(400).json({
+        message: "This handover has already been reviewed",
+      });
+    }
+
+    // 4. Find the associated item
+    const item = await Item.findById(handover.item);
+
+    if (!item) {
+      return res.status(404).json({
+        message: "Associated item not found",
+      });
+    }
+
+    // 5. Update handover information
+    handover.status = status;
+    handover.reviewedBy = req.user._id;
+    handover.reviewedAt = new Date();
+    handover.note = note || "";
+
+    // 6. Update the physical location of the item
+    if (status === "confirmed") {
+      item.itemLocation = "lost-found-department";
+    } else {
+      item.itemLocation = "with-finder";
+    }
+
+    // 7. Save both changes
+    await item.save();
+    await handover.save();
+
+    // 8. Notify the finder
+    await createNotification({
+      recipient: handover.submittedBy,
+      type:
+        status === "confirmed"
+          ? "handover-confirmed"
+          : "handover-rejected",
+      title:
+        status === "confirmed"
+          ? "Handover Confirmed"
+          : "Handover Rejected",
+      message:
+        status === "confirmed"
+          ? "The Lost & Found Department has confirmed receipt of the item."
+          : "The Lost & Found Department could not confirm receipt of the item.",
+      item: item._id,
+    });
+
+    res.status(200).json({
+      message:
+        status === "confirmed"
+          ? "Handover confirmed successfully"
+          : "Handover rejected successfully",
+      handover,
+      item,
+    });
+  } catch (error) {
+    console.error("Review handover error:", error);
+
+    res.status(500).json({
+      message: "Unable to review handover",
+    });
+  }
 };
 
-
+module.exports = {
+  reportHandover,
+  reviewHandover,
+};

@@ -1,9 +1,8 @@
-
 const Conversation = require("../models/Conversation");
 const Claim = require("../models/Claim");
 const Item = require("../models/Item");
 const Message = require("../models/Message");
-
+const createNotification = require("../utils/createNotification");
 
 const getOrCreateConversation = async (req, res) => {
   try {
@@ -30,10 +29,7 @@ const getOrCreateConversation = async (req, res) => {
         });
       }
 
-      participants = [
-        item.reportedBy,
-        item.foundBy,
-      ];
+      participants = [item.reportedBy, item.foundBy];
     }
 
     // 3. FOUND item workflow
@@ -52,16 +48,12 @@ const getOrCreateConversation = async (req, res) => {
         });
       }
 
-      participants = [
-        item.reportedBy,
-        claim.claimant,
-      ];
+      participants = [item.reportedBy, claim.claimant];
     }
 
     // 4. Check whether the logged-in user is a participant
     const isParticipant = participants.some(
-      (participant) =>
-        participant.toString() === req.user._id.toString()
+      (participant) => participant.toString() === req.user._id.toString(),
     );
 
     if (!isParticipant) {
@@ -89,9 +81,7 @@ const getOrCreateConversation = async (req, res) => {
         participants,
       });
 
-      conversation = await Conversation.findById(
-        conversation._id
-      )
+      conversation = await Conversation.findById(conversation._id)
         .populate("participants", "name email")
         .populate("item", "title type category location")
         .populate("claim");
@@ -110,8 +100,6 @@ const getOrCreateConversation = async (req, res) => {
   }
 };
 
-
-
 const sendMessage = async (req, res) => {
   try {
     const { conversationId } = req.params;
@@ -125,9 +113,7 @@ const sendMessage = async (req, res) => {
     }
 
     // 2. Find the conversation
-    const conversation = await Conversation.findById(
-      conversationId
-    );
+    const conversation = await Conversation.findById(conversationId);
 
     if (!conversation) {
       return res.status(404).json({
@@ -137,8 +123,7 @@ const sendMessage = async (req, res) => {
 
     // 3. Check that the user is a participant
     const isParticipant = conversation.participants.some(
-      (participant) =>
-        participant.toString() === req.user._id.toString()
+      (participant) => participant.toString() === req.user._id.toString(),
     );
 
     if (!isParticipant) {
@@ -158,11 +143,24 @@ const sendMessage = async (req, res) => {
     conversation.lastMessage = message.text;
     await conversation.save();
 
-    // 6. Return the created message
-    const populatedMessage = await message.populate(
-      "sender",
-      "name email"
+    const recipient = conversation.participants.find(
+      (participant) => participant.toString() !== req.user._id.toString(),
     );
+
+    if (recipient) {
+      await createNotification({
+        recipient,
+        type: "new-message",
+        title: "New Message",
+        message: "You have received a new message.",
+        item: conversation.item,
+        claim: conversation.claim,
+        conversation: conversation._id,
+      });
+    }
+
+    // 6. Return the created message
+    const populatedMessage = await message.populate("sender", "name email");
 
     return res.status(201).json({
       message: "Message sent successfully",
@@ -177,17 +175,12 @@ const sendMessage = async (req, res) => {
   }
 };
 
-
-
-
 const getMessages = async (req, res) => {
   try {
     const { conversationId } = req.params;
 
     // 1. Find the conversation
-    const conversation = await Conversation.findById(
-      conversationId
-    );
+    const conversation = await Conversation.findById(conversationId);
 
     if (!conversation) {
       return res.status(404).json({
@@ -197,8 +190,7 @@ const getMessages = async (req, res) => {
 
     // 2. Check that the user is a participant
     const isParticipant = conversation.participants.some(
-      (participant) =>
-        participant.toString() === req.user._id.toString()
+      (participant) => participant.toString() === req.user._id.toString(),
     );
 
     if (!isParticipant) {
@@ -227,17 +219,12 @@ const getMessages = async (req, res) => {
   }
 };
 
-
-
-
 const markMessagesAsRead = async (req, res) => {
   try {
     const { conversationId } = req.params;
 
     // 1. Find the conversation
-    const conversation = await Conversation.findById(
-      conversationId
-    );
+    const conversation = await Conversation.findById(conversationId);
 
     if (!conversation) {
       return res.status(404).json({
@@ -247,8 +234,7 @@ const markMessagesAsRead = async (req, res) => {
 
     // 2. Check that the user is a participant
     const isParticipant = conversation.participants.some(
-      (participant) =>
-        participant.toString() === req.user._id.toString()
+      (participant) => participant.toString() === req.user._id.toString(),
     );
 
     if (!isParticipant) {
@@ -268,7 +254,7 @@ const markMessagesAsRead = async (req, res) => {
         $set: {
           read: true,
         },
-      }
+      },
     );
 
     return res.status(200).json({
@@ -284,14 +270,9 @@ const markMessagesAsRead = async (req, res) => {
   }
 };
 
-
-
-
-
 module.exports = {
   getOrCreateConversation,
   sendMessage,
   getMessages,
   markMessagesAsRead,
 };
-
