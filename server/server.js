@@ -11,6 +11,8 @@ const itemRoutes = require("./routes/itemRoutes");
 const claimRoutes = require("./routes/claimRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const handoverRoutes = require("./routes/handoverRoutes");
+
 
 
 
@@ -32,6 +34,8 @@ app.use("/api/items", itemRoutes);
 app.use("/api/claims", claimRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/handovers", handoverRoutes);
+
 
 
 
