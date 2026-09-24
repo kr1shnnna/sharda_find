@@ -20,13 +20,13 @@ const handoverSchema = new mongoose.Schema(
       default: "pending",
     },
 
-    confirmedBy: {
+    reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
     },
 
-    confirmedAt: {
+    reviewedAt: {
       type: Date,
       default: null,
     },
