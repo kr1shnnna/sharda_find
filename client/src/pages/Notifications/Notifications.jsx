@@ -9,7 +9,7 @@ import {
   FiXCircle,
 } from "react-icons/fi";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import api from "../../api/axios";
 
@@ -103,6 +103,8 @@ const getNotificationIcon = (type) => {
 };
 
 const Notifications = () => {
+  const navigate = useNavigate();
+
   const [notifications, setNotifications] =
     useState([]);
 
@@ -224,6 +226,47 @@ const Notifications = () => {
     }
   };
 
+  const handleNotificationClick = async (
+    notification
+  ) => {
+    try {
+      // Only mark it as read if it is currently unread.
+      if (!notification.read) {
+        await markAsRead(notification._id);
+      }
+
+      switch (notification.type) {
+        case "new-message":
+          if (notification.conversation?._id) {
+            navigate(
+              `/messages/${notification.conversation._id}`
+            );
+          }
+          break;
+
+        case "claim-submitted":
+        case "claim-approved":
+        case "claim-rejected":
+          navigate("/my-claims");
+          break;
+
+        case "handover-submitted":
+        case "handover-confirmed":
+        case "handover-rejected":
+          navigate("/my-items");
+          break;
+
+        default:
+          break;
+      }
+    } catch (error) {
+      console.error(
+        "Notification click error:",
+        error
+      );
+    }
+  };
+
   const sortedNotifications = useMemo(() => {
     return [...notifications].sort(
       (a, b) =>
@@ -237,6 +280,7 @@ const Notifications = () => {
       <main className="notifications-page">
         <div className="notifications-loading">
           <div className="notifications-spinner" />
+
           <p>
             Loading notifications...
           </p>
@@ -352,8 +396,8 @@ const Notifications = () => {
                         : ""
                     }`}
                     onClick={() =>
-                      markAsRead(
-                        notification._id
+                      handleNotificationClick(
+                        notification
                       )
                     }
                   >
