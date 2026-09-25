@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import axios from "axios";
+import {
+  Link,
+  useParams,
+} from "react-router-dom";
 import {
   FiArrowLeft,
   FiMapPin,
@@ -12,13 +14,40 @@ import {
   FiChevronRight,
 } from "react-icons/fi";
 
+import api from "../../api/axios";
+
 import "./ItemDetails.css";
+
+const FALLBACK_IMAGE =
+  "https://placehold.co/900x650/f1f5f9/64748b?text=No+Image";
+
+const statusLabels = {
+  active: "Active",
+  "claim-pending": "Claim Pending",
+  returned: "Returned",
+  closed: "Closed",
+};
+
+const categoryLabels = {
+  electronics: "Electronics",
+  "id-card": "ID Card",
+  documents: "Documents",
+  keys: "Keys",
+  wallet: "Wallet",
+  bag: "Bag",
+  bottle: "Bottle",
+  clothing: "Clothing",
+  accessories: "Accessories",
+  other: "Other",
+};
 
 const ItemDetails = () => {
   const { id } = useParams();
 
   const [item, setItem] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedImage, setSelectedImage] =
+    useState(0);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -28,17 +57,21 @@ const ItemDetails = () => {
         setLoading(true);
         setError("");
 
-        const response = await axios.get(
-          `http://localhost:5000/api/items/${id}`
+        const response = await api.get(
+          `/items/${id}`
         );
 
         setItem(response.data.item);
         setSelectedImage(0);
       } catch (error) {
-        console.error("Error fetching item:", error);
+        console.error(
+          "Error fetching item:",
+          error
+        );
 
         setError(
-          "Unable to load this item. It may no longer exist."
+          error.response?.data?.message ||
+            "Unable to load this item. It may no longer exist."
         );
       } finally {
         setLoading(false);
@@ -49,11 +82,24 @@ const ItemDetails = () => {
   }, [id]);
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    if (!date) {
+      return "Date unavailable";
+    }
+
+    const formattedDate = new Date(date);
+
+    if (Number.isNaN(formattedDate.getTime())) {
+      return "Date unavailable";
+    }
+
+    return formattedDate.toLocaleDateString(
+      "en-IN",
+      {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }
+    );
   };
 
   if (loading) {
@@ -62,7 +108,6 @@ const ItemDetails = () => {
         <div className="item-details-container">
           <div className="item-details-loading">
             <div className="details-spinner"></div>
-
             <p>Loading item...</p>
           </div>
         </div>
@@ -79,12 +124,11 @@ const ItemDetails = () => {
               <FiPackage />
             </div>
 
-            <h2>
-              Item not found
-            </h2>
+            <h2>Item not found</h2>
 
             <p>
-              {error || "This item could not be found."}
+              {error ||
+                "This item could not be found."}
             </p>
 
             <Link
@@ -100,17 +144,44 @@ const ItemDetails = () => {
     );
   }
 
-  const images = item.images?.length
-    ? item.images
-    : [
-        "https://placehold.co/900x650/f1f5f9/64748b?text=No+Image",
-      ];
+  /*
+   * Backend image structure:
+   *
+   * images: [
+   *   {
+   *     url: "...",
+   *     publicId: "..."
+   *   }
+   * ]
+   *
+   * Convert it into an array of URLs for
+   * the gallery.
+   */
+  const images =
+    Array.isArray(item.images) &&
+    item.images.length > 0
+      ? item.images
+          .map((image) => image?.url)
+          .filter(Boolean)
+      : [FALLBACK_IMAGE];
 
-  const mainImage = images[selectedImage];
+  const mainImage =
+    images[selectedImage] || FALLBACK_IMAGE;
 
   const isLost = item.type === "lost";
 
-  const hasMultipleImages = images.length > 1;
+  const hasMultipleImages =
+    images.length > 1;
+
+  const statusLabel =
+    statusLabels[item.status] ||
+    item.status ||
+    "Active";
+
+  const categoryLabel =
+    categoryLabels[item.category] ||
+    item.category ||
+    "Other";
 
   const goToPreviousImage = () => {
     if (!hasMultipleImages) {
@@ -136,9 +207,15 @@ const ItemDetails = () => {
     );
   };
 
+  const handleImageError = (event) => {
+    event.currentTarget.src = FALLBACK_IMAGE;
+  };
+
   return (
     <main className="item-details-page">
       <div className="item-details-container">
+
+        {/* BACK LINK */}
 
         <Link
           to="/browse"
@@ -150,15 +227,17 @@ const ItemDetails = () => {
 
         <div className="item-details-card">
 
-          {/* Image Gallery */}
+          {/* IMAGE GALLERY */}
 
           <div className="item-details-gallery">
 
             <div className="item-details-image">
-
               <img
                 src={mainImage}
-                alt={`${item.title} ${selectedImage + 1}`}
+                alt={`${item.title} ${
+                  selectedImage + 1
+                }`}
+                onError={handleImageError}
               />
 
               <span
@@ -172,7 +251,9 @@ const ItemDetails = () => {
               <button
                 type="button"
                 className="gallery-arrow gallery-arrow-left"
-                onClick={goToPreviousImage}
+                onClick={
+                  goToPreviousImage
+                }
                 disabled={!hasMultipleImages}
                 aria-label="Previous image"
               >
@@ -188,53 +269,55 @@ const ItemDetails = () => {
               >
                 <FiChevronRight />
               </button>
-
             </div>
 
-            {images.length > 1 && (
+            {/* THUMBNAILS */}
+
+            {hasMultipleImages && (
               <div className="item-image-thumbnails">
-
-                {images.map((image, index) => (
-                  <button
-                    type="button"
-                    key={`${image}-${index}`}
-                    className={`item-image-thumbnail ${
-                      selectedImage === index
-                        ? "active"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      setSelectedImage(index)
-                    }
-                  >
-                    <img
-                      src={image}
-                      alt={`${item.title} thumbnail ${
-                        index + 1
+                {images.map(
+                  (image, index) => (
+                    <button
+                      type="button"
+                      key={`${image}-${index}`}
+                      className={`item-image-thumbnail ${
+                        selectedImage === index
+                          ? "active"
+                          : ""
                       }`}
-                    />
-                  </button>
-                ))}
-
+                      onClick={() =>
+                        setSelectedImage(
+                          index
+                        )
+                      }
+                    >
+                      <img
+                        src={image}
+                        alt={`${item.title} thumbnail ${
+                          index + 1
+                        }`}
+                        onError={
+                          handleImageError
+                        }
+                      />
+                    </button>
+                  )
+                )}
               </div>
             )}
-
           </div>
 
-          {/* Item Content */}
+          {/* ITEM CONTENT */}
 
           <div className="item-details-content">
 
             <div className="details-heading">
-
               <div>
                 <span className="details-category">
-                  {item.category}
+                  {categoryLabel}
                 </span>
 
-                <h1>
-                  {item.title}
-                </h1>
+                <h1>{item.title}</h1>
               </div>
 
               <span
@@ -242,77 +325,70 @@ const ItemDetails = () => {
                   item.status
                 }`}
               >
-                {item.status}
+                {statusLabel}
               </span>
-
             </div>
 
             <p className="details-description">
               {item.description}
             </p>
 
+            {/* ITEM INFORMATION */}
+
             <div className="details-info">
 
               <div className="details-info-item">
-
                 <div className="details-info-icon">
                   <FiMapPin />
                 </div>
 
                 <div>
-                  <span>
-                    Location
-                  </span>
+                  <span>Location</span>
 
                   <strong>
-                    {item.location}
+                    {item.location ||
+                      "Location unavailable"}
                   </strong>
                 </div>
-
               </div>
 
               <div className="details-info-item">
-
                 <div className="details-info-icon">
                   <FiCalendar />
                 </div>
 
                 <div>
-                  <span>
-                    Date
-                  </span>
+                  <span>Date</span>
 
                   <strong>
-                    {formatDate(item.itemDate)}
+                    {formatDate(
+                      item.itemDate
+                    )}
                   </strong>
                 </div>
-
               </div>
 
               <div className="details-info-item">
-
                 <div className="details-info-icon">
                   <FiUser />
                 </div>
 
                 <div>
-                  <span>
-                    Reported by
-                  </span>
+                  <span>Reported by</span>
 
                   <strong>
                     {item.reportedBy?.name ||
                       "Sharda Student"}
                   </strong>
                 </div>
-
               </div>
 
             </div>
 
+            {/* PICKUP LOCATION */}
+
             {item.pickupLocation && (
               <div className="pickup-box">
-
                 <FiCheckCircle />
 
                 <div>
@@ -324,26 +400,29 @@ const ItemDetails = () => {
                     {item.pickupLocation}
                   </strong>
                 </div>
-
               </div>
             )}
 
-            <div className="details-actions">
+            {/* ACTION */}
 
+            <div className="details-actions">
               <button
                 type="button"
                 className="claim-button"
+                disabled={
+                  item.status !== "active"
+                }
               >
                 <FiCheckCircle />
-                Claim This Item
-              </button>
 
+                {item.status === "active"
+                  ? "Claim This Item"
+                  : "Item Unavailable"}
+              </button>
             </div>
 
           </div>
-
         </div>
-
       </div>
     </main>
   );

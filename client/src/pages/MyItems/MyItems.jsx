@@ -1,8 +1,494 @@
+import { useEffect, useMemo, useState } from "react";
+import {
+  FiAlertCircle,
+  FiCalendar,
+  FiEye,
+  FiMapPin,
+  FiPackage,
+  FiPlus,
+  FiRefreshCw,
+} from "react-icons/fi";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
+import api from "../../api/axios";
+
+import "./MyItems.css";
+
+const filters = [
+  {
+    value: "all",
+    label: "All Items",
+  },
+  {
+    value: "lost",
+    label: "Lost",
+  },
+  {
+    value: "found",
+    label: "Found",
+  },
+];
+
+const statusLabels = {
+  active: "Active",
+  "claim-pending": "Claim Pending",
+  returned: "Returned",
+  closed: "Closed",
+};
+
+const statusClasses = {
+  active: "active",
+  "claim-pending": "claim-pending",
+  returned: "returned",
+  closed: "closed",
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) {
+    return "Date unavailable";
+  }
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date unavailable";
+  }
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+const getCategoryLabel = (category) => {
+  if (!category) {
+    return "Other";
+  }
+
+  return category
+    .split("-")
+    .map(
+      (word) =>
+        word.charAt(0).toUpperCase() +
+        word.slice(1)
+    )
+    .join(" ");
+};
+
+const getImageUrl = (item) => {
+  /*
+   * Backend stores images as:
+   *
+   * images: [
+   *   {
+   *     url: "...",
+   *     publicId: "..."
+   *   }
+   * ]
+   */
+
+  if (
+    Array.isArray(item.images) &&
+    item.images.length > 0 &&
+    item.images[0]?.url
+  ) {
+    return item.images[0].url;
+  }
+
+  return "https://placehold.co/800x600/f1f5f9/64748b?text=No+Image";
+};
+
 const MyItems = () => {
+  const navigate = useNavigate();
+
+  const [items, setItems] = useState([]);
+  const [activeFilter, setActiveFilter] =
+    useState("all");
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchMyItems = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await api.get(
+        "/items/my-items"
+      );
+
+      setItems(response.data?.items || []);
+    } catch (error) {
+      console.error(
+        "Fetch my items error:",
+        error
+      );
+
+      setError(
+        error.response?.data?.message ||
+          "Unable to load your items. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMyItems();
+  }, []);
+
+  const filteredItems = useMemo(() => {
+    if (activeFilter === "all") {
+      return items;
+    }
+
+    return items.filter(
+      (item) => item.type === activeFilter
+    );
+  }, [items, activeFilter]);
+
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter);
+  };
+
   return (
-    <main>
-      <h1>My Items</h1>
-      <p>Your reported items will appear here.</p>
+    <main className="my-items-page">
+      <div className="my-items-container">
+
+        {/* HEADER */}
+
+        <div className="my-items-header">
+          <div>
+            <p className="my-items-label">
+              ShardaFind
+            </p>
+
+            <h1>My Items</h1>
+
+            <p className="my-items-description">
+              Manage the lost and found items you
+              have reported.
+            </p>
+          </div>
+
+          <div className="my-items-actions">
+            <Link
+              to="/report-lost"
+              className="my-items-report-button secondary"
+            >
+              <FiPlus />
+              Report Lost
+            </Link>
+
+            <Link
+              to="/report-found"
+              className="my-items-report-button primary"
+            >
+              <FiPlus />
+              Report Found
+            </Link>
+          </div>
+        </div>
+
+        {/* FILTERS */}
+
+        <div className="my-items-toolbar">
+          <div className="my-items-filters">
+            {filters.map((filter) => (
+              <button
+                key={filter.value}
+                type="button"
+                className={`my-items-filter ${
+                  activeFilter === filter.value
+                    ? "active"
+                    : ""
+                }`}
+                onClick={() =>
+                  handleFilterChange(
+                    filter.value
+                  )
+                }
+              >
+                {filter.label}
+
+                {filter.value === "all" && (
+                  <span>
+                    {items.length}
+                  </span>
+                )}
+
+                {filter.value === "lost" && (
+                  <span>
+                    {
+                      items.filter(
+                        (item) =>
+                          item.type === "lost"
+                      ).length
+                    }
+                  </span>
+                )}
+
+                {filter.value === "found" && (
+                  <span>
+                    {
+                      items.filter(
+                        (item) =>
+                          item.type === "found"
+                      ).length
+                    }
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {!loading && items.length > 0 && (
+            <span className="my-items-count">
+              {filteredItems.length}{" "}
+              {filteredItems.length === 1
+                ? "item"
+                : "items"}
+            </span>
+          )}
+        </div>
+
+        {/* LOADING */}
+
+        {loading && (
+          <div className="my-items-grid">
+            {Array.from({ length: 6 }).map(
+              (_, index) => (
+                <div
+                  className="my-item-skeleton"
+                  key={index}
+                >
+                  <div className="skeleton-image" />
+
+                  <div className="skeleton-content">
+                    <div className="skeleton-line title" />
+                    <div className="skeleton-line" />
+                    <div className="skeleton-line short" />
+
+                    <div className="skeleton-footer">
+                      <div className="skeleton-small" />
+                      <div className="skeleton-button" />
+                    </div>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+        )}
+
+        {/* ERROR */}
+
+        {!loading && error && (
+          <div className="my-items-state">
+            <div className="my-items-state-icon error">
+              <FiAlertCircle />
+            </div>
+
+            <h2>Unable to load your items</h2>
+
+            <p>{error}</p>
+
+            <button
+              type="button"
+              className="retry-button"
+              onClick={fetchMyItems}
+            >
+              <FiRefreshCw />
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* EMPTY */}
+
+        {!loading &&
+          !error &&
+          items.length === 0 && (
+            <div className="my-items-state">
+              <div className="my-items-state-icon">
+                <FiPackage />
+              </div>
+
+              <h2>No items reported yet</h2>
+
+              <p>
+                Items that you report will appear here.
+              </p>
+
+              <div className="empty-state-actions">
+                <Link
+                  to="/report-lost"
+                  className="empty-state-button secondary"
+                >
+                  <FiPlus />
+                  Report Lost Item
+                </Link>
+
+                <Link
+                  to="/report-found"
+                  className="empty-state-button primary"
+                >
+                  <FiPlus />
+                  Report Found Item
+                </Link>
+              </div>
+            </div>
+          )}
+
+        {/* FILTER EMPTY */}
+
+        {!loading &&
+          !error &&
+          items.length > 0 &&
+          filteredItems.length === 0 && (
+            <div className="my-items-state filter-empty">
+              <div className="my-items-state-icon">
+                <FiPackage />
+              </div>
+
+              <h2>No {activeFilter} items</h2>
+
+              <p>
+                You haven't reported any{" "}
+                {activeFilter} items yet.
+              </p>
+
+              <button
+                type="button"
+                className="retry-button"
+                onClick={() =>
+                  setActiveFilter("all")
+                }
+              >
+                View All Items
+              </button>
+            </div>
+          )}
+
+        {/* ITEMS */}
+
+        {!loading &&
+          !error &&
+          filteredItems.length > 0 && (
+            <div className="my-items-grid">
+              {filteredItems.map((item) => {
+                const isLost =
+                  item.type === "lost";
+
+                const statusClass =
+                  statusClasses[item.status] ||
+                  "active";
+
+                const statusLabel =
+                  statusLabels[item.status] ||
+                  "Active";
+
+                return (
+                  <article
+                    className="my-item-card"
+                    key={item._id}
+                  >
+                    {/* IMAGE */}
+
+                    <div className="my-item-image">
+                      <img
+                        src={getImageUrl(item)}
+                        alt={item.title}
+                        onError={(event) => {
+                          event.currentTarget.src =
+                            "https://placehold.co/800x600/f1f5f9/64748b?text=No+Image";
+                        }}
+                      />
+
+                      <span
+                        className={`my-item-type-badge ${
+                          isLost
+                            ? "lost"
+                            : "found"
+                        }`}
+                      >
+                        {isLost
+                          ? "Lost"
+                          : "Found"}
+                      </span>
+                    </div>
+
+                    {/* CONTENT */}
+
+                    <div className="my-item-content">
+                      <div className="my-item-title-row">
+                        <h2>
+                          {item.title}
+                        </h2>
+
+                        <span
+                          className={`my-item-status ${statusClass}`}
+                        >
+                          {statusLabel}
+                        </span>
+                      </div>
+
+                      <div className="my-item-details">
+
+                        <div className="my-item-detail">
+                          <FiMapPin />
+
+                          <span>
+                            {item.location ||
+                              "Location unavailable"}
+                          </span>
+                        </div>
+
+                        <div className="my-item-detail">
+                          <FiCalendar />
+
+                          <span>
+                            {formatDate(
+                              item.itemDate
+                            )}
+                          </span>
+                        </div>
+
+                      </div>
+
+                      <div className="my-item-footer">
+
+                        <span className="my-item-category">
+                          {getCategoryLabel(
+                            item.category
+                          )}
+                        </span>
+
+                        <button
+                          type="button"
+                          className="my-item-view-button"
+                          onClick={() =>
+                            navigate(
+                              `/items/${item._id}`
+                            )
+                          }
+                        >
+                          <FiEye />
+                          View
+                        </button>
+
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+
+      </div>
     </main>
   );
 };

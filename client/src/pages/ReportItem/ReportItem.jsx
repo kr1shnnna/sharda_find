@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FiArrowLeft,
   FiCalendar,
@@ -65,9 +62,7 @@ const ReportItem = ({ type = "lost" }) => {
    * or when images change.
    */
   useEffect(() => {
-    const previewUrls = imagePreviews.map(
-      (preview) => preview.url
-    );
+    const previewUrls = imagePreviews.map((preview) => preview.url);
 
     return () => {
       previewUrls.forEach((url) => {
@@ -93,9 +88,7 @@ const ReportItem = ({ type = "lost" }) => {
   };
 
   const handleImageChange = (event) => {
-    const selectedFiles = Array.from(
-      event.target.files
-    );
+    const selectedFiles = Array.from(event.target.files);
 
     if (selectedFiles.length === 0) {
       return;
@@ -110,10 +103,7 @@ const ReportItem = ({ type = "lost" }) => {
 
     const remainingSlots = 3 - images.length;
 
-    const filesToAdd = selectedFiles.slice(
-      0,
-      remainingSlots
-    );
+    const filesToAdd = selectedFiles.slice(0, remainingSlots);
 
     if (filesToAdd.length < selectedFiles.length) {
       setErrors((previous) => ({
@@ -122,10 +112,7 @@ const ReportItem = ({ type = "lost" }) => {
       }));
     }
 
-    setImages((previous) => [
-      ...previous,
-      ...filesToAdd,
-    ]);
+    setImages((previous) => [...previous, ...filesToAdd]);
 
     /*
      * Reset the input so the same file can be selected
@@ -136,9 +123,7 @@ const ReportItem = ({ type = "lost" }) => {
 
   const removeImage = (indexToRemove) => {
     setImages((previous) =>
-      previous.filter(
-        (_, index) => index !== indexToRemove
-      )
+      previous.filter((_, index) => index !== indexToRemove),
     );
 
     setErrors((previous) => ({
@@ -159,28 +144,23 @@ const ReportItem = ({ type = "lost" }) => {
     }
 
     if (!description) {
-      newErrors.description =
-        "Item description is required.";
+      newErrors.description = "Item description is required.";
     }
 
     if (!formData.category) {
-      newErrors.category =
-        "Please select a category.";
+      newErrors.category = "Please select a category.";
     }
 
     if (!location) {
-      newErrors.location =
-        "Location is required.";
+      newErrors.location = "Location is required.";
     }
 
     if (!formData.itemDate) {
-      newErrors.itemDate =
-        "Please select the date.";
+      newErrors.itemDate = "Please select the date.";
     }
 
     if (!formData.returnMethod) {
-      newErrors.returnMethod =
-        "Please select a return method.";
+      newErrors.returnMethod = "Please select a return method.";
     }
 
     /*
@@ -189,8 +169,7 @@ const ReportItem = ({ type = "lost" }) => {
      * by the backend.
      */
     if (!isLost && !formData.itemLocation) {
-      newErrors.itemLocation =
-        "Please select the current item location.";
+      newErrors.itemLocation = "Please select the current item location.";
     }
 
     return newErrors;
@@ -218,55 +197,28 @@ const ReportItem = ({ type = "lost" }) => {
        */
       const requestData = new FormData();
 
-      requestData.append(
-        "title",
-        formData.title.trim()
-      );
+      requestData.append("title", formData.title.trim());
 
-      requestData.append(
-        "description",
-        formData.description.trim()
-      );
+      requestData.append("description", formData.description.trim());
 
-      requestData.append(
-        "type",
-        type
-      );
+      requestData.append("type", type);
 
-      requestData.append(
-        "category",
-        formData.category
-      );
+      requestData.append("category", formData.category);
 
-      requestData.append(
-        "location",
-        formData.location.trim()
-      );
+      requestData.append("location", formData.location.trim());
 
-      requestData.append(
-        "itemDate",
-        formData.itemDate
-      );
+      requestData.append("itemDate", formData.itemDate);
 
-      requestData.append(
-        "returnMethod",
-        formData.returnMethod
-      );
+      requestData.append("returnMethod", formData.returnMethod);
 
-      requestData.append(
-        "pickupLocation",
-        formData.pickupLocation.trim()
-      );
+      requestData.append("pickupLocation", formData.pickupLocation.trim());
 
       /*
        * Only send itemLocation for found items.
        * The backend sets it to null for lost items.
        */
       if (!isLost) {
-        requestData.append(
-          "itemLocation",
-          formData.itemLocation
-        );
+        requestData.append("itemLocation", formData.itemLocation);
       }
 
       /*
@@ -281,20 +233,9 @@ const ReportItem = ({ type = "lost" }) => {
         requestData.append("images", image);
       });
 
-      const response = await api.post(
-        "/items",
-        requestData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await api.post("/items", requestData);
 
-      setSuccessMessage(
-        response.data?.message ||
-          "Item posted successfully."
-      );
+      setSuccessMessage(response.data?.message || "Item posted successfully.");
 
       /*
        * Backend returns:
@@ -325,14 +266,11 @@ const ReportItem = ({ type = "lost" }) => {
         navigate("/browse");
       }, 1000);
     } catch (error) {
-      console.error(
-        "Create item error:",
-        error
-      );
+      console.error("Create item error:", error);
 
       setServerError(
         error.response?.data?.message ||
-          "Unable to post item. Please try again."
+          "Unable to post item. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -342,11 +280,7 @@ const ReportItem = ({ type = "lost" }) => {
   return (
     <main className="report-item-page">
       <div className="report-item-container">
-
-        <Link
-          to="/"
-          className="report-back-link"
-        >
+        <Link to="/" className="report-back-link">
           <FiArrowLeft />
           Back to home
         </Link>
@@ -356,15 +290,9 @@ const ReportItem = ({ type = "lost" }) => {
             <FiPackage />
           </div>
 
-          <p className="report-item-label">
-            ShardaFind
-          </p>
+          <p className="report-item-label">ShardaFind</p>
 
-          <h1>
-            {isLost
-              ? "Report a lost item"
-              : "Report a found item"}
-          </h1>
+          <h1>{isLost ? "Report a lost item" : "Report a found item"}</h1>
 
           <p>
             {isLost
@@ -386,30 +314,21 @@ const ReportItem = ({ type = "lost" }) => {
           </div>
         )}
 
-        <form
-          className="report-item-form"
-          onSubmit={handleSubmit}
-        >
+        <form className="report-item-form" onSubmit={handleSubmit}>
           {/* ITEM INFORMATION */}
 
           <section className="form-section">
             <div className="form-section-header">
               <h2>Item Information</h2>
 
-              <p>
-                Provide the basic details about the
-                item.
-              </p>
+              <p>Provide the basic details about the item.</p>
             </div>
 
             <div className="form-grid">
-
               {/* TITLE */}
 
               <div className="form-group form-group-full">
-                <label htmlFor="title">
-                  Item Title
-                </label>
+                <label htmlFor="title">Item Title</label>
 
                 <input
                   id="title"
@@ -421,19 +340,13 @@ const ReportItem = ({ type = "lost" }) => {
                   disabled={loading}
                 />
 
-                {errors.title && (
-                  <p className="field-error">
-                    {errors.title}
-                  </p>
-                )}
+                {errors.title && <p className="field-error">{errors.title}</p>}
               </div>
 
               {/* DESCRIPTION */}
 
               <div className="form-group form-group-full">
-                <label htmlFor="description">
-                  Description
-                </label>
+                <label htmlFor="description">Description</label>
 
                 <textarea
                   id="description"
@@ -446,18 +359,14 @@ const ReportItem = ({ type = "lost" }) => {
                 />
 
                 {errors.description && (
-                  <p className="field-error">
-                    {errors.description}
-                  </p>
+                  <p className="field-error">{errors.description}</p>
                 )}
               </div>
 
               {/* CATEGORY */}
 
               <div className="form-group">
-                <label htmlFor="category">
-                  Category
-                </label>
+                <label htmlFor="category">Category</label>
 
                 <select
                   id="category"
@@ -466,33 +375,24 @@ const ReportItem = ({ type = "lost" }) => {
                   onChange={handleChange}
                   disabled={loading}
                 >
-                  <option value="">
-                    Select category
-                  </option>
+                  <option value="">Select category</option>
 
                   {categories.map((category) => (
-                    <option
-                      key={category.value}
-                      value={category.value}
-                    >
+                    <option key={category.value} value={category.value}>
                       {category.label}
                     </option>
                   ))}
                 </select>
 
                 {errors.category && (
-                  <p className="field-error">
-                    {errors.category}
-                  </p>
+                  <p className="field-error">{errors.category}</p>
                 )}
               </div>
 
               {/* DATE */}
 
               <div className="form-group">
-                <label htmlFor="itemDate">
-                  Date
-                </label>
+                <label htmlFor="itemDate">Date</label>
 
                 <div className="input-with-icon">
                   <FiCalendar />
@@ -508,9 +408,7 @@ const ReportItem = ({ type = "lost" }) => {
                 </div>
 
                 {errors.itemDate && (
-                  <p className="field-error">
-                    {errors.itemDate}
-                  </p>
+                  <p className="field-error">{errors.itemDate}</p>
                 )}
               </div>
 
@@ -518,9 +416,7 @@ const ReportItem = ({ type = "lost" }) => {
 
               <div className="form-group form-group-full">
                 <label htmlFor="location">
-                  {isLost
-                    ? "Where did you lose it?"
-                    : "Where did you find it?"}
+                  {isLost ? "Where did you lose it?" : "Where did you find it?"}
                 </label>
 
                 <div className="input-with-icon">
@@ -538,12 +434,9 @@ const ReportItem = ({ type = "lost" }) => {
                 </div>
 
                 {errors.location && (
-                  <p className="field-error">
-                    {errors.location}
-                  </p>
+                  <p className="field-error">{errors.location}</p>
                 )}
               </div>
-
             </div>
           </section>
 
@@ -554,16 +447,11 @@ const ReportItem = ({ type = "lost" }) => {
               <div className="form-section-header">
                 <h2>Current Item Location</h2>
 
-                <p>
-                  Tell us where the item is currently
-                  being kept.
-                </p>
+                <p>Tell us where the item is currently being kept.</p>
               </div>
 
               <div className="form-group">
-                <label htmlFor="itemLocation">
-                  Item is currently
-                </label>
+                <label htmlFor="itemLocation">Item is currently</label>
 
                 <select
                   id="itemLocation"
@@ -572,9 +460,7 @@ const ReportItem = ({ type = "lost" }) => {
                   onChange={handleChange}
                   disabled={loading}
                 >
-                  <option value="with-finder">
-                    With me
-                  </option>
+                  <option value="with-finder">With me</option>
 
                   <option value="lost-found-department">
                     At Lost & Found Department
@@ -582,9 +468,7 @@ const ReportItem = ({ type = "lost" }) => {
                 </select>
 
                 {errors.itemLocation && (
-                  <p className="field-error">
-                    {errors.itemLocation}
-                  </p>
+                  <p className="field-error">{errors.itemLocation}</p>
                 )}
               </div>
             </section>
@@ -596,20 +480,14 @@ const ReportItem = ({ type = "lost" }) => {
             <div className="form-section-header">
               <h2>Return Information</h2>
 
-              <p>
-                Let the owner know how the item can be
-                returned.
-              </p>
+              <p>Let the owner know how the item can be returned.</p>
             </div>
 
             <div className="form-grid">
-
               {/* RETURN METHOD */}
 
               <div className="form-group">
-                <label htmlFor="returnMethod">
-                  Return Method
-                </label>
+                <label htmlFor="returnMethod">Return Method</label>
 
                 <select
                   id="returnMethod"
@@ -622,24 +500,18 @@ const ReportItem = ({ type = "lost" }) => {
                     Lost & Found Department
                   </option>
 
-                  <option value="direct-return">
-                    Directly to owner
-                  </option>
+                  <option value="direct-return">Directly to owner</option>
                 </select>
 
                 {errors.returnMethod && (
-                  <p className="field-error">
-                    {errors.returnMethod}
-                  </p>
+                  <p className="field-error">{errors.returnMethod}</p>
                 )}
               </div>
 
               {/* PICKUP LOCATION */}
 
               <div className="form-group">
-                <label htmlFor="pickupLocation">
-                  Pickup Location
-                </label>
+                <label htmlFor="pickupLocation">Pickup Location</label>
 
                 <input
                   id="pickupLocation"
@@ -651,7 +523,6 @@ const ReportItem = ({ type = "lost" }) => {
                   disabled={loading}
                 />
               </div>
-
             </div>
           </section>
 
@@ -663,24 +534,17 @@ const ReportItem = ({ type = "lost" }) => {
                 <div>
                   <h2>Images</h2>
 
-                  <p>
-                    Add up to 3 photos that can help
-                    identify the item.
-                  </p>
+                  <p>Add up to 3 photos that can help identify the item.</p>
                 </div>
 
-                <span className="image-count">
-                  {images.length}/3
-                </span>
+                <span className="image-count">{images.length}/3</span>
               </div>
             </div>
 
             <label
               htmlFor="item-images"
               className={`image-upload-box ${
-                images.length >= 3
-                  ? "upload-disabled"
-                  : ""
+                images.length >= 3 ? "upload-disabled" : ""
               }`}
             >
               <FiImage />
@@ -703,48 +567,32 @@ const ReportItem = ({ type = "lost" }) => {
                 accept="image/*"
                 multiple
                 onChange={handleImageChange}
-                disabled={
-                  loading ||
-                  images.length >= 3
-                }
+                disabled={loading || images.length >= 3}
               />
             </label>
 
-            {errors.images && (
-              <p className="field-error">
-                {errors.images}
-              </p>
-            )}
+            {errors.images && <p className="field-error">{errors.images}</p>}
 
             {images.length > 0 && (
               <div className="selected-images">
-                {imagePreviews.map(
-                  (preview, index) => (
-                    <div
-                      className="selected-image"
-                      key={`${preview.file.name}-${index}`}
-                    >
-                      <img
-                        src={preview.url}
-                        alt={`Selected item ${index + 1}`}
-                      />
+                {imagePreviews.map((preview, index) => (
+                  <div
+                    className="selected-image"
+                    key={`${preview.file.name}-${index}`}
+                  >
+                    <img src={preview.url} alt={`Selected item ${index + 1}`} />
 
-                      <button
-                        type="button"
-                        className="remove-image-button"
-                        onClick={() =>
-                          removeImage(index)
-                        }
-                        disabled={loading}
-                        aria-label={`Remove image ${
-                          index + 1
-                        }`}
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </div>
-                  )
-                )}
+                    <button
+                      type="button"
+                      className="remove-image-button"
+                      onClick={() => removeImage(index)}
+                      disabled={loading}
+                      aria-label={`Remove image ${index + 1}`}
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </section>
@@ -772,9 +620,7 @@ const ReportItem = ({ type = "lost" }) => {
                 <>
                   <FiCheckCircle />
 
-                  {isLost
-                    ? "Report Lost Item"
-                    : "Report Found Item"}
+                  {isLost ? "Report Lost Item" : "Report Found Item"}
                 </>
               )}
             </button>

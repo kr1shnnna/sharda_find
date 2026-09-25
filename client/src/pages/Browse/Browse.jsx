@@ -106,7 +106,7 @@ const Browse = () => {
 
       // Backend images[] → ItemCard image
       image:
-        item.images?.[0] ||
+        item.images?.[0]?.url ||
         "https://placehold.co/800x500/f1f5f9/64748b?text=No+Image",
     };
   };
