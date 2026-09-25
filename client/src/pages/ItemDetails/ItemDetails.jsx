@@ -4,7 +4,6 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-
 import {
   FiArrowLeft,
   FiMapPin,
@@ -49,14 +48,19 @@ const ItemDetails = () => {
   const navigate = useNavigate();
 
   const [item, setItem] = useState(null);
+  const [eligibleClaim, setEligibleClaim] = useState(null);
+
   const [selectedImage, setSelectedImage] =
     useState(0);
 
-  const [eligibleClaim, setEligibleClaim] =
-    useState(null);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [reportingFound, setReportingFound] =
+    useState(false);
+
+  const [reportFoundError, setReportFoundError] =
+    useState("");
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -70,8 +74,9 @@ const ItemDetails = () => {
 
         setItem(response.data.item);
         setEligibleClaim(
-          response.data.eligibleClaim
+          response.data.eligibleClaim || null
         );
+
         setSelectedImage(0);
       } catch (error) {
         console.error(
@@ -98,7 +103,11 @@ const ItemDetails = () => {
 
     const formattedDate = new Date(date);
 
-    if (Number.isNaN(formattedDate.getTime())) {
+    if (
+      Number.isNaN(
+        formattedDate.getTime()
+      )
+    ) {
       return "Date unavailable";
     }
 
@@ -112,12 +121,101 @@ const ItemDetails = () => {
     );
   };
 
+  const handleReportFound = async () => {
+    if (
+      !item?._id ||
+      item.type !== "lost"
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Did you find this item? This will notify the person who reported it."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setReportingFound(true);
+      setReportFoundError("");
+
+      await api.post(
+        `/items/${item._id}/report-found`
+      );
+
+      /*
+       * Fetch the item again so the frontend
+       * gets the latest foundBy/status data
+       * directly from the backend.
+       */
+      const response = await api.get(
+        `/items/${item._id}`
+      );
+
+      setItem(response.data.item);
+
+      setEligibleClaim(
+        response.data.eligibleClaim || null
+      );
+
+      alert(
+        "Item reported as found successfully."
+      );
+    } catch (error) {
+      console.error(
+        "Report found error:",
+        error
+      );
+
+      setReportFoundError(
+        error.response?.data?.message ||
+          "Unable to report this item as found."
+      );
+    } finally {
+      setReportingFound(false);
+    }
+  };
+
+  const handleMessage = async () => {
+    if (!item?._id) {
+      return;
+    }
+
+    try {
+      const response = await api.get(
+        `/messages/conversation/${item._id}`
+      );
+
+      const conversation =
+        response.data?.conversation;
+
+      if (conversation?._id) {
+        navigate(
+          `/messages/${conversation._id}`
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Open conversation error:",
+        error
+      );
+
+      setReportFoundError(
+        error.response?.data?.message ||
+          "Unable to open this conversation."
+      );
+    }
+  };
+
   if (loading) {
     return (
       <main className="item-details-page">
         <div className="item-details-container">
           <div className="item-details-loading">
             <div className="details-spinner"></div>
+
             <p>Loading item...</p>
           </div>
         </div>
@@ -164,10 +262,9 @@ const ItemDetails = () => {
    *   }
    * ]
    *
-   * Convert it into an array of URLs for
-   * the gallery.
+   * Convert it into an array of URLs
+   * for the gallery.
    */
-
   const images =
     Array.isArray(item.images) &&
     item.images.length > 0
@@ -177,23 +274,10 @@ const ItemDetails = () => {
       : [FALLBACK_IMAGE];
 
   const mainImage =
-    images[selectedImage] || FALLBACK_IMAGE;
+    images[selectedImage] ||
+    FALLBACK_IMAGE;
 
   const isLost = item.type === "lost";
-
-  /*
-   * Messaging is available when:
-   *
-   * Lost item:
-   * The item has been reported as found.
-   *
-   * Found item:
-   * There is a pending or approved claim.
-   */
-  const canMessage =
-    (isLost && Boolean(item.foundBy)) ||
-    (!isLost &&
-      Boolean(eligibleClaim?.claimant));
 
   const hasMultipleImages =
     images.length > 1;
@@ -207,6 +291,33 @@ const ItemDetails = () => {
     categoryLabels[item.category] ||
     item.category ||
     "Other";
+
+  /*
+   * Messaging rules:
+   *
+   * LOST ITEM
+   * -> message becomes available once
+   *    somebody has reported finding it.
+   *
+   * FOUND ITEM
+   * -> message becomes available when
+   *    there is an active claim.
+   *
+   * If the item is already with the
+   * Lost & Found Department, messaging
+   * is disabled.
+   */
+  const canMessage =
+    item.itemLocation !==
+      "lost-found-department" &&
+    (
+      (isLost &&
+        Boolean(item.foundBy)) ||
+      (!isLost &&
+        Boolean(
+          eligibleClaim?.claimant
+        ))
+    );
 
   const goToPreviousImage = () => {
     if (!hasMultipleImages) {
@@ -233,31 +344,8 @@ const ItemDetails = () => {
   };
 
   const handleImageError = (event) => {
-    event.currentTarget.src = FALLBACK_IMAGE;
-  };
-
-  const handleMessage = async () => {
-    try {
-      const response = await api.get(
-        `/messages/conversation/${item._id}`
-      );
-
-      const conversation =
-        response.data.conversation;
-
-      if (!conversation?._id) {
-        return;
-      }
-
-      navigate(
-        `/messages/${conversation._id}`
-      );
-    } catch (error) {
-      console.error(
-        "Unable to open conversation:",
-        error
-      );
-    }
+    event.currentTarget.src =
+      FALLBACK_IMAGE;
   };
 
   return (
@@ -286,15 +374,21 @@ const ItemDetails = () => {
                 alt={`${item.title} ${
                   selectedImage + 1
                 }`}
-                onError={handleImageError}
+                onError={
+                  handleImageError
+                }
               />
 
               <span
                 className={`details-type-badge ${
-                  isLost ? "lost" : "found"
+                  isLost
+                    ? "lost"
+                    : "found"
                 }`}
               >
-                {isLost ? "Lost" : "Found"}
+                {isLost
+                  ? "Lost"
+                  : "Found"}
               </span>
 
               <button
@@ -303,7 +397,9 @@ const ItemDetails = () => {
                 onClick={
                   goToPreviousImage
                 }
-                disabled={!hasMultipleImages}
+                disabled={
+                  !hasMultipleImages
+                }
                 aria-label="Previous image"
               >
                 <FiChevronLeft />
@@ -312,8 +408,12 @@ const ItemDetails = () => {
               <button
                 type="button"
                 className="gallery-arrow gallery-arrow-right"
-                onClick={goToNextImage}
-                disabled={!hasMultipleImages}
+                onClick={
+                  goToNextImage
+                }
+                disabled={
+                  !hasMultipleImages
+                }
                 aria-label="Next image"
               >
                 <FiChevronRight />
@@ -330,7 +430,8 @@ const ItemDetails = () => {
                       type="button"
                       key={`${image}-${index}`}
                       className={`item-image-thumbnail ${
-                        selectedImage === index
+                        selectedImage ===
+                        index
                           ? "active"
                           : ""
                       }`}
@@ -392,7 +493,11 @@ const ItemDetails = () => {
                 </div>
 
                 <div>
-                  <span>Location</span>
+                  <span>
+                    {isLost
+                      ? "Lost at"
+                      : "Found at"}
+                  </span>
 
                   <strong>
                     {item.location ||
@@ -423,7 +528,11 @@ const ItemDetails = () => {
                 </div>
 
                 <div>
-                  <span>Reported by</span>
+                  <span>
+                    {isLost
+                      ? "Reported by"
+                      : "Found by"}
+                  </span>
 
                   <strong>
                     {item.reportedBy?.name ||
@@ -434,25 +543,29 @@ const ItemDetails = () => {
 
             </div>
 
-            {/* PICKUP LOCATION */}
+            {/* CURRENT LOCATION */}
 
-            {item.pickupLocation && (
-              <div className="pickup-box">
-                <FiCheckCircle />
+            {!isLost &&
+              item.itemLocation && (
+                <div className="pickup-box">
+                  <FiCheckCircle />
 
-                <div>
-                  <span>
-                    Pickup location
-                  </span>
+                  <div>
+                    <span>
+                      Current location
+                    </span>
 
-                  <strong>
-                    {item.pickupLocation}
-                  </strong>
+                    <strong>
+                      {item.itemLocation ===
+                      "lost-found-department"
+                        ? "Lost & Found Department"
+                        : "With finder"}
+                    </strong>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* ACTION */}
+            {/* ACTIONS */}
 
             <div className="details-actions">
 
@@ -460,21 +573,35 @@ const ItemDetails = () => {
                 type="button"
                 className="claim-button"
                 disabled={
-                  item.status !== "active"
+                  item.status !==
+                    "active" ||
+                  reportingFound
+                }
+                onClick={
+                  isLost
+                    ? handleReportFound
+                    : undefined
                 }
               >
                 <FiCheckCircle />
 
-                {item.status === "active"
-                  ? "Claim This Item"
-                  : "Item Unavailable"}
+                {item.status !==
+                "active"
+                  ? "Item Unavailable"
+                  : isLost
+                    ? reportingFound
+                      ? "Reporting..."
+                      : "Report Found"
+                    : "Claim This Item"}
               </button>
 
               {canMessage && (
                 <button
                   type="button"
                   className="message-button"
-                  onClick={handleMessage}
+                  onClick={
+                    handleMessage
+                  }
                 >
                   <FiMessageSquare />
                   Message
@@ -482,6 +609,14 @@ const ItemDetails = () => {
               )}
 
             </div>
+
+            {/* ACTION ERROR */}
+
+            {reportFoundError && (
+              <p className="details-action-error">
+                {reportFoundError}
+              </p>
+            )}
 
           </div>
         </div>
