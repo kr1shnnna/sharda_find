@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FiArrowRight, FiSearch } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
@@ -7,13 +8,14 @@ import placeholderItems from "../../data/placeholderItems";
 import "./RecentItems.css";
 
 const RecentItems = () => {
+  const [loading] = useState(false);
+
   const items = placeholderItems;
 
   return (
     <section className="recent-items">
       <div className="recent-items-container">
 
-        {/* Section heading */}
         <div className="recent-items-header">
           <div>
             <p className="section-label">
@@ -38,8 +40,30 @@ const RecentItems = () => {
           </Link>
         </div>
 
-        {/* Items / Empty state */}
-        {items.length > 0 ? (
+        {loading ? (
+          <div className="recent-items-grid">
+            {[1, 2, 3].map((item) => (
+              <div
+                className="item-card-skeleton"
+                key={item}
+              >
+                <div className="skeleton-image"></div>
+
+                <div className="skeleton-content">
+                  <div className="skeleton-title"></div>
+
+                  <div className="skeleton-info"></div>
+                  <div className="skeleton-info short"></div>
+
+                  <div className="skeleton-footer">
+                    <div className="skeleton-category"></div>
+                    <div className="skeleton-button"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : items.length > 0 ? (
           <div className="recent-items-grid">
             {items.map((item) => (
               <ItemCard
