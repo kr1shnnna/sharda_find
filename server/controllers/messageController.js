@@ -100,6 +100,31 @@ const getOrCreateConversation = async (req, res) => {
   }
 };
 
+const getMyConversations = async (req, res) => {
+  try {
+    const conversations = await Conversation.find({
+      participants: req.user._id,
+    })
+      .populate("participants", "name email")
+      .populate("item", "title type category location")
+      .populate("claim", "status")
+      .sort({
+        updatedAt: -1,
+      });
+
+    return res.status(200).json({
+      count: conversations.length,
+      conversations,
+    });
+  } catch (error) {
+    console.error("Get my conversations error:", error);
+
+    return res.status(500).json({
+      message: "Unable to fetch conversations",
+    });
+  }
+};
+
 const sendMessage = async (req, res) => {
   try {
     const { conversationId } = req.params;
@@ -275,4 +300,5 @@ module.exports = {
   sendMessage,
   getMessages,
   markMessagesAsRead,
+  getMyConversations,
 };

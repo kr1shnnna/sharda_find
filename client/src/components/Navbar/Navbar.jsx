@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { FaLeaf } from "react-icons/fa";
 
 import {
+  FiBell,
   FiChevronDown,
-  FiLogOut,
   FiGrid,
+  FiLogOut,
   FiPackage,
   FiFileText,
   FiUser,
@@ -18,6 +19,7 @@ import {
 } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
+import api from "../../api/axios";
 
 import "./Navbar.css";
 
@@ -32,6 +34,34 @@ const Navbar = () => {
   } = useAuth();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  /*
+   * Fetch unread notification count
+   */
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const fetchUnreadNotifications = async () => {
+      try {
+        const response = await api.get("/notifications");
+
+        setUnreadCount(
+          response.data?.unreadCount || 0
+        );
+      } catch (error) {
+        console.error(
+          "Fetch notification count error:",
+          error
+        );
+      }
+    };
+
+    fetchUnreadNotifications();
+  }, [isAuthenticated, location.pathname]);
 
   const handleSectionClick = (sectionId) => {
     setMenuOpen(false);
@@ -52,6 +82,7 @@ const Navbar = () => {
   const handleLogout = () => {
     logout();
     setMenuOpen(false);
+    setUnreadCount(0);
 
     navigate("/login", {
       replace: true,
@@ -136,113 +167,133 @@ const Navbar = () => {
           ) : (
             <div className="navbar-user">
 
-              {/* User Menu Button */}
-              <button
-                type="button"
-                className="user-menu-button"
-                onClick={() =>
-                  setMenuOpen(
-                    (previous) => !previous
-                  )
-                }
-                aria-expanded={menuOpen}
+              {/* Notification Button */}
+              <Link
+                to="/notifications"
+                className="navbar-notification-button"
+                aria-label="Notifications"
+                title="Notifications"
               >
-                <span className="user-avatar">
-                  <FiUser />
-                </span>
+                <FiBell />
 
-                <span className="user-name">
-                  {getUserName()}
-                </span>
+                {unreadCount > 0 && (
+                  <span className="notification-badge">
+                    {unreadCount > 99
+                      ? "99+"
+                      : unreadCount}
+                  </span>
+                )}
+              </Link>
 
-                <FiChevronDown
-                  className={`user-chevron ${
-                    menuOpen ? "open" : ""
-                  }`}
-                />
-              </button>
+              {/* User Menu */}
+              <div className="navbar-user-menu">
+                <button
+                  type="button"
+                  className="user-menu-button"
+                  onClick={() =>
+                    setMenuOpen(
+                      (previous) => !previous
+                    )
+                  }
+                  aria-expanded={menuOpen}
+                >
+                  <span className="user-avatar">
+                    <FiUser />
+                  </span>
 
-              {/* User Dropdown */}
-              {menuOpen && (
-                <div className="user-dropdown">
+                  <span className="user-name">
+                    {getUserName()}
+                  </span>
 
-                  {/* User Information */}
-                  <div className="user-dropdown-header">
-                    <span className="dropdown-user-name">
-                      {getUserName()}
-                    </span>
+                  <FiChevronDown
+                    className={`user-chevron ${
+                      menuOpen ? "open" : ""
+                    }`}
+                  />
+                </button>
 
-                    {user?.email && (
-                      <span className="dropdown-user-email">
-                        {user.email}
+                {/* User Dropdown */}
+                {menuOpen && (
+                  <div className="user-dropdown">
+
+                    {/* User Information */}
+                    <div className="user-dropdown-header">
+                      <span className="dropdown-user-name">
+                        {getUserName()}
                       </span>
-                    )}
+
+                      {user?.email && (
+                        <span className="dropdown-user-email">
+                          {user.email}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="user-dropdown-divider" />
+
+                    {/* Dashboard */}
+                    <Link
+                      to="/dashboard"
+                      className="user-dropdown-item"
+                      onClick={() =>
+                        setMenuOpen(false)
+                      }
+                    >
+                      <FiGrid />
+
+                      <span>
+                        Dashboard
+                      </span>
+                    </Link>
+
+                    {/* My Items */}
+                    <Link
+                      to="/my-items"
+                      className="user-dropdown-item"
+                      onClick={() =>
+                        setMenuOpen(false)
+                      }
+                    >
+                      <FiPackage />
+
+                      <span>
+                        My Items
+                      </span>
+                    </Link>
+
+                    {/* My Claims */}
+                    <Link
+                      to="/my-claims"
+                      className="user-dropdown-item"
+                      onClick={() =>
+                        setMenuOpen(false)
+                      }
+                    >
+                      <FiFileText />
+
+                      <span>
+                        My Claims
+                      </span>
+                    </Link>
+
+                    <div className="user-dropdown-divider" />
+
+                    {/* Logout */}
+                    <button
+                      type="button"
+                      className="user-dropdown-item logout-item"
+                      onClick={handleLogout}
+                    >
+                      <FiLogOut />
+
+                      <span>
+                        Logout
+                      </span>
+                    </button>
+
                   </div>
-
-                  <div className="user-dropdown-divider" />
-
-                  {/* Dashboard */}
-                  <Link
-                    to="/dashboard"
-                    className="user-dropdown-item"
-                    onClick={() =>
-                      setMenuOpen(false)
-                    }
-                  >
-                    <FiGrid />
-
-                    <span>
-                      Dashboard
-                    </span>
-                  </Link>
-
-                  {/* My Items */}
-                  <Link
-                    to="/my-items"
-                    className="user-dropdown-item"
-                    onClick={() =>
-                      setMenuOpen(false)
-                    }
-                  >
-                    <FiPackage />
-
-                    <span>
-                      My Items
-                    </span>
-                  </Link>
-
-                  {/* My Claims */}
-                  <Link
-                    to="/my-claims"
-                    className="user-dropdown-item"
-                    onClick={() =>
-                      setMenuOpen(false)
-                    }
-                  >
-                    <FiFileText />
-
-                    <span>
-                      My Claims
-                    </span>
-                  </Link>
-
-                  <div className="user-dropdown-divider" />
-
-                  {/* Logout */}
-                  <button
-                    type="button"
-                    className="user-dropdown-item logout-item"
-                    onClick={handleLogout}
-                  >
-                    <FiLogOut />
-
-                    <span>
-                      Logout
-                    </span>
-                  </button>
-
-                </div>
-              )}
+                )}
+              </div>
 
             </div>
           )}
