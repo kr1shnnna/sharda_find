@@ -1,9 +1,15 @@
-import React from 'react'
+import Navbar from "./components/Navbar/Navbar";
 
-const App = () => {
+function App() {
   return (
-    <div className="app">App</div>
-  )
+    <>
+      <Navbar />
+
+      <main>
+        <h1>ShardaFind</h1>
+      </main>
+    </>
+  );
 }
 
-export default App
+export default App;
