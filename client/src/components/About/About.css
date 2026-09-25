@@ -1,0 +1,142 @@
+.about {
+  width: 100%;
+  padding: 80px 0;
+  background-color: var(--background);
+}
+
+.about-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 80px;
+
+  padding: 56px 64px;
+
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.about-text {
+  max-width: 600px;
+}
+
+.about-label {
+  margin-bottom: 12px;
+
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.about h2 {
+  margin-bottom: 20px;
+
+  color: var(--text-primary);
+  font-size: 36px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+}
+
+.about h2 span {
+  display: block;
+  color: var(--primary);
+}
+
+.about-description {
+  margin-bottom: 14px;
+
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.about-description:last-child {
+  margin-bottom: 0;
+}
+
+/* Features */
+
+.about-features {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+
+.about-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.about-feature-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--primary);
+  background-color: var(--primary-light);
+
+  border-radius: 10px;
+}
+
+.about-feature-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.about-feature h3 {
+  margin-bottom: 5px;
+
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.about-feature p {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .about-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+
+    padding: 48px;
+  }
+
+  .about-text {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .about {
+    padding: 60px 0;
+  }
+
+  .about-content {
+    padding: 36px 24px;
+  }
+
+  .about h2 {
+    font-size: 30px;
+  }
+}

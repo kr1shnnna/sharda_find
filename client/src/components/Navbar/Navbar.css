@@ -132,3 +132,24 @@
 .navbar-links a:hover {
   color: var(--primary);
 }
+
+
+.navbar-links button {
+  padding: 0;
+
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition: color 0.2s ease;
+}
+
+.navbar-links button:hover {
+  color: var(--primary);
+}

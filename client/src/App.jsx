@@ -1,23 +1,81 @@
+import { useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+
 import Navbar from "./components/Navbar/Navbar";
 import Hero from "./components/Hero/Hero";
 import Stats from "./components/Stats/Stats";
 import RecentItems from "./components/RecentItems/RecentItems";
 import HowItWorks from "./components/HowItWorks/HowItWorks";
-import CTA from "./components/CTA/CTA";
+import About from "./components/About/About";
 import Footer from "./components/Footer/Footer";
 
-function App() {
+import Browse from "./pages/Browse/Browse";
+
+const Home = () => {
   return (
     <>
-      <Navbar />
       <Hero />
       <Stats />
       <RecentItems />
       <HowItWorks />
-      <CTA />
+      <About />
+    </>
+  );
+};
+
+const AppContent = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!location.hash) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
+      return;
+    }
+
+    const sectionId = location.hash.substring(1);
+
+    const scrollToSection = () => {
+      const section = document.getElementById(sectionId);
+
+      if (section) {
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    };
+
+    // Wait for the target section to be rendered.
+    requestAnimationFrame(scrollToSection);
+  }, [location.pathname, location.hash]);
+
+  return (
+    <>
+      <Navbar />
+
+      <Routes>
+        <Route
+          path="/"
+          element={<Home />}
+        />
+
+        <Route
+          path="/browse"
+          element={<Browse />}
+        />
+      </Routes>
+
       <Footer />
     </>
   );
+};
+
+function App() {
+  return <AppContent />;
 }
 
 export default App;
