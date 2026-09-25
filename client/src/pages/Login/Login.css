@@ -27,11 +27,12 @@
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
 }
 
-/* Header */
+/* =========================
+   Header
+========================= */
 
 .login-header {
   margin-bottom: 32px;
-
   text-align: center;
 }
 
@@ -46,7 +47,6 @@
   justify-content: center;
 
   color: var(--primary);
-
   background-color: var(--primary-light);
 
   border-radius: 14px;
@@ -88,7 +88,9 @@
   line-height: 1.6;
 }
 
-/* Server Error */
+/* =========================
+   Server Error
+========================= */
 
 .login-server-error {
   display: flex;
@@ -99,7 +101,6 @@
   padding: 12px 14px;
 
   color: var(--danger);
-
   background-color: #fef2f2;
 
   border: 1px solid #fecaca;
@@ -120,40 +121,44 @@
   line-height: 1.5;
 }
 
-/* Form */
+/* =========================
+   Form
+========================= */
 
 .login-form {
   display: flex;
   flex-direction: column;
-
   gap: 20px;
 }
 
-.form-group {
+.login-page .form-group {
   display: flex;
   flex-direction: column;
-
   gap: 7px;
 }
 
-.form-group label {
+.login-page .form-group label {
   color: var(--text-primary);
 
   font-size: 13px;
   font-weight: 600;
 }
 
-/* Password label */
+/* =========================
+   Password Label
+========================= */
 
-.password-label-row {
+.login-page .password-label-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-/* Inputs */
+/* =========================
+   Input Wrapper
+========================= */
 
-.input-wrapper {
+.login-page .input-wrapper {
   width: 100%;
   height: 46px;
 
@@ -172,13 +177,15 @@
     box-shadow 0.2s ease;
 }
 
-.input-wrapper:focus-within {
+.login-page .input-wrapper:focus-within {
   border-color: var(--primary);
 
   box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.08);
 }
 
-.input-wrapper > svg {
+/* Left-side icon */
+
+.login-page .input-wrapper > svg {
   width: 17px;
   height: 17px;
 
@@ -187,45 +194,65 @@
   color: var(--text-secondary);
 }
 
-.input-wrapper:focus-within > svg {
+.login-page .input-wrapper:focus-within > svg {
   color: var(--primary);
 }
 
-.input-wrapper input {
+/* Actual input */
+
+.login-page .input-wrapper input {
   flex: 1;
 
   width: 100%;
   height: 100%;
 
+  min-width: 0;
+
   padding: 0 10px;
 
-  border: none;
-  outline: none;
-
   color: var(--text-primary);
-
   background: transparent;
 
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+
+  font-family: inherit;
   font-size: 13px;
+
+  appearance: none;
+  -webkit-appearance: none;
 }
 
-.input-wrapper input::placeholder {
+.login-page .input-wrapper input:focus {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+
+.login-page .input-wrapper input::placeholder {
   color: #94a3b8;
 }
 
-.input-wrapper.input-error {
+/* =========================
+   Input Error
+========================= */
+
+.login-page .input-wrapper.input-error {
   border-color: var(--danger);
 }
 
-.input-wrapper.input-error:focus-within {
+.login-page .input-wrapper.input-error:focus-within {
   border-color: var(--danger);
 
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
 }
 
-/* Password Toggle */
+/* =========================
+   Password Toggle
+========================= */
 
-.password-toggle {
+.login-page .password-toggle {
   width: 28px;
   height: 28px;
 
@@ -238,37 +265,47 @@
   padding: 0;
 
   color: var(--text-secondary);
+  background: transparent;
 
-  background: none;
-
-  border: none;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
 
   cursor: pointer;
 }
 
-.password-toggle:hover {
+.login-page .password-toggle:hover {
   color: var(--primary);
 }
 
-.password-toggle:disabled {
+.login-page .password-toggle:focus {
+  outline: 0;
+  box-shadow: none;
+}
+
+.login-page .password-toggle:disabled {
   cursor: not-allowed;
 }
 
-.password-toggle svg {
+.login-page .password-toggle svg {
   width: 17px;
   height: 17px;
 }
 
-/* Errors */
+/* =========================
+   Field Errors
+========================= */
 
-.field-error {
+.login-page .field-error {
   color: var(--danger);
 
   font-size: 11px;
   line-height: 1.4;
 }
 
-/* Submit */
+/* =========================
+   Submit
+========================= */
 
 .login-submit {
   width: 100%;
@@ -282,7 +319,6 @@
   margin-top: 4px;
 
   color: var(--white);
-
   background-color: var(--primary);
 
   border: none;
@@ -301,24 +337,24 @@
   background-color: var(--primary-dark);
 }
 
+.login-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .login-submit svg {
   width: 17px;
   height: 17px;
 }
 
-.login-submit:disabled {
-  opacity: 0.7;
-
-  cursor: not-allowed;
-}
-
-/* Footer */
+/* =========================
+   Footer
+========================= */
 
 .login-footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-
   gap: 12px;
 
   margin-top: 24px;
@@ -339,7 +375,6 @@
   color: var(--primary);
 
   text-decoration: none;
-
   font-weight: 600;
 }
 
@@ -362,7 +397,9 @@
   color: var(--primary);
 }
 
-/* Responsive */
+/* =========================
+   Responsive
+========================= */
 
 @media (max-width: 600px) {
   .login-page {
