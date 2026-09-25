@@ -1,6 +1,8 @@
 const Item = require("../models/Item");
 const uploadToCloudinary = require("../utils/cloudinaryUpload");
 
+const Claim = require("../models/Claim");
+
 const createItem = async (req, res) => {
   try {
     const {
@@ -158,10 +160,9 @@ const getMyItems = async (req, res) => {
 
 const getItemById = async (req, res) => {
   try {
-    const item = await Item.findById(req.params.id).populate(
-      "reportedBy",
-      "name email",
-    );
+    const item = await Item.findById(req.params.id)
+      .populate("reportedBy", "name email")
+      .populate("foundBy", "name email");
 
     if (!item) {
       return res.status(404).json({
@@ -169,8 +170,21 @@ const getItemById = async (req, res) => {
       });
     }
 
+    let eligibleClaim = null;
+
+    // For a found item, find the latest pending/approved claim.
+    if (item.type === "found") {
+      eligibleClaim = await Claim.findOne({
+        item: item._id,
+        status: { $in: ["pending", "approved"] },
+      })
+        .populate("claimant", "name email")
+        .sort({ createdAt: -1 });
+    }
+
     res.status(200).json({
       item,
+      eligibleClaim,
     });
   } catch (error) {
     res.status(500).json({

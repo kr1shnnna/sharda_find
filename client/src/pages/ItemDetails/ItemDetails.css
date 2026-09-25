@@ -618,3 +618,82 @@
     right: 10px;
   }
 }
+
+/* ============================= */
+/* ITEM ACTIONS */
+/* ============================= */
+
+.details-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+/* Message button */
+
+.message-button {
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 18px;
+
+  color: var(--primary);
+  background-color: var(--white);
+
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.message-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.message-button:hover {
+  color: var(--white);
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.message-button:active {
+  transform: translateY(1px);
+}
+
+.message-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+
+/* ============================= */
+/* RESPONSIVE ITEM ACTIONS */
+/* ============================= */
+
+@media (max-width: 600px) {
+  .details-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .details-actions .claim-button,
+  .details-actions .message-button {
+    width: 100%;
+  }
+}

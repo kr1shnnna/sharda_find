@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import {
   Link,
+  useNavigate,
   useParams,
 } from "react-router-dom";
+
 import {
   FiArrowLeft,
   FiMapPin,
@@ -12,6 +14,7 @@ import {
   FiCheckCircle,
   FiChevronLeft,
   FiChevronRight,
+  FiMessageSquare,
 } from "react-icons/fi";
 
 import api from "../../api/axios";
@@ -43,10 +46,14 @@ const categoryLabels = {
 
 const ItemDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [item, setItem] = useState(null);
   const [selectedImage, setSelectedImage] =
     useState(0);
+
+  const [eligibleClaim, setEligibleClaim] =
+    useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -62,6 +69,9 @@ const ItemDetails = () => {
         );
 
         setItem(response.data.item);
+        setEligibleClaim(
+          response.data.eligibleClaim
+        );
         setSelectedImage(0);
       } catch (error) {
         console.error(
@@ -157,6 +167,7 @@ const ItemDetails = () => {
    * Convert it into an array of URLs for
    * the gallery.
    */
+
   const images =
     Array.isArray(item.images) &&
     item.images.length > 0
@@ -169,6 +180,20 @@ const ItemDetails = () => {
     images[selectedImage] || FALLBACK_IMAGE;
 
   const isLost = item.type === "lost";
+
+  /*
+   * Messaging is available when:
+   *
+   * Lost item:
+   * The item has been reported as found.
+   *
+   * Found item:
+   * There is a pending or approved claim.
+   */
+  const canMessage =
+    (isLost && Boolean(item.foundBy)) ||
+    (!isLost &&
+      Boolean(eligibleClaim?.claimant));
 
   const hasMultipleImages =
     images.length > 1;
@@ -209,6 +234,30 @@ const ItemDetails = () => {
 
   const handleImageError = (event) => {
     event.currentTarget.src = FALLBACK_IMAGE;
+  };
+
+  const handleMessage = async () => {
+    try {
+      const response = await api.get(
+        `/messages/conversation/${item._id}`
+      );
+
+      const conversation =
+        response.data.conversation;
+
+      if (!conversation?._id) {
+        return;
+      }
+
+      navigate(
+        `/messages/${conversation._id}`
+      );
+    } catch (error) {
+      console.error(
+        "Unable to open conversation:",
+        error
+      );
+    }
   };
 
   return (
@@ -406,6 +455,7 @@ const ItemDetails = () => {
             {/* ACTION */}
 
             <div className="details-actions">
+
               <button
                 type="button"
                 className="claim-button"
@@ -419,6 +469,18 @@ const ItemDetails = () => {
                   ? "Claim This Item"
                   : "Item Unavailable"}
               </button>
+
+              {canMessage && (
+                <button
+                  type="button"
+                  className="message-button"
+                  onClick={handleMessage}
+                >
+                  <FiMessageSquare />
+                  Message
+                </button>
+              )}
+
             </div>
 
           </div>
