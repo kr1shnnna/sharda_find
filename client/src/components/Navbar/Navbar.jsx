@@ -1,4 +1,4 @@
-import { FiLeaf } from "react-icons/fi";
+import { FaLeaf } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import "./Navbar.css";
 
@@ -9,7 +9,7 @@ const Navbar = () => {
 
         <Link to="/" className="navbar-logo">
           <span className="logo-icon">
-            <FiLeaf />
+            <FaLeaf />
           </span>
 
           <span>ShardaFind</span>
