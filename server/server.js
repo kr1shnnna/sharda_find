@@ -26,6 +26,14 @@ const handoverRoutes = require("./routes/handoverRoutes");
 
 const notificationRoutes = require("./routes/notificationRoutes");
 
+const socketAuthMiddleware = require(
+  "./middleware/socketAuthMiddleware"
+);
+
+const Conversation = require(
+  "./models/Conversation"
+);
+
 connectDB();
 
 const app = express();
@@ -59,11 +67,13 @@ const PORT = process.env.PORT || 5000;
 /*
  * Create HTTP server
  */
+
 const server = http.createServer(app);
 
 /*
  * Create Socket.IO server
  */
+
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
@@ -72,30 +82,123 @@ const io = new Server(server, {
 });
 
 /*
+ * Socket authentication
+ */
+
+io.use(socketAuthMiddleware);
+
+/*
  * Socket.IO connection
  */
+
 io.on("connection", (socket) => {
   console.log(
     "Socket connected:",
-    socket.id
+    socket.id,
+    "User:",
+    socket.user._id
   );
+
+  /*
+   * Join conversation
+   */
 
   socket.on(
     "join-conversation",
-    (conversationId) => {
-      if (!conversationId) {
-        return;
+    async (conversationId) => {
+      try {
+        if (!conversationId) {
+          socket.emit("conversation-error", {
+            message:
+              "Conversation ID is required",
+          });
+
+          return;
+        }
+
+        /*
+         * Find conversation
+         */
+
+        const conversation =
+          await Conversation.findById(
+            conversationId
+          );
+
+        if (!conversation) {
+          socket.emit("conversation-error", {
+            message:
+              "Conversation not found",
+          });
+
+          return;
+        }
+
+        /*
+         * Check whether the authenticated
+         * user is a participant
+         */
+
+        const isParticipant =
+          conversation.participants.some(
+            (participant) =>
+              participant.toString() ===
+              socket.user._id.toString()
+          );
+
+        if (!isParticipant) {
+          socket.emit("conversation-error", {
+            message:
+              "You are not part of this conversation",
+          });
+
+          return;
+        }
+
+        /*
+         * Create conversation room
+         */
+
+        const roomName =
+          `conversation:${conversationId}`;
+
+        /*
+         * Join room
+         */
+
+        socket.join(roomName);
+
+        console.log(
+          `User ${socket.user._id} joined ${roomName}`
+        );
+
+        /*
+         * Tell client that joining succeeded
+         */
+
+        socket.emit(
+          "conversation-joined",
+          {
+            conversationId,
+          }
+        );
+      } catch (error) {
+        console.error(
+          "Join conversation error:",
+          error
+        );
+
+        socket.emit("conversation-error", {
+          message:
+            "Unable to join conversation",
+        });
       }
-
-      socket.join(
-        `conversation:${conversationId}`
-      );
-
-      console.log(
-        `Socket ${socket.id} joined conversation ${conversationId}`
-      );
     }
   );
+
+  /*
+   * Leave conversation
+   */
 
   socket.on(
     "leave-conversation",
@@ -104,32 +207,42 @@ io.on("connection", (socket) => {
         return;
       }
 
-      socket.leave(
-        `conversation:${conversationId}`
-      );
+      const roomName =
+        `conversation:${conversationId}`;
+
+      socket.leave(roomName);
 
       console.log(
-        `Socket ${socket.id} left conversation ${conversationId}`
+        `User ${socket.user._id} left ${roomName}`
       );
     }
   );
 
+  /*
+   * Socket disconnected
+   */
+
   socket.on("disconnect", () => {
     console.log(
       "Socket disconnected:",
-      socket.id
+      socket.id,
+      "User:",
+      socket.user._id
     );
   });
 });
 
 /*
- * Make Socket.IO available to controllers
+ * Make Socket.IO available
+ * inside Express controllers
  */
+
 app.set("io", io);
 
 /*
  * Start server
  */
+
 server.listen(PORT, () => {
   console.log(
     `Server is running on port ${PORT}`
