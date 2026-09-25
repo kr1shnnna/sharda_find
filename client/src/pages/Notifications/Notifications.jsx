@@ -94,6 +94,9 @@ const getNotificationIcon = (type) => {
     case "handover-rejected":
       return FiXCircle;
 
+    case "item-found":
+      return FiCheckCircle;
+
     case "new-message":
       return FiFileText;
 
@@ -237,9 +240,19 @@ const Notifications = () => {
 
       switch (notification.type) {
         case "new-message":
-          if (notification.conversation?._id) {
+          if (
+            notification.conversation?._id
+          ) {
             navigate(
               `/messages/${notification.conversation._id}`
+            );
+          }
+          break;
+
+        case "item-found":
+          if (notification.item?._id) {
+            navigate(
+              `/items/${notification.item._id}`
             );
           }
           break;

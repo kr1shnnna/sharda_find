@@ -18,6 +18,7 @@ const notificationSchema = new mongoose.Schema(
         "handover-confirmed",
         "handover-rejected",
         "new-message",
+        "item-found",
       ],
       required: true,
     },

@@ -4,6 +4,7 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
+
 import {
   FiArrowLeft,
   FiMapPin,
@@ -14,7 +15,10 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiMessageSquare,
+  FiX,
 } from "react-icons/fi";
+
+import toast from "react-hot-toast";
 
 import api from "../../api/axios";
 
@@ -59,8 +63,8 @@ const ItemDetails = () => {
   const [reportingFound, setReportingFound] =
     useState(false);
 
-  const [reportFoundError, setReportFoundError] =
-    useState("");
+  const [showReportFoundModal, setShowReportFoundModal] =
+    useState(false);
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -73,6 +77,7 @@ const ItemDetails = () => {
         );
 
         setItem(response.data.item);
+
         setEligibleClaim(
           response.data.eligibleClaim || null
         );
@@ -129,17 +134,8 @@ const ItemDetails = () => {
       return;
     }
 
-    const confirmed = window.confirm(
-      "Did you find this item? This will notify the person who reported it."
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     try {
       setReportingFound(true);
-      setReportFoundError("");
 
       await api.post(
         `/items/${item._id}/report-found`
@@ -147,8 +143,7 @@ const ItemDetails = () => {
 
       /*
        * Fetch the item again so the frontend
-       * gets the latest foundBy/status data
-       * directly from the backend.
+       * gets the latest foundBy information.
        */
       const response = await api.get(
         `/items/${item._id}`
@@ -160,8 +155,8 @@ const ItemDetails = () => {
         response.data.eligibleClaim || null
       );
 
-      alert(
-        "Item reported as found successfully."
+      toast.success(
+        "Item reported successfully. The owner has been notified."
       );
     } catch (error) {
       console.error(
@@ -169,10 +164,11 @@ const ItemDetails = () => {
         error
       );
 
-      setReportFoundError(
+      const message =
         error.response?.data?.message ||
-          "Unable to report this item as found."
-      );
+        "Unable to report this item as found.";
+
+      toast.error(message);
     } finally {
       setReportingFound(false);
     }
@@ -202,7 +198,7 @@ const ItemDetails = () => {
         error
       );
 
-      setReportFoundError(
+      toast.error(
         error.response?.data?.message ||
           "Unable to open this conversation."
       );
@@ -575,24 +571,32 @@ const ItemDetails = () => {
                 disabled={
                   item.status !==
                     "active" ||
-                  reportingFound
+                  reportingFound ||
+                  Boolean(item.foundBy)
                 }
-                onClick={
-                  isLost
-                    ? handleReportFound
-                    : undefined
-                }
+                onClick={() => {
+                  if (
+                    isLost &&
+                    !item.foundBy
+                  ) {
+                    setShowReportFoundModal(
+                      true
+                    );
+                  }
+                }}
               >
                 <FiCheckCircle />
 
-                {item.status !==
-                "active"
-                  ? "Item Unavailable"
-                  : isLost
-                    ? reportingFound
-                      ? "Reporting..."
-                      : "Report Found"
-                    : "Claim This Item"}
+                {item.foundBy
+                  ? "Already Reported"
+                  : item.status !==
+                      "active"
+                    ? "Item Unavailable"
+                    : isLost
+                      ? reportingFound
+                        ? "Reporting..."
+                        : "Report Found"
+                      : "Claim This Item"}
               </button>
 
               {canMessage && (
@@ -610,17 +614,96 @@ const ItemDetails = () => {
 
             </div>
 
-            {/* ACTION ERROR */}
-
-            {reportFoundError && (
-              <p className="details-action-error">
-                {reportFoundError}
-              </p>
-            )}
-
           </div>
         </div>
       </div>
+
+      {/* REPORT FOUND CONFIRMATION MODAL */}
+
+      {showReportFoundModal && (
+        <div
+          className="report-found-overlay"
+          onClick={(event) => {
+            if (
+              event.target ===
+              event.currentTarget
+            ) {
+              setShowReportFoundModal(
+                false
+              );
+            }
+          }}
+        >
+          <div
+            className="report-found-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="report-found-title"
+          >
+
+            <button
+              type="button"
+              className="report-found-close"
+              onClick={() =>
+                setShowReportFoundModal(
+                  false
+                )
+              }
+              aria-label="Close"
+            >
+              <FiX />
+            </button>
+
+            <div className="report-found-icon">
+              <FiCheckCircle />
+            </div>
+
+            <h2 id="report-found-title">
+              Report this item as found?
+            </h2>
+
+            <p>
+              If you have found this item,
+              the person who reported it will
+              be notified and you will be able
+              to message each other.
+            </p>
+
+            <div className="report-found-actions">
+
+              <button
+                type="button"
+                className="report-found-cancel"
+                onClick={() =>
+                  setShowReportFoundModal(
+                    false
+                  )
+                }
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="report-found-confirm"
+                onClick={() => {
+                  setShowReportFoundModal(
+                    false
+                  );
+
+                  handleReportFound();
+                }}
+                disabled={reportingFound}
+              >
+                {reportingFound
+                  ? "Reporting..."
+                  : "Yes, I Found It"}
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

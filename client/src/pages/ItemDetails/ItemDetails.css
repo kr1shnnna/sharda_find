@@ -697,3 +697,191 @@
     width: 100%;
   }
 }
+
+
+
+/* =========================================
+   REPORT FOUND MODAL
+   ========================================= */
+
+.report-found-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background-color: rgba(15, 23, 42, 0.45);
+}
+
+.report-found-modal {
+  position: relative;
+
+  width: 100%;
+  max-width: 440px;
+
+  padding: 32px;
+
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+
+  text-align: center;
+}
+
+.report-found-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--text-secondary);
+  background-color: transparent;
+
+  border: none;
+  border-radius: 8px;
+
+  font-size: 18px;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.report-found-close:hover {
+  color: var(--text-primary);
+  background-color: var(--background);
+}
+
+.report-found-icon {
+  width: 56px;
+  height: 56px;
+
+  margin: 0 auto 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--primary);
+  background-color: var(--primary-light);
+
+  border-radius: 50%;
+
+  font-size: 26px;
+}
+
+.report-found-modal h2 {
+  margin-bottom: 10px;
+
+  color: var(--text-primary);
+
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.report-found-modal p {
+  max-width: 360px;
+
+  margin: 0 auto;
+
+  color: var(--text-secondary);
+
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.report-found-actions {
+  display: flex;
+  gap: 10px;
+
+  margin-top: 28px;
+}
+
+.report-found-cancel,
+.report-found-confirm {
+  flex: 1;
+
+  height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: var(--radius-sm);
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Cancel button */
+
+.report-found-cancel {
+  color: var(--text-primary);
+  background-color: var(--white);
+
+  border: 1px solid var(--border);
+}
+
+.report-found-cancel:hover {
+  background-color: var(--background);
+  border-color: #cbd5e1;
+}
+
+/* Confirm button */
+
+.report-found-confirm {
+  color: var(--white);
+  background-color: var(--primary);
+
+  border: 1px solid var(--primary);
+}
+
+.report-found-confirm:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.report-found-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .report-found-overlay {
+    padding: 16px;
+  }
+
+  .report-found-modal {
+    padding: 28px 22px;
+  }
+
+  .report-found-actions {
+    flex-direction: column-reverse;
+  }
+
+  .report-found-cancel,
+  .report-found-confirm {
+    width: 100%;
+  }
+}
