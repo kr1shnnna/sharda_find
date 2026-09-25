@@ -4,6 +4,7 @@ import Stats from "./components/Stats/Stats";
 import RecentItems from "./components/RecentItems/RecentItems";
 import HowItWorks from "./components/HowItWorks/HowItWorks";
 import CTA from "./components/CTA/CTA";
+import Footer from "./components/Footer/Footer";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <RecentItems />
       <HowItWorks />
       <CTA />
+      <Footer />
     </>
   );
 }
