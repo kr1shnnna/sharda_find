@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
 import { FaLeaf } from "react-icons/fa";
 
 import {
   FiBell,
   FiChevronDown,
+  FiFileText,
   FiGrid,
   FiLogOut,
+  FiMessageSquare,
   FiPackage,
-  FiFileText,
   FiUser,
 } from "react-icons/fi";
 
@@ -23,21 +25,25 @@ import api from "../../api/axios";
 
 import "./Navbar.css";
 
-const Navbar = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+const SOCKET_URL = "http://localhost:5000";
 
+const Navbar = () => {
   const {
     user,
     isAuthenticated,
     logout,
   } = useAuth();
 
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [menuOpen, setMenuOpen] = useState(false);
+
   const [unreadCount, setUnreadCount] = useState(0);
 
   /*
    * Fetch unread notification count
+   * from the database.
    */
   useEffect(() => {
     if (!isAuthenticated) {
@@ -63,111 +69,133 @@ const Navbar = () => {
     fetchUnreadNotifications();
   }, [isAuthenticated, location.pathname]);
 
-  const handleSectionClick = (sectionId) => {
-    setMenuOpen(false);
-
-    if (location.pathname === "/") {
-      document
-        .getElementById(sectionId)
-        ?.scrollIntoView({
-          behavior: "smooth",
-        });
-
+  /*
+   * Real-time notification listener
+   */
+  useEffect(() => {
+    if (!isAuthenticated) {
       return;
     }
 
-    navigate(`/#${sectionId}`);
-  };
+    const token = localStorage.getItem("token");
 
-  const handleLogout = () => {
-    logout();
-    setMenuOpen(false);
-    setUnreadCount(0);
+    if (!token) {
+      return;
+    }
 
-    navigate("/login", {
-      replace: true,
+    const socket = io(SOCKET_URL, {
+      auth: {
+        token,
+      },
     });
+
+    socket.on("connect", () => {
+      console.log(
+        "Navbar notification socket connected:",
+        socket.id
+      );
+    });
+
+    /*
+     * When the backend sends a new notification,
+     * increase the unread notification count.
+     */
+    socket.on(
+      "new-notification",
+      (notification) => {
+        console.log(
+          "New notification received:",
+          notification
+        );
+
+        setUnreadCount(
+          (previousCount) => previousCount + 1
+        );
+      }
+    );
+
+    socket.on("connect_error", (error) => {
+      console.error(
+        "Navbar notification socket connection error:",
+        error.message
+      );
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [isAuthenticated]);
+
+  /*
+   * Logout
+   */
+  const handleLogout = () => {
+    setMenuOpen(false);
+
+    logout();
+
+    navigate("/login");
   };
 
-  const getUserName = () => {
-    if (user?.name) {
-      return user.name;
-    }
-
-    if (user?.email) {
-      return user.email.split("@")[0];
-    }
-
-    return "Account";
+  /*
+   * Check if navbar link is active
+   */
+  const isActive = (path) => {
+    return location.pathname === path;
   };
 
   return (
-    <nav className="navbar">
+    <header className="navbar">
       <div className="navbar-container">
 
         {/* Logo */}
         <Link
           to="/"
           className="navbar-logo"
-          onClick={() => setMenuOpen(false)}
         >
-          <span className="logo-icon">
+          <span className="navbar-logo-icon">
             <FaLeaf />
           </span>
 
-          <span>ShardaFind</span>
+          <span className="navbar-logo-text">
+            ShardaFind
+          </span>
         </Link>
 
         {/* Navigation */}
-        <div className="navbar-links">
+        <nav className="navbar-links">
           <Link
             to="/browse"
-            onClick={() => setMenuOpen(false)}
+            className={`navbar-link ${
+              isActive("/browse")
+                ? "active"
+                : ""
+            }`}
           >
             Browse
           </Link>
 
-          <button
-            type="button"
-            onClick={() =>
-              handleSectionClick("how-it-works")
-            }
+          <Link
+            to="/#how-it-works"
+            className="navbar-link"
           >
-            How it works
-          </button>
+            How It Works
+          </Link>
 
-          <button
-            type="button"
-            onClick={() =>
-              handleSectionClick("about")
-            }
+          <Link
+            to="/#about"
+            className="navbar-link"
           >
             About
-          </button>
-        </div>
+          </Link>
+        </nav>
 
-        {/* Actions */}
+        {/* Right side */}
         <div className="navbar-actions">
-          {!isAuthenticated ? (
-            <>
-              <Link
-                to="/login"
-                className="login-button"
-              >
-                Login
-              </Link>
-
-              <Link
-                to="/register"
-                className="register-button"
-              >
-                Register
-              </Link>
-            </>
-          ) : (
+          {isAuthenticated ? (
             <div className="navbar-user">
 
-              {/* Notification Button */}
+              {/* Notification button */}
               <Link
                 to="/notifications"
                 className="navbar-notification-button"
@@ -185,51 +213,36 @@ const Navbar = () => {
                 )}
               </Link>
 
-              {/* User Menu */}
+              {/* User menu */}
               <div className="navbar-user-menu">
                 <button
                   type="button"
-                  className="user-menu-button"
+                  className="navbar-user-button"
                   onClick={() =>
                     setMenuOpen(
                       (previous) => !previous
                     )
                   }
-                  aria-expanded={menuOpen}
                 >
-                  <span className="user-avatar">
+                  <span className="navbar-user-avatar">
                     <FiUser />
                   </span>
 
-                  <span className="user-name">
-                    {getUserName()}
+                  <span className="navbar-user-name">
+                    {user?.name || "Account"}
                   </span>
 
                   <FiChevronDown
-                    className={`user-chevron ${
-                      menuOpen ? "open" : ""
-                    }`}
+                    className={
+                      menuOpen
+                        ? "rotate"
+                        : ""
+                    }
                   />
                 </button>
 
-                {/* User Dropdown */}
                 {menuOpen && (
-                  <div className="user-dropdown">
-
-                    {/* User Information */}
-                    <div className="user-dropdown-header">
-                      <span className="dropdown-user-name">
-                        {getUserName()}
-                      </span>
-
-                      {user?.email && (
-                        <span className="dropdown-user-email">
-                          {user.email}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="user-dropdown-divider" />
+                  <div className="navbar-user-dropdown">
 
                     {/* Dashboard */}
                     <Link
@@ -276,6 +289,21 @@ const Navbar = () => {
                       </span>
                     </Link>
 
+                    {/* Messages */}
+                    <Link
+                      to="/messages"
+                      className="user-dropdown-item"
+                      onClick={() =>
+                        setMenuOpen(false)
+                      }
+                    >
+                      <FiMessageSquare />
+
+                      <span>
+                        Messages
+                      </span>
+                    </Link>
+
                     <div className="user-dropdown-divider" />
 
                     {/* Logout */}
@@ -294,13 +322,30 @@ const Navbar = () => {
                   </div>
                 )}
               </div>
-
             </div>
+          ) : (
+            <>
+              {/* Login */}
+              <Link
+                to="/login"
+                className="navbar-login-button"
+              >
+                Login
+              </Link>
+
+              {/* Register */}
+              <Link
+                to="/register"
+                className="navbar-register-button"
+              >
+                Register
+              </Link>
+            </>
           )}
         </div>
 
       </div>
-    </nav>
+    </header>
   );
 };
 

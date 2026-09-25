@@ -13,29 +13,43 @@ import {
   useParams,
 } from "react-router-dom";
 
+import { io } from "socket.io-client";
+
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 
 import "./Chat.css";
 
+const SOCKET_URL = "http://localhost:5000";
+
 const Chat = () => {
   const { conversationId } = useParams();
+
   const navigate = useNavigate();
 
   const { user } = useAuth();
 
   const [messages, setMessages] = useState([]);
+
   const [conversation, setConversation] =
     useState(null);
 
   const [text, setText] = useState("");
 
   const [loading, setLoading] = useState(true);
+
   const [sending, setSending] = useState(false);
+
   const [error, setError] = useState("");
 
+  const [socketError, setSocketError] =
+    useState("");
+
   const messagesEndRef = useRef(null);
+
   const textareaRef = useRef(null);
+
+  const socketRef = useRef(null);
 
   const getUserId = () => {
     return user?._id || user?.id;
@@ -53,7 +67,8 @@ const Chat = () => {
     return (
       participants.find(
         (participant) =>
-          participant?._id !== currentUserId
+          participant?._id?.toString() !==
+          currentUserId.toString()
       ) || null
     );
   };
@@ -75,10 +90,12 @@ const Chat = () => {
     return "User";
   };
 
+  /*
+   * Fetch conversation information
+   */
+
   const fetchConversation = async () => {
     try {
-      setError("");
-
       const response = await api.get(
         `/messages/conversation/${conversationId}`
       );
@@ -92,17 +109,19 @@ const Chat = () => {
         error
       );
 
-      setError(
+      throw new Error(
         error.response?.data?.message ||
           "Unable to load this conversation."
       );
     }
   };
 
+  /*
+   * Fetch existing messages
+   */
+
   const fetchMessages = async () => {
     try {
-      setError("");
-
       const response = await api.get(
         `/messages/conversation/${conversationId}/messages`
       );
@@ -116,12 +135,16 @@ const Chat = () => {
         error
       );
 
-      setError(
+      throw new Error(
         error.response?.data?.message ||
           "Unable to load messages."
       );
     }
   };
+
+  /*
+   * Mark messages as read
+   */
 
   const markMessagesAsRead = async () => {
     try {
@@ -136,9 +159,14 @@ const Chat = () => {
     }
   };
 
+  /*
+   * Load initial chat data
+   */
+
   const loadChat = async () => {
     try {
       setLoading(true);
+
       setError("");
 
       await Promise.all([
@@ -148,11 +176,189 @@ const Chat = () => {
 
       await markMessagesAsRead();
     } catch (error) {
-      console.error("Load chat error:", error);
+      console.error(
+        "Load chat error:",
+        error
+      );
+
+      setError(
+        error.message ||
+          "Unable to load conversation."
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  /*
+   * Connect to Socket.IO
+   */
+
+  useEffect(() => {
+    if (!conversationId || !user) {
+      return;
+    }
+
+    const token =
+      localStorage.getItem("token");
+
+    if (!token) {
+      return;
+    }
+
+    const socket = io(SOCKET_URL, {
+      auth: {
+        token,
+      },
+    });
+
+    socketRef.current = socket;
+
+    /*
+     * Socket connected
+     */
+
+    socket.on("connect", () => {
+      console.log(
+        "Socket connected:",
+        socket.id
+      );
+
+      setSocketError("");
+
+      socket.emit(
+        "join-conversation",
+        conversationId
+      );
+    });
+
+    /*
+     * Successfully joined conversation
+     */
+
+    socket.on(
+      "conversation-joined",
+      (data) => {
+        console.log(
+          "Joined conversation:",
+          data.conversationId
+        );
+      }
+    );
+
+    /*
+     * Receive new message
+     */
+
+    socket.on(
+      "new-message",
+      (newMessage) => {
+        if (
+          newMessage?.conversation?.toString() !==
+          conversationId.toString()
+        ) {
+          return;
+        }
+
+        setMessages(
+          (previousMessages) => {
+            const alreadyExists =
+              previousMessages.some(
+                (message) =>
+                  message._id ===
+                  newMessage._id
+              );
+
+            if (alreadyExists) {
+              return previousMessages;
+            }
+
+            return [
+              ...previousMessages,
+              newMessage,
+            ];
+          }
+        );
+
+        /*
+         * If the other user sends a message
+         * while this chat is open, mark it
+         * as read.
+         */
+
+        if (
+          newMessage.sender?._id?.toString() !==
+          getUserId()?.toString()
+        ) {
+          markMessagesAsRead();
+        }
+      }
+    );
+
+    /*
+     * Server rejected conversation join
+     */
+
+    socket.on(
+      "conversation-error",
+      (data) => {
+        console.error(
+          "Conversation socket error:",
+          data?.message
+        );
+
+        setSocketError(
+          data?.message ||
+            "Unable to join conversation."
+        );
+      }
+    );
+
+    /*
+     * Socket authentication error
+     */
+
+    socket.on("connect_error", (error) => {
+      console.error(
+        "Socket connection error:",
+        error.message
+      );
+
+      setSocketError(
+        "Real-time connection could not be established."
+      );
+    });
+
+    /*
+     * Socket disconnected
+     */
+
+    socket.on("disconnect", (reason) => {
+      console.log(
+        "Socket disconnected:",
+        reason
+      );
+    });
+
+    /*
+     * Cleanup
+     */
+
+    return () => {
+      socket.emit(
+        "leave-conversation",
+        conversationId
+      );
+
+      socket.disconnect();
+
+      socketRef.current = null;
+    };
+  }, [conversationId, user]);
+
+  /*
+   * Load chat when page opens
+   */
 
   useEffect(() => {
     if (!conversationId || !user) {
@@ -162,11 +368,19 @@ const Chat = () => {
     loadChat();
   }, [conversationId, user]);
 
+  /*
+   * Scroll to latest message
+   */
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
     });
   }, [messages]);
+
+  /*
+   * Send message
+   */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -180,6 +394,8 @@ const Chat = () => {
     try {
       setSending(true);
 
+      setError("");
+
       const response = await api.post(
         `/messages/conversation/${conversationId}`,
         {
@@ -190,11 +406,34 @@ const Chat = () => {
       const newMessage =
         response.data?.data;
 
+      /*
+       * Add our own message immediately.
+       *
+       * The server also emits this message
+       * through Socket.IO, so we check the
+       * message ID to prevent duplication.
+       */
+
       if (newMessage) {
-        setMessages((previousMessages) => [
-          ...previousMessages,
-          newMessage,
-        ]);
+        setMessages(
+          (previousMessages) => {
+            const alreadyExists =
+              previousMessages.some(
+                (message) =>
+                  message._id ===
+                  newMessage._id
+              );
+
+            if (alreadyExists) {
+              return previousMessages;
+            }
+
+            return [
+              ...previousMessages,
+              newMessage,
+            ];
+          }
+        );
       }
 
       setText("");
@@ -215,7 +454,14 @@ const Chat = () => {
     }
   };
 
-  const handleTextareaKeyDown = (event) => {
+  /*
+   * Enter sends message.
+   * Shift + Enter creates a new line.
+   */
+
+  const handleTextareaKeyDown = (
+    event
+  ) => {
     if (
       event.key === "Enter" &&
       !event.shiftKey
@@ -226,7 +472,13 @@ const Chat = () => {
     }
   };
 
-  const formatMessageTime = (dateString) => {
+  /*
+   * Format message timestamp
+   */
+
+  const formatMessageTime = (
+    dateString
+  ) => {
     if (!dateString) {
       return "";
     }
@@ -242,6 +494,11 @@ const Chat = () => {
       minute: "2-digit",
     });
   };
+
+  /*
+   * Check whether message belongs
+   * to current user
+   */
 
   const isOwnMessage = (message) => {
     const currentUserId = getUserId();
@@ -260,9 +517,17 @@ const Chat = () => {
     );
   };
 
+  /*
+   * Back to inbox
+   */
+
   const handleBack = () => {
     navigate("/messages");
   };
+
+  /*
+   * Loading state
+   */
 
   if (loading) {
     return (
@@ -276,12 +541,17 @@ const Chat = () => {
             <div className="chat-loading-title" />
 
             <div className="chat-loading-line" />
+
             <div className="chat-loading-line short" />
           </div>
         </div>
       </main>
     );
   }
+
+  /*
+   * Error state
+   */
 
   if (error && !conversation) {
     return (
@@ -305,7 +575,10 @@ const Chat = () => {
                 onClick={handleBack}
               >
                 <FiArrowLeft />
-                <span>Back to Messages</span>
+
+                <span>
+                  Back to Messages
+                </span>
               </button>
 
               <button
@@ -314,6 +587,7 @@ const Chat = () => {
                 onClick={loadChat}
               >
                 <FiRefreshCw />
+
                 <span>Try again</span>
               </button>
             </div>
@@ -337,7 +611,7 @@ const Chat = () => {
     <main className="chat-page">
       <div className="chat-container">
 
-        {/* Chat header */}
+        {/* Header */}
 
         <header className="chat-header">
           <button
@@ -361,7 +635,9 @@ const Chat = () => {
           </div>
 
           <div className="chat-header-info">
-            <h1>{participantName}</h1>
+            <h1>
+              {participantName}
+            </h1>
 
             <p>
               {conversation?.item?.title ||
@@ -377,7 +653,9 @@ const Chat = () => {
             <FiMessageSquare />
 
             <div>
-              <span>Conversation about</span>
+              <span>
+                Conversation about
+              </span>
 
               <strong>
                 {conversation.item.title}
@@ -386,10 +664,17 @@ const Chat = () => {
           </div>
         )}
 
+        {/* Socket status */}
+
+        {socketError && (
+          <div className="chat-socket-warning">
+            {socketError}
+          </div>
+        )}
+
         {/* Messages */}
 
         <section className="chat-messages">
-
           {error && (
             <div className="chat-inline-error">
               <span>{error}</span>
@@ -398,6 +683,7 @@ const Chat = () => {
                 type="button"
                 onClick={() => {
                   setError("");
+
                   fetchMessages();
                 }}
               >
@@ -412,48 +698,56 @@ const Chat = () => {
                 <FiMessageSquare />
               </div>
 
-              <h2>No messages yet</h2>
+              <h2>
+                No messages yet
+              </h2>
 
               <p>
-                Start the conversation by sending
-                a message below.
+                Start the conversation by
+                sending a message below.
               </p>
             </div>
           ) : (
             <div className="message-list">
-              {messages.map((message) => {
-                const ownMessage =
-                  isOwnMessage(message);
+              {messages.map(
+                (message) => {
+                  const ownMessage =
+                    isOwnMessage(message);
 
-                return (
-                  <div
-                    key={message._id}
-                    className={`message-row ${
-                      ownMessage
-                        ? "own"
-                        : "other"
-                    }`}
-                  >
+                  return (
                     <div
-                      className={`message-bubble ${
+                      key={message._id}
+                      className={`message-row ${
                         ownMessage
                           ? "own"
                           : "other"
                       }`}
                     >
-                      <p>{message.text}</p>
+                      <div
+                        className={`message-bubble ${
+                          ownMessage
+                            ? "own"
+                            : "other"
+                        }`}
+                      >
+                        <p>
+                          {message.text}
+                        </p>
 
-                      <span className="message-time">
-                        {formatMessageTime(
-                          message.createdAt
-                        )}
-                      </span>
+                        <span className="message-time">
+                          {formatMessageTime(
+                            message.createdAt
+                          )}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                }
+              )}
 
-              <div ref={messagesEndRef} />
+              <div
+                ref={messagesEndRef}
+              />
             </div>
           )}
         </section>
@@ -482,7 +776,8 @@ const Chat = () => {
             type="submit"
             className="chat-send-button"
             disabled={
-              sending || !text.trim()
+              sending ||
+              !text.trim()
             }
             aria-label="Send message"
             title="Send message"
@@ -490,7 +785,6 @@ const Chat = () => {
             <FiSend />
           </button>
         </form>
-
       </div>
     </main>
   );

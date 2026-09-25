@@ -1,18 +1,17 @@
 const Conversation = require("../models/Conversation");
-
 const Claim = require("../models/Claim");
-
 const Item = require("../models/Item");
-
 const Message = require("../models/Message");
 
 const createNotification = require("../utils/createNotification");
 
+/*
+ * GET OR CREATE CONVERSATION
+ */
 const getOrCreateConversation = async (req, res) => {
   try {
     const { itemId } = req.params;
 
-    // 1. Find the item
     const item = await Item.findById(itemId);
 
     if (!item) {
@@ -22,12 +21,15 @@ const getOrCreateConversation = async (req, res) => {
     }
 
     let participants;
-
     let claim = null;
 
-    // 2. LOST item workflow
+    /*
+     * LOST ITEM
+     *
+     * Conversation is between:
+     * reportedBy + foundBy
+     */
     if (item.type === "lost") {
-      // Someone must have reported finding the item
       if (!item.foundBy) {
         return res.status(400).json({
           message:
@@ -41,15 +43,21 @@ const getOrCreateConversation = async (req, res) => {
       ];
     }
 
-    // 3. FOUND item workflow
+    /*
+     * FOUND ITEM
+     *
+     * Conversation is between:
+     * reportedBy + claimant
+     */
     else if (item.type === "found") {
-      // Find the relevant claim
       claim = await Claim.findOne({
         item: item._id,
         status: {
           $in: ["pending", "approved"],
         },
-      }).sort({ createdAt: -1 });
+      }).sort({
+        createdAt: -1,
+      });
 
       if (!claim) {
         return res.status(400).json({
@@ -64,12 +72,16 @@ const getOrCreateConversation = async (req, res) => {
       ];
     }
 
-    // 4. Check whether the logged-in user is a participant
-    const isParticipant = participants.some(
-      (participant) =>
-        participant.toString() ===
-        req.user._id.toString()
-    );
+    /*
+     * Make sure the current user
+     * is one of the participants.
+     */
+    const isParticipant =
+      participants.some(
+        (participant) =>
+          participant.toString() ===
+          req.user._id.toString()
+      );
 
     if (!isParticipant) {
       return res.status(403).json({
@@ -78,7 +90,9 @@ const getOrCreateConversation = async (req, res) => {
       });
     }
 
-    // 5. Look for an existing conversation
+    /*
+     * Find existing conversation
+     */
     let conversation =
       await Conversation.findOne({
         item: item._id,
@@ -96,7 +110,9 @@ const getOrCreateConversation = async (req, res) => {
         )
         .populate("claim");
 
-    // 6. Create conversation if it doesn't exist
+    /*
+     * Create conversation if it doesn't exist
+     */
     if (!conversation) {
       conversation =
         await Conversation.create({
@@ -140,6 +156,9 @@ const getOrCreateConversation = async (req, res) => {
   }
 };
 
+/*
+ * GET MY CONVERSATIONS
+ */
 const getMyConversations = async (req, res) => {
   try {
     const conversations =
@@ -179,6 +198,9 @@ const getMyConversations = async (req, res) => {
   }
 };
 
+/*
+ * SEND MESSAGE
+ */
 const sendMessage = async (req, res) => {
   try {
     const { conversationId } =
@@ -186,7 +208,9 @@ const sendMessage = async (req, res) => {
 
     const { text } = req.body;
 
-    // 1. Validate message text
+    /*
+     * Validate message text
+     */
     if (!text || !text.trim()) {
       return res.status(400).json({
         message:
@@ -194,7 +218,9 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    // 2. Find the conversation
+    /*
+     * Find conversation
+     */
     const conversation =
       await Conversation.findById(
         conversationId
@@ -207,7 +233,9 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    // 3. Check that the user is a participant
+    /*
+     * Make sure sender is a participant
+     */
     const isParticipant =
       conversation.participants.some(
         (participant) =>
@@ -222,7 +250,9 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    // 4. Create the message
+    /*
+     * Create message
+     */
     const message =
       await Message.create({
         conversation:
@@ -231,22 +261,34 @@ const sendMessage = async (req, res) => {
         text: text.trim(),
       });
 
-    // 5. Update the latest message
+    /*
+     * Update conversation preview
+     */
     conversation.lastMessage =
       message.text;
 
     await conversation.save();
 
-    // 6. Populate sender information
+    /*
+     * Populate sender information
+     */
     const populatedMessage =
       await message.populate(
         "sender",
         "name email"
       );
 
-    // 7. Emit real-time message
+    /*
+     * Get Socket.IO instance
+     */
     const io = req.app.get("io");
 
+    /*
+     * REAL-TIME MESSAGE
+     *
+     * Everyone currently inside this
+     * conversation receives the message.
+     */
     if (io) {
       io.to(
         `conversation:${conversation._id}`
@@ -256,7 +298,12 @@ const sendMessage = async (req, res) => {
       );
     }
 
-    // 8. Find the other participant
+    /*
+     * Find the other participant
+     *
+     * This person will receive the
+     * notification.
+     */
     const recipient =
       conversation.participants.find(
         (participant) =>
@@ -264,8 +311,13 @@ const sendMessage = async (req, res) => {
           req.user._id.toString()
       );
 
-    // 9. Create notification
+    /*
+     * CREATE + EMIT NOTIFICATION
+     */
     if (recipient) {
+      /*
+       * Save notification in MongoDB
+       */
       await createNotification({
         recipient,
         type: "new-message",
@@ -277,9 +329,30 @@ const sendMessage = async (req, res) => {
         conversation:
           conversation._id,
       });
+
+      /*
+       * Send notification instantly
+       * to the recipient's personal room.
+       */
+      if (io) {
+        io.to(
+          `user:${recipient.toString()}`
+        ).emit(
+          "new-notification",
+          {
+            type: "new-message",
+            title: "New Message",
+            message:
+              "You have received a new message.",
+            item: conversation.item,
+            claim: conversation.claim,
+            conversation:
+              conversation._id,
+          }
+        );
+      }
     }
 
-    // 10. Return the created message
     return res.status(201).json({
       message:
         "Message sent successfully",
@@ -298,12 +371,14 @@ const sendMessage = async (req, res) => {
   }
 };
 
+/*
+ * GET MESSAGES
+ */
 const getMessages = async (req, res) => {
   try {
     const { conversationId } =
       req.params;
 
-    // 1. Find the conversation
     const conversation =
       await Conversation.findById(
         conversationId
@@ -316,7 +391,9 @@ const getMessages = async (req, res) => {
       });
     }
 
-    // 2. Check that the user is a participant
+    /*
+     * Check participant
+     */
     const isParticipant =
       conversation.participants.some(
         (participant) =>
@@ -331,7 +408,9 @@ const getMessages = async (req, res) => {
       });
     }
 
-    // 3. Get messages
+    /*
+     * Fetch messages
+     */
     const messages =
       await Message.find({
         conversation:
@@ -362,6 +441,9 @@ const getMessages = async (req, res) => {
   }
 };
 
+/*
+ * MARK MESSAGES AS READ
+ */
 const markMessagesAsRead = async (
   req,
   res
@@ -370,7 +452,6 @@ const markMessagesAsRead = async (
     const { conversationId } =
       req.params;
 
-    // 1. Find the conversation
     const conversation =
       await Conversation.findById(
         conversationId
@@ -383,7 +464,9 @@ const markMessagesAsRead = async (
       });
     }
 
-    // 2. Check that the user is a participant
+    /*
+     * Check participant
+     */
     const isParticipant =
       conversation.participants.some(
         (participant) =>
@@ -398,7 +481,10 @@ const markMessagesAsRead = async (
       });
     }
 
-    // 3. Mark messages from the other participant as read
+    /*
+     * Mark only messages sent
+     * by other users as read.
+     */
     const result =
       await Message.updateMany(
         {
