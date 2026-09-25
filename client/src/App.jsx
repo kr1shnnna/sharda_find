@@ -11,6 +11,8 @@ import Footer from "./components/Footer/Footer";
 
 import Browse from "./pages/Browse/Browse";
 
+import ItemDetails from "./pages/ItemDetails/ItemDetails";
+
 const Home = () => {
   return (
     <>
@@ -58,15 +60,12 @@ const AppContent = () => {
       <Navbar />
 
       <Routes>
-        <Route
-          path="/"
-          element={<Home />}
-        />
+        <Route path="/" element={<Home />} />
 
-        <Route
-          path="/browse"
-          element={<Browse />}
-        />
+        <Route path="/browse" element={<Browse />} />
+
+        <Route path="/items/:id" element={<ItemDetails />} />
+        
       </Routes>
 
       <Footer />

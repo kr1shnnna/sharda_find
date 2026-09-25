@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   FiSearch,
   FiSliders,
@@ -5,12 +7,109 @@ import {
 } from "react-icons/fi";
 
 import ItemCard from "../../components/ItemCard/ItemCard";
-import placeholderItems from "../../data/placeholderItems";
 
 import "./Browse.css";
 
 const Browse = () => {
-  const items = placeholderItems;
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [search, setSearch] = useState("");
+  const [type, setType] = useState("all");
+  const [category, setCategory] = useState("all");
+  const [location, setLocation] = useState("all");
+  const [sort, setSort] = useState("latest");
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await axios.get(
+          "http://localhost:5000/api/items"
+        );
+
+        setItems(response.data.items || []);
+      } catch (error) {
+        console.error("Error fetching items:", error);
+
+        setError(
+          "Unable to load items. Please try again later."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, []);
+
+  const filteredItems = items
+    .filter((item) => {
+      const searchValue = search.toLowerCase().trim();
+
+      const matchesSearch =
+        !searchValue ||
+        item.title?.toLowerCase().includes(searchValue) ||
+        item.location?.toLowerCase().includes(searchValue) ||
+        item.category?.toLowerCase().includes(searchValue);
+
+      const matchesType =
+        type === "all" || item.type === type;
+
+      const matchesCategory =
+        category === "all" ||
+        item.category === category;
+
+      const matchesLocation =
+        location === "all" ||
+        item.location === location;
+
+      return (
+        matchesSearch &&
+        matchesType &&
+        matchesCategory &&
+        matchesLocation
+      );
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.itemDate);
+      const dateB = new Date(b.itemDate);
+
+      return sort === "latest"
+        ? dateB - dateA
+        : dateA - dateB;
+    });
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString(
+      "en-IN",
+      {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }
+    );
+  };
+
+  const getItemForCard = (item) => {
+    return {
+      ...item,
+
+      // Backend _id → ItemCard id
+      id: item._id,
+
+      // Backend itemDate → ItemCard date
+      date: formatDate(item.itemDate),
+
+      // Backend images[] → ItemCard image
+      image:
+        item.images?.[0] ||
+        "https://placehold.co/800x500/f1f5f9/64748b?text=No+Image",
+    };
+  };
 
   return (
     <main className="browse-page">
@@ -42,6 +141,10 @@ const Browse = () => {
           <input
             type="text"
             placeholder="Search items, locations, categories..."
+            value={search}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
           />
         </div>
 
@@ -50,26 +153,37 @@ const Browse = () => {
         <div className="browse-toolbar">
 
           <div className="browse-tabs">
+
             <button
               type="button"
-              className="browse-tab active"
+              className={`browse-tab ${
+                type === "all" ? "active" : ""
+              }`}
+              onClick={() => setType("all")}
             >
               All
             </button>
 
             <button
               type="button"
-              className="browse-tab"
+              className={`browse-tab ${
+                type === "lost" ? "active" : ""
+              }`}
+              onClick={() => setType("lost")}
             >
               Lost
             </button>
 
             <button
               type="button"
-              className="browse-tab"
+              className={`browse-tab ${
+                type === "found" ? "active" : ""
+              }`}
+              onClick={() => setType("found")}
             >
               Found
             </button>
+
           </div>
 
           <div className="browse-filter-controls">
@@ -77,7 +191,12 @@ const Browse = () => {
             <div className="filter-select">
               <FiSliders />
 
-              <select defaultValue="all">
+              <select
+                value={category}
+                onChange={(event) =>
+                  setCategory(event.target.value)
+                }
+              >
                 <option value="all">
                   All Categories
                 </option>
@@ -115,28 +234,38 @@ const Browse = () => {
             </div>
 
             <div className="filter-select">
-              <select defaultValue="all">
+
+              <select
+                value={location}
+                onChange={(event) =>
+                  setLocation(event.target.value)
+                }
+              >
                 <option value="all">
                   All Locations
                 </option>
 
-                <option value="academic">
+                <option value="Block 3">
+                  Block 3
+                </option>
+
+                <option value="Academic Block">
                   Academic Block
                 </option>
 
-                <option value="library">
-                  Library
+                <option value="University Library">
+                  University Library
                 </option>
 
-                <option value="hostel">
+                <option value="Hostel">
                   Hostel
                 </option>
 
-                <option value="cafeteria">
+                <option value="Cafeteria">
                   Cafeteria
                 </option>
 
-                <option value="parking">
+                <option value="Parking">
                   Parking
                 </option>
               </select>
@@ -145,7 +274,13 @@ const Browse = () => {
             </div>
 
             <div className="filter-select">
-              <select defaultValue="latest">
+
+              <select
+                value={sort}
+                onChange={(event) =>
+                  setSort(event.target.value)
+                }
+              >
                 <option value="latest">
                   Latest
                 </option>
@@ -163,36 +298,95 @@ const Browse = () => {
 
         {/* Results */}
 
-        <div className="browse-results-header">
-          <p>
-            <strong>{items.length}</strong> items found
-          </p>
-        </div>
+        {!loading && !error && (
+          <div className="browse-results-header">
+            <p>
+              <strong>
+                {filteredItems.length}
+              </strong>{" "}
+              {filteredItems.length === 1
+                ? "item"
+                : "items"}{" "}
+              found
+            </p>
+          </div>
+        )}
 
-        {items.length > 0 ? (
-          <div className="browse-grid">
-            {items.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-              />
+        {/* Loading */}
+
+        {loading && (
+          <div className="browse-loading">
+            {[1, 2, 3].map((item) => (
+              <div
+                className="browse-loading-card"
+                key={item}
+              >
+                <div className="browse-loading-image"></div>
+
+                <div className="browse-loading-content">
+                  <div className="browse-loading-line"></div>
+
+                  <div className="browse-loading-line short"></div>
+
+                  <div className="browse-loading-line short"></div>
+                </div>
+              </div>
             ))}
           </div>
-        ) : (
+        )}
+
+        {/* Error */}
+
+        {!loading && error && (
           <div className="browse-empty">
             <div className="browse-empty-icon">
               <FiSearch />
             </div>
 
             <h3>
-              No items found
+              Something went wrong
             </h3>
 
             <p>
-              Try changing your search or filters.
+              {error}
             </p>
           </div>
         )}
+
+        {/* Items */}
+
+        {!loading &&
+          !error &&
+          filteredItems.length > 0 && (
+            <div className="browse-grid">
+              {filteredItems.map((item) => (
+                <ItemCard
+                  key={item._id}
+                  item={getItemForCard(item)}
+                />
+              ))}
+            </div>
+          )}
+
+        {/* Empty */}
+
+        {!loading &&
+          !error &&
+          filteredItems.length === 0 && (
+            <div className="browse-empty">
+              <div className="browse-empty-icon">
+                <FiSearch />
+              </div>
+
+              <h3>
+                No items found
+              </h3>
+
+              <p>
+                Try changing your search or filters.
+              </p>
+            </div>
+          )}
 
       </div>
     </main>
