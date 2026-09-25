@@ -26,6 +26,9 @@ import MyClaims from "./pages/MyClaims/MyClaims";
 import ReportItem from "./pages/ReportItem/ReportItem";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Notifications from "./pages/Notifications/Notifications";
+import Messages from "./pages/Messages/Messages";
+
+import Chat from "./pages/Chat/Chat";
 
 const Home = () => {
   return (
@@ -98,6 +101,9 @@ const AppContent = () => {
           <Route path="/report-lost" element={<ReportItem type="lost" />} />
 
           <Route path="/report-found" element={<ReportItem type="found" />} />
+
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/messages/:conversationId" element={<Chat />} />
         </Route>
       </Routes>
 
