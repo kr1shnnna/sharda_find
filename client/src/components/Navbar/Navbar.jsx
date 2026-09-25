@@ -1,14 +1,16 @@
 import { useState } from "react";
-import {
-  FaLeaf,
-} from "react-icons/fa";
+
+import { FaLeaf } from "react-icons/fa";
+
 import {
   FiChevronDown,
   FiLogOut,
+  FiGrid,
   FiPackage,
   FiFileText,
   FiUser,
 } from "react-icons/fi";
+
 import {
   Link,
   useLocation,
@@ -49,7 +51,6 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-
     setMenuOpen(false);
 
     navigate("/login", {
@@ -74,7 +75,6 @@ const Navbar = () => {
       <div className="navbar-container">
 
         {/* Logo */}
-
         <Link
           to="/"
           className="navbar-logo"
@@ -84,15 +84,11 @@ const Navbar = () => {
             <FaLeaf />
           </span>
 
-          <span>
-            ShardaFind
-          </span>
+          <span>ShardaFind</span>
         </Link>
 
         {/* Navigation */}
-
         <div className="navbar-links">
-
           <Link
             to="/browse"
             onClick={() => setMenuOpen(false)}
@@ -103,9 +99,7 @@ const Navbar = () => {
           <button
             type="button"
             onClick={() =>
-              handleSectionClick(
-                "how-it-works"
-              )
+              handleSectionClick("how-it-works")
             }
           >
             How it works
@@ -119,13 +113,10 @@ const Navbar = () => {
           >
             About
           </button>
-
         </div>
 
         {/* Actions */}
-
         <div className="navbar-actions">
-
           {!isAuthenticated ? (
             <>
               <Link
@@ -145,13 +136,13 @@ const Navbar = () => {
           ) : (
             <div className="navbar-user">
 
+              {/* User Menu Button */}
               <button
                 type="button"
                 className="user-menu-button"
                 onClick={() =>
                   setMenuOpen(
-                    (previous) =>
-                      !previous
+                    (previous) => !previous
                   )
                 }
                 aria-expanded={menuOpen}
@@ -166,18 +157,17 @@ const Navbar = () => {
 
                 <FiChevronDown
                   className={`user-chevron ${
-                    menuOpen
-                      ? "open"
-                      : ""
+                    menuOpen ? "open" : ""
                   }`}
                 />
               </button>
 
+              {/* User Dropdown */}
               {menuOpen && (
                 <div className="user-dropdown">
 
+                  {/* User Information */}
                   <div className="user-dropdown-header">
-
                     <span className="dropdown-user-name">
                       {getUserName()}
                     </span>
@@ -187,11 +177,26 @@ const Navbar = () => {
                         {user.email}
                       </span>
                     )}
-
                   </div>
 
                   <div className="user-dropdown-divider" />
 
+                  {/* Dashboard */}
+                  <Link
+                    to="/dashboard"
+                    className="user-dropdown-item"
+                    onClick={() =>
+                      setMenuOpen(false)
+                    }
+                  >
+                    <FiGrid />
+
+                    <span>
+                      Dashboard
+                    </span>
+                  </Link>
+
+                  {/* My Items */}
                   <Link
                     to="/my-items"
                     className="user-dropdown-item"
@@ -200,11 +205,13 @@ const Navbar = () => {
                     }
                   >
                     <FiPackage />
+
                     <span>
                       My Items
                     </span>
                   </Link>
 
+                  {/* My Claims */}
                   <Link
                     to="/my-claims"
                     className="user-dropdown-item"
@@ -213,6 +220,7 @@ const Navbar = () => {
                     }
                   >
                     <FiFileText />
+
                     <span>
                       My Claims
                     </span>
@@ -220,12 +228,14 @@ const Navbar = () => {
 
                   <div className="user-dropdown-divider" />
 
+                  {/* Logout */}
                   <button
                     type="button"
                     className="user-dropdown-item logout-item"
                     onClick={handleLogout}
                   >
                     <FiLogOut />
+
                     <span>
                       Logout
                     </span>
@@ -236,7 +246,6 @@ const Navbar = () => {
 
             </div>
           )}
-
         </div>
 
       </div>

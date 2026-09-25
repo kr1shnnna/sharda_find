@@ -25,7 +25,7 @@ import MyItems from "./pages/MyItems/MyItems";
 import MyClaims from "./pages/MyClaims/MyClaims";
 import ReportItem from "./pages/ReportItem/ReportItem";
 import Dashboard from "./pages/Dashboard/Dashboard";
-
+import Notifications from "./pages/Notifications/Notifications";
 
 const Home = () => {
   return (
@@ -92,6 +92,8 @@ const AppContent = () => {
           <Route path="/my-items" element={<MyItems />} />
 
           <Route path="/my-claims" element={<MyClaims />} />
+
+          <Route path="/notifications" element={<Notifications />} />
 
           <Route path="/report-lost" element={<ReportItem type="lost" />} />
 

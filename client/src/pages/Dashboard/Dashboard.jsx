@@ -143,33 +143,26 @@ const Dashboard = () => {
       setLoading(true);
       setError("");
 
-      const [
-        itemsResponse,
-        claimsResponse,
-        notificationsResponse,
-      ] = await Promise.all([
-        api.get("/items/my-items"),
-        api.get("/claims/my-claims"),
-        api.get("/notifications"),
-      ]);
+      const [itemsResponse, claimsResponse, notificationsResponse] =
+        await Promise.all([
+          api.get("/items/my-items"),
+          api.get("/claims/my-claims"),
+          api.get("/notifications"),
+        ]);
 
       setItems(itemsResponse.data?.items || []);
 
       setClaims(itemsResponse.data?.claims || []);
 
-      setNotifications(
-        notificationsResponse.data?.notifications || []
-      );
+      setNotifications(notificationsResponse.data?.notifications || []);
 
-      setUnreadCount(
-        notificationsResponse.data?.unreadCount || 0
-      );
+      setUnreadCount(notificationsResponse.data?.unreadCount || 0);
     } catch (error) {
       console.error("Fetch dashboard data error:", error);
 
       setError(
         error.response?.data?.message ||
-          "Unable to load your dashboard. Please try again."
+          "Unable to load your dashboard. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -187,9 +180,7 @@ const Dashboard = () => {
     }
 
     try {
-      await api.patch(
-        `/notifications/${notification._id}/read`
-      );
+      await api.patch(`/notifications/${notification._id}/read`);
 
       setNotifications((previousNotifications) =>
         previousNotifications.map((currentNotification) =>
@@ -198,18 +189,13 @@ const Dashboard = () => {
                 ...currentNotification,
                 read: true,
               }
-            : currentNotification
-        )
+            : currentNotification,
+        ),
       );
 
-      setUnreadCount((previousCount) =>
-        Math.max(previousCount - 1, 0)
-      );
+      setUnreadCount((previousCount) => Math.max(previousCount - 1, 0));
     } catch (error) {
-      console.error(
-        "Mark notification as read error:",
-        error
-      );
+      console.error("Mark notification as read error:", error);
     }
   };
 
@@ -221,25 +207,18 @@ const Dashboard = () => {
     return {
       totalItems: items.length,
 
-      activeItems: items.filter(
-        (item) => item.status === "active"
-      ).length,
+      activeItems: items.filter((item) => item.status === "active").length,
 
-      returnedItems: items.filter(
-        (item) => item.status === "returned"
-      ).length,
+      returnedItems: items.filter((item) => item.status === "returned").length,
 
-      pendingClaims: claims.filter(
-        (claim) => claim.status === "pending"
-      ).length,
+      pendingClaims: claims.filter((claim) => claim.status === "pending")
+        .length,
 
-      approvedClaims: claims.filter(
-        (claim) => claim.status === "approved"
-      ).length,
+      approvedClaims: claims.filter((claim) => claim.status === "approved")
+        .length,
 
-      rejectedClaims: claims.filter(
-        (claim) => claim.status === "rejected"
-      ).length,
+      rejectedClaims: claims.filter((claim) => claim.status === "rejected")
+        .length,
 
       unreadNotifications: unreadCount,
     };
@@ -247,31 +226,19 @@ const Dashboard = () => {
 
   const recentItems = useMemo(() => {
     return [...items]
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt) -
-          new Date(a.createdAt)
-      )
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 3);
   }, [items]);
 
   const recentClaims = useMemo(() => {
     return [...claims]
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt) -
-          new Date(a.createdAt)
-      )
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 3);
   }, [claims]);
 
   const recentNotifications = useMemo(() => {
     return [...notifications]
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt) -
-          new Date(a.createdAt)
-      )
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 4);
   }, [notifications]);
 
@@ -284,9 +251,7 @@ const Dashboard = () => {
         type: "item",
         title: `You reported ${item.title}`,
         description:
-          item.type === "lost"
-            ? "Lost item reported"
-            : "Found item reported",
+          item.type === "lost" ? "Lost item reported" : "Found item reported",
         date: item.createdAt,
         icon: FiPackage,
       });
@@ -309,9 +274,7 @@ const Dashboard = () => {
       activities.push({
         id: `claim-${claim._id}`,
         type: "claim",
-        title: `Claim submitted for ${
-          claim.item?.title || "an item"
-        }`,
+        title: `Claim submitted for ${claim.item?.title || "an item"}`,
         description,
         date: claim.createdAt,
         icon,
@@ -323,19 +286,14 @@ const Dashboard = () => {
         id: `notification-${notification._id}`,
         type: "notification",
         title: notification.title || "Notification",
-        description:
-          getNotificationDescription(notification),
+        description: getNotificationDescription(notification),
         date: notification.createdAt,
         icon: getNotificationIcon(notification.type),
       });
     });
 
     return activities
-      .sort(
-        (a, b) =>
-          new Date(b.date) -
-          new Date(a.date)
-      )
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, 5);
   }, [recentItems, recentClaims, notifications]);
 
@@ -387,36 +345,31 @@ const Dashboard = () => {
   return (
     <main className="dashboard-page">
       <div className="dashboard-container">
-
         {/* Sidebar */}
         <aside className="dashboard-sidebar">
           <div className="dashboard-sidebar-header">
-            <span className="dashboard-sidebar-label">
-              Student
-            </span>
+            <span className="dashboard-sidebar-label">Student</span>
 
             <h2>My Account</h2>
           </div>
 
           <nav className="dashboard-navigation">
+            {/* Dashboard */}
             <Link
               to="/dashboard"
               className={`dashboard-nav-item ${
-                isActive("/dashboard")
-                  ? "active"
-                  : ""
+                isActive("/dashboard") ? "active" : ""
               }`}
             >
               <FiGrid />
               <span>Dashboard</span>
             </Link>
 
+            {/* My Items */}
             <Link
               to="/my-items"
               className={`dashboard-nav-item ${
-                isActive("/my-items")
-                  ? "active"
-                  : ""
+                isActive("/my-items") ? "active" : ""
               }`}
             >
               <FiPackage />
@@ -429,12 +382,11 @@ const Dashboard = () => {
               )}
             </Link>
 
+            {/* My Claims */}
             <Link
               to="/my-claims"
               className={`dashboard-nav-item ${
-                isActive("/my-claims")
-                  ? "active"
-                  : ""
+                isActive("/my-claims") ? "active" : ""
               }`}
             >
               <FiFileText />
@@ -447,12 +399,11 @@ const Dashboard = () => {
               )}
             </Link>
 
+            {/* Notifications */}
             <Link
               to="/notifications"
               className={`dashboard-nav-item ${
-                isActive("/notifications")
-                  ? "active"
-                  : ""
+                isActive("/notifications") ? "active" : ""
               }`}
             >
               <FiBell />
@@ -489,28 +440,19 @@ const Dashboard = () => {
 
         {/* Main Content */}
         <section className="dashboard-content">
-
           {/* Header */}
           <div className="dashboard-header">
             <div>
-              <p className="dashboard-label">
-                ShardaFind
-              </p>
+              <p className="dashboard-label">ShardaFind</p>
 
-              <h1>
-                Welcome back, {getUserName(user)}
-              </h1>
+              <h1>Welcome back, {getUserName(user)}</h1>
 
               <p className="dashboard-description">
-                Here's what's happening with your lost
-                and found activity.
+                Here's what's happening with your lost and found activity.
               </p>
             </div>
 
-            <Link
-              to="/browse"
-              className="dashboard-browse-button"
-            >
+            <Link to="/browse" className="dashboard-browse-button">
               <FiSearch />
               Browse Items
             </Link>
@@ -518,7 +460,6 @@ const Dashboard = () => {
 
           {/* Overview Cards */}
           <div className="dashboard-stats">
-
             <div className="dashboard-stat-card">
               <div className="dashboard-stat-icon">
                 <FiPackage />
@@ -526,9 +467,7 @@ const Dashboard = () => {
 
               <div>
                 <span>Items Reported</span>
-                <strong>
-                  {statistics.totalItems}
-                </strong>
+                <strong>{statistics.totalItems}</strong>
               </div>
             </div>
 
@@ -539,9 +478,7 @@ const Dashboard = () => {
 
               <div>
                 <span>Pending Claims</span>
-                <strong>
-                  {statistics.pendingClaims}
-                </strong>
+                <strong>{statistics.pendingClaims}</strong>
               </div>
             </div>
 
@@ -552,9 +489,7 @@ const Dashboard = () => {
 
               <div>
                 <span>Items Returned</span>
-                <strong>
-                  {statistics.returnedItems}
-                </strong>
+                <strong>{statistics.returnedItems}</strong>
               </div>
             </div>
 
@@ -565,26 +500,20 @@ const Dashboard = () => {
 
               <div>
                 <span>Unread Notifications</span>
-                <strong>
-                  {statistics.unreadNotifications}
-                </strong>
+                <strong>{statistics.unreadNotifications}</strong>
               </div>
             </div>
-
           </div>
 
           {/* Main Dashboard Grid */}
           <div className="dashboard-main-grid">
-
             {/* Recent Activity */}
             <section className="dashboard-panel activity-panel">
               <div className="dashboard-panel-header">
                 <div>
                   <h2>Recent Activity</h2>
 
-                  <p>
-                    Your latest activity on ShardaFind.
-                  </p>
+                  <p>Your latest activity on ShardaFind.</p>
                 </div>
               </div>
 
@@ -597,8 +526,8 @@ const Dashboard = () => {
                   <h3>No activity yet</h3>
 
                   <p>
-                    Your reported items, claims, and
-                    notifications will appear here.
+                    Your reported items, claims, and notifications will appear
+                    here.
                   </p>
                 </div>
               ) : (
@@ -607,10 +536,7 @@ const Dashboard = () => {
                     const Icon = activity.icon;
 
                     return (
-                      <div
-                        className="activity-item"
-                        key={activity.id}
-                      >
+                      <div className="activity-item" key={activity.id}>
                         <div className="activity-icon">
                           <Icon />
                         </div>
@@ -618,15 +544,11 @@ const Dashboard = () => {
                         <div className="activity-content">
                           <h3>{activity.title}</h3>
 
-                          <p>
-                            {activity.description}
-                          </p>
+                          <p>{activity.description}</p>
                         </div>
 
                         <span className="activity-date">
-                          {formatRelativeDate(
-                            activity.date
-                          )}
+                          {formatRelativeDate(activity.date)}
                         </span>
                       </div>
                     );
@@ -644,10 +566,7 @@ const Dashboard = () => {
                   <p>Your latest updates.</p>
                 </div>
 
-                <Link
-                  to="/notifications"
-                  className="dashboard-panel-link"
-                >
+                <Link to="/notifications" className="dashboard-panel-link">
                   View all
                 </Link>
               </div>
@@ -660,67 +579,48 @@ const Dashboard = () => {
 
                   <h3>No notifications</h3>
 
-                  <p>
-                    You're all caught up.
-                  </p>
+                  <p>You're all caught up.</p>
                 </div>
               ) : (
                 <div className="notification-list">
-                  {recentNotifications.map(
-                    (notification) => {
-                      const Icon =
-                        getNotificationIcon(
-                          notification.type
-                        );
+                  {recentNotifications.map((notification) => {
+                    const Icon = getNotificationIcon(notification.type);
 
-                      return (
-                        <button
-                          type="button"
-                          className={`dashboard-notification ${
-                            notification.read === false
-                              ? "unread"
-                              : ""
-                          }`}
-                          key={notification._id}
-                          onClick={() =>
-                            handleNotificationClick(
-                              notification
-                            )
-                          }
-                        >
-                          <div className="notification-icon">
-                            <Icon />
-                          </div>
+                    return (
+                      <button
+                        type="button"
+                        className={`dashboard-notification ${
+                          notification.read === false ? "unread" : ""
+                        }`}
+                        key={notification._id}
+                        onClick={() => handleNotificationClick(notification)}
+                      >
+                        <div className="notification-icon">
+                          <Icon />
+                        </div>
 
-                          <div className="notification-content">
-                            <h3>
-                              {notification.title}
-                            </h3>
+                        <div className="notification-content">
+                          <h3>{notification.title}</h3>
 
-                            <p>
-                              {notification.message}
-                            </p>
+                          <p>{notification.message}</p>
 
-                            {notification.item?.title && (
-                              <span className="notification-item">
-                                {notification.item.title}
-                              </span>
-                            )}
-
-                            <span className="notification-date">
-                              {formatRelativeDate(
-                                notification.createdAt
-                              )}
+                          {notification.item?.title && (
+                            <span className="notification-item">
+                              {notification.item.title}
                             </span>
-                          </div>
-
-                          {notification.read === false && (
-                            <span className="notification-unread-dot" />
                           )}
-                        </button>
-                      );
-                    }
-                  )}
+
+                          <span className="notification-date">
+                            {formatRelativeDate(notification.createdAt)}
+                          </span>
+                        </div>
+
+                        {notification.read === false && (
+                          <span className="notification-unread-dot" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </section>
@@ -732,18 +632,12 @@ const Dashboard = () => {
               <div>
                 <h2>Quick Actions</h2>
 
-                <p>
-                  Common things you may want to do.
-                </p>
+                <p>Common things you may want to do.</p>
               </div>
             </div>
 
             <div className="dashboard-quick-actions">
-
-              <Link
-                to="/report-lost"
-                className="dashboard-quick-action"
-              >
+              <Link to="/report-lost" className="dashboard-quick-action">
                 <div className="quick-action-icon">
                   <FiPlus />
                 </div>
@@ -751,16 +645,11 @@ const Dashboard = () => {
                 <div>
                   <h3>Report Lost Item</h3>
 
-                  <p>
-                    Report something you've lost.
-                  </p>
+                  <p>Report something you've lost.</p>
                 </div>
               </Link>
 
-              <Link
-                to="/report-found"
-                className="dashboard-quick-action"
-              >
+              <Link to="/report-found" className="dashboard-quick-action">
                 <div className="quick-action-icon">
                   <FiPackage />
                 </div>
@@ -768,16 +657,11 @@ const Dashboard = () => {
                 <div>
                   <h3>Report Found Item</h3>
 
-                  <p>
-                    Help someone find their item.
-                  </p>
+                  <p>Help someone find their item.</p>
                 </div>
               </Link>
 
-              <Link
-                to="/browse"
-                className="dashboard-quick-action"
-              >
+              <Link to="/browse" className="dashboard-quick-action">
                 <div className="quick-action-icon">
                   <FiSearch />
                 </div>
@@ -785,16 +669,11 @@ const Dashboard = () => {
                 <div>
                   <h3>Browse Items</h3>
 
-                  <p>
-                    Search through reported items.
-                  </p>
+                  <p>Search through reported items.</p>
                 </div>
               </Link>
 
-              <Link
-                to="/my-claims"
-                className="dashboard-quick-action"
-              >
+              <Link to="/my-claims" className="dashboard-quick-action">
                 <div className="quick-action-icon">
                   <FiFileText />
                 </div>
@@ -802,15 +681,11 @@ const Dashboard = () => {
                 <div>
                   <h3>View My Claims</h3>
 
-                  <p>
-                    Track your submitted claims.
-                  </p>
+                  <p>Track your submitted claims.</p>
                 </div>
               </Link>
-
             </div>
           </section>
-
         </section>
       </div>
     </main>
