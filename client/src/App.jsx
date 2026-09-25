@@ -15,6 +15,10 @@ import ItemDetails from "./pages/ItemDetails/ItemDetails";
 
 import Register from "./pages/Register/Register";
 
+import VerifyEmail from "./pages/VerifyEmail/VerifyEmail";
+
+import Login from "./pages/Login/Login";
+
 const Home = () => {
   return (
     <>
@@ -69,6 +73,10 @@ const AppContent = () => {
         <Route path="/items/:id" element={<ItemDetails />} />
 
         <Route path="/register" element={<Register />} />
+
+        <Route path="/verify-email" element={<VerifyEmail />} />
+
+        <Route path="/login" element={<Login />} />
         
       </Routes>
 
