@@ -19,6 +19,11 @@ import VerifyEmail from "./pages/VerifyEmail/VerifyEmail";
 
 import Login from "./pages/Login/Login";
 
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+
+import MyItems from "./pages/MyItems/MyItems";
+import MyClaims from "./pages/MyClaims/MyClaims";
+
 const Home = () => {
   return (
     <>
@@ -77,7 +82,12 @@ const AppContent = () => {
         <Route path="/verify-email" element={<VerifyEmail />} />
 
         <Route path="/login" element={<Login />} />
-        
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/my-items" element={<MyItems />} />
+
+          <Route path="/my-claims" element={<MyClaims />} />
+        </Route>
       </Routes>
 
       <Footer />

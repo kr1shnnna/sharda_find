@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import {
   FiMail,
   FiLock,
@@ -73,12 +77,9 @@ const Login = () => {
 
     setServerError("");
 
-    const validationErrors =
-      validateForm();
+    const validationErrors = validateForm();
 
-    if (
-      Object.keys(validationErrors).length > 0
-    ) {
+    if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
@@ -92,17 +93,25 @@ const Login = () => {
       );
 
       /*
-       * If the user originally tried to access
-       * a protected page, return them there.
+       * ProtectedRoute stores the exact original URL
+       * in location.state.from.
        *
-       * Otherwise go to the homepage.
+       * This can include:
+       * - pathname
+       * - query parameters
+       * - hash
+       *
+       * Example:
+       * /my-items?status=returned#claims
        */
+
       const redirectPath =
         location.state?.from || "/";
 
       navigate(redirectPath, {
         replace: true,
       });
+
     } catch (error) {
       console.error(
         "Login error:",
@@ -121,6 +130,7 @@ const Login = () => {
 
   return (
     <main className="login-page">
+
       <div className="login-container">
 
         <div className="login-card">
@@ -184,6 +194,7 @@ const Login = () => {
                     : ""
                 }`}
               >
+
                 <FiMail />
 
                 <input
@@ -196,6 +207,7 @@ const Login = () => {
                   disabled={loading}
                   autoComplete="email"
                 />
+
               </div>
 
               {errors.email && (
@@ -225,6 +237,7 @@ const Login = () => {
                     : ""
                 }`}
               >
+
                 <FiLock />
 
                 <input
@@ -282,6 +295,7 @@ const Login = () => {
               className="login-submit"
               disabled={loading}
             >
+
               {loading
                 ? "Logging in..."
                 : "Login"}
@@ -289,6 +303,7 @@ const Login = () => {
               {!loading && (
                 <FiArrowRight />
               )}
+
             </button>
 
           </form>
@@ -317,6 +332,7 @@ const Login = () => {
         </div>
 
       </div>
+
     </main>
   );
 };
