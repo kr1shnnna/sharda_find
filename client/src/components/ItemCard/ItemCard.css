@@ -1,0 +1,192 @@
+.item-card {
+  width: 100%;
+
+  background-color: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  overflow: hidden;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.item-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+
+/* --------------------------------
+   IMAGE
+-------------------------------- */
+
+.item-card-image {
+  position: relative;
+
+  width: 100%;
+  height: 210px;
+
+  background-color: #f1f5f9;
+
+  overflow: hidden;
+}
+
+.item-card-image img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition: transform 0.3s ease;
+}
+
+.item-card:hover .item-card-image img {
+  transform: scale(1.03);
+}
+
+
+/* --------------------------------
+   STATUS BADGE
+-------------------------------- */
+
+.item-type-badge {
+  position: absolute;
+
+  top: 12px;
+  left: 12px;
+
+  padding: 5px 9px;
+
+  border-radius: 6px;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.item-type-badge.lost {
+  color: #b91c1c;
+  background-color: #fee2e2;
+}
+
+.item-type-badge.found {
+  color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+
+/* --------------------------------
+   CONTENT
+-------------------------------- */
+
+.item-card-content {
+  padding: 16px;
+}
+
+.item-card-title {
+  margin-bottom: 12px;
+
+  color: var(--text-primary);
+
+  font-size: 17px;
+  font-weight: 700;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* --------------------------------
+   ITEM INFO
+-------------------------------- */
+
+.item-card-info {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  margin-bottom: 16px;
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  color: var(--text-secondary);
+
+  font-size: 13px;
+}
+
+.item-info svg {
+  flex-shrink: 0;
+
+  width: 15px;
+  height: 15px;
+
+  color: var(--primary);
+}
+
+
+/* --------------------------------
+   FOOTER
+-------------------------------- */
+
+.item-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding-top: 13px;
+
+  border-top: 1px solid var(--border);
+}
+
+.item-category {
+  color: var(--text-secondary);
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.item-view-button {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 7px 11px;
+
+  color: var(--primary);
+
+  border: 1px solid #bbf7d0;
+  border-radius: 7px;
+
+  background-color: var(--white);
+
+  text-decoration: none;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  transition: all 0.2s ease;
+}
+
+.item-view-button:hover {
+  color: var(--white);
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.item-view-button svg {
+  width: 14px;
+  height: 14px;
+}
