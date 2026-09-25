@@ -13,6 +13,8 @@ import Browse from "./pages/Browse/Browse";
 
 import ItemDetails from "./pages/ItemDetails/ItemDetails";
 
+import Register from "./pages/Register/Register";
+
 const Home = () => {
   return (
     <>
@@ -65,6 +67,8 @@ const AppContent = () => {
         <Route path="/browse" element={<Browse />} />
 
         <Route path="/items/:id" element={<ItemDetails />} />
+
+        <Route path="/register" element={<Register />} />
         
       </Routes>
 
