@@ -6,6 +6,7 @@ const {
   sendMessage,
   getMessages,
   markMessagesAsRead,
+  getConversationById,
 } = require("../controllers/messageController");
 
 const { protect } = require("../middleware/authMiddleware");
@@ -17,6 +18,12 @@ router.get(
   "/conversations",
   protect,
   getMyConversations
+);
+
+router.get(
+  "/conversation-by-id/:conversationId",
+  protect,
+  getConversationById
 );
 
 // Get or create conversation for an item

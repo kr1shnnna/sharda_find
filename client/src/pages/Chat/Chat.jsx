@@ -97,7 +97,7 @@ const Chat = () => {
   const fetchConversation = async () => {
     try {
       const response = await api.get(
-        `/messages/conversation/${conversationId}`
+        `/messages/conversation-by-id/${conversationId}`
       );
 
       setConversation(
