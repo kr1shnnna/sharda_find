@@ -1,0 +1,688 @@
+/* =========================================
+   REPORT ITEM PAGE
+========================================= */
+
+.report-item-page {
+  min-height: calc(100vh - 72px);
+  padding: 48px 20px 80px;
+  background-color: var(--background);
+}
+
+.report-item-container {
+  width: min(900px, 100%);
+  margin: 0 auto;
+}
+
+
+/* =========================================
+   BACK LINK
+========================================= */
+
+.report-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 32px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.report-back-link:hover {
+  color: var(--primary);
+}
+
+.report-back-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.report-item-header {
+  margin-bottom: 36px;
+  text-align: center;
+}
+
+.report-item-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+
+  color: var(--primary);
+  background-color: var(--primary-light);
+
+  border-radius: 12px;
+}
+
+.report-item-icon svg {
+  width: 23px;
+  height: 23px;
+}
+
+.report-item-label {
+  margin-bottom: 8px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.report-item-header h1 {
+  margin-bottom: 10px;
+  color: var(--text-primary);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.report-item-header > p:last-child {
+  max-width: 560px;
+  margin: 0 auto;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+
+/* =========================================
+   SUCCESS / ERROR MESSAGES
+========================================= */
+
+.report-server-error,
+.report-success-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 20px;
+  padding: 13px 15px;
+
+  border-radius: var(--radius-md);
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.report-server-error {
+  color: var(--danger);
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.report-success-message {
+  color: var(--primary-dark);
+  background-color: var(--primary-light);
+  border: 1px solid #bbf7d0;
+}
+
+.report-server-error p,
+.report-success-message p {
+  margin: 0;
+}
+
+.report-server-error svg,
+.report-success-message svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+.report-item-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+
+/* =========================================
+   FORM SECTION
+========================================= */
+
+.form-section {
+  padding: 28px;
+
+  background-color: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  box-shadow:
+    0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.form-section-header {
+  margin-bottom: 24px;
+}
+
+.form-section-header h2 {
+  margin-bottom: 5px;
+  color: var(--text-primary);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.form-section-header p {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+/* =========================================
+   FORM GRID
+========================================= */
+
+.form-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group-full {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   INPUTS
+========================================= */
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+
+  color: var(--text-primary);
+  background-color: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  outline: none;
+
+  font-family: inherit;
+  font-size: 13px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.form-group input,
+.form-group select {
+  height: 44px;
+  padding: 0 13px;
+}
+
+.form-group textarea {
+  min-height: 120px;
+  padding: 12px 13px;
+
+  resize: vertical;
+
+  line-height: 1.6;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #94a3b8;
+}
+
+
+/* =========================================
+   INPUT FOCUS
+========================================= */
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #86efac;
+
+  box-shadow:
+    0 0 0 3px rgba(34, 197, 94, 0.08);
+}
+
+
+/* =========================================
+   DISABLED INPUTS
+========================================= */
+
+.form-group input:disabled,
+.form-group textarea:disabled,
+.form-group select:disabled {
+  color: #94a3b8;
+  background-color: #f8fafc;
+  cursor: not-allowed;
+}
+
+
+/* =========================================
+   INPUT WITH ICON
+========================================= */
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon > svg {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+
+  width: 16px;
+  height: 16px;
+
+  color: var(--text-secondary);
+
+  pointer-events: none;
+
+  transform: translateY(-50%);
+}
+
+.input-with-icon input {
+  padding-left: 38px;
+}
+
+
+/* =========================================
+   VALIDATION ERROR
+========================================= */
+
+.field-error {
+  margin: 0;
+
+  color: var(--danger);
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+
+/* =========================================
+   IMAGES HEADER
+========================================= */
+
+.images-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.image-count {
+  flex-shrink: 0;
+
+  padding: 5px 9px;
+
+  color: var(--primary);
+  background-color: var(--primary-light);
+
+  border-radius: 6px;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   IMAGE UPLOAD
+========================================= */
+
+.image-upload-box {
+  min-height: 170px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  color: var(--text-secondary);
+  background-color: #f8fafc;
+
+  border: 1px dashed #cbd5e1;
+  border-radius: var(--radius-md);
+
+  text-align: center;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.image-upload-box:hover {
+  background-color: #f0fdf4;
+  border-color: #86efac;
+}
+
+.image-upload-box > svg {
+  width: 28px;
+  height: 28px;
+
+  margin-bottom: 10px;
+
+  color: var(--primary);
+}
+
+.image-upload-title {
+  margin-bottom: 5px;
+
+  color: var(--text-primary);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.image-upload-text {
+  color: var(--text-secondary);
+
+  font-size: 12px;
+}
+
+.image-upload-box input {
+  display: none;
+}
+
+
+/* =========================================
+   DISABLED IMAGE UPLOAD
+========================================= */
+
+.image-upload-box.upload-disabled {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+}
+
+.image-upload-box.upload-disabled > svg {
+  color: #94a3b8;
+}
+
+.image-upload-box.upload-disabled .image-upload-title {
+  color: var(--text-secondary);
+}
+
+
+/* =========================================
+   SELECTED IMAGES
+========================================= */
+
+.selected-images {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 14px;
+
+  margin-top: 16px;
+}
+
+.selected-image {
+  position: relative;
+
+  aspect-ratio: 4 / 3;
+
+  overflow: hidden;
+
+  background-color: #f1f5f9;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.selected-image img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+}
+
+
+/* =========================================
+   REMOVE IMAGE BUTTON
+========================================= */
+
+.remove-image-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--danger);
+  background-color: rgba(255, 255, 255, 0.95);
+
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+
+  box-shadow:
+    0 3px 8px rgba(15, 23, 42, 0.12);
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.remove-image-button:hover {
+  background-color: #fef2f2;
+  transform: translateY(-1px);
+}
+
+.remove-image-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.remove-image-button svg {
+  width: 15px;
+  height: 15px;
+}
+
+
+/* =========================================
+   FORM FOOTER
+========================================= */
+
+.report-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+
+  padding-top: 4px;
+}
+
+
+/* =========================================
+   CANCEL BUTTON
+========================================= */
+
+.cancel-button {
+  height: 44px;
+
+  padding: 0 20px;
+
+  color: var(--text-secondary);
+  background-color: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.cancel-button:hover {
+  color: var(--text-primary);
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.cancel-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* =========================================
+   SUBMIT BUTTON
+========================================= */
+
+.submit-report-button {
+  min-width: 175px;
+  height: 44px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 20px;
+
+  color: var(--white);
+  background-color: var(--primary);
+
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.submit-report-button:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.submit-report-button:active {
+  transform: translateY(1px);
+}
+
+.submit-report-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submit-report-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 700px) {
+  .report-item-page {
+    padding: 32px 16px 60px;
+  }
+
+  .report-item-header {
+    margin-bottom: 28px;
+  }
+
+  .report-item-header h1 {
+    font-size: 26px;
+  }
+
+  .form-section {
+    padding: 22px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group-full {
+    grid-column: auto;
+  }
+
+  .selected-images {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .report-form-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .cancel-button,
+  .submit-report-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 450px) {
+  .selected-images {
+    grid-template-columns: 1fr;
+  }
+
+  .report-item-header h1 {
+    font-size: 24px;
+  }
+
+  .form-section {
+    padding: 18px;
+  }
+}

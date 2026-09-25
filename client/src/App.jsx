@@ -23,6 +23,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 
 import MyItems from "./pages/MyItems/MyItems";
 import MyClaims from "./pages/MyClaims/MyClaims";
+import ReportItem from "./pages/ReportItem/ReportItem";
 
 const Home = () => {
   return (
@@ -87,6 +88,10 @@ const AppContent = () => {
           <Route path="/my-items" element={<MyItems />} />
 
           <Route path="/my-claims" element={<MyClaims />} />
+
+          <Route path="/report-lost" element={<ReportItem type="lost" />} />
+
+          <Route path="/report-found" element={<ReportItem type="found" />} />
         </Route>
       </Routes>
 
