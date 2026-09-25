@@ -83,7 +83,7 @@ const reviewClaim = async (req, res) => {
     claim.reviewNote = reviewNote || "";
 
     if (status === "approved") {
-      item.status = "claim-pending";
+      item.status = "returned";
     } else {
       item.status = "active";
     }
@@ -200,8 +200,22 @@ const reviewHandover = async (req, res) => {
       item.itemLocation = "with-finder";
     }
 
+    // 7. Save the changes
     await item.save();
     await handover.save();
+
+    // 8. Notify the finder
+    await createNotification({
+      recipient: handover.submittedBy,
+      type: status === "confirmed" ? "handover-confirmed" : "handover-rejected",
+      title:
+        status === "confirmed" ? "Handover Confirmed" : "Handover Rejected",
+      message:
+        status === "confirmed"
+          ? "The Lost & Found Department has confirmed receipt of the item."
+          : "The Lost & Found Department could not confirm receipt of the item.",
+      item: item._id,
+    });
 
     res.status(200).json({
       message:
@@ -219,6 +233,7 @@ const reviewHandover = async (req, res) => {
     });
   }
 };
+
 
 module.exports = {
   getAllClaims,
