@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+
 import {
   FiBell,
   FiCheckCircle,
-  FiClock,
   FiFileText,
   FiPackage,
   FiRefreshCw,
   FiXCircle,
 } from "react-icons/fi";
+
 import { Link } from "react-router-dom";
 
 import api from "../../api/axios";
@@ -46,9 +47,17 @@ const formatRelativeDate = (dateString) => {
   const now = new Date();
   const difference = now - date;
 
-  const minutes = Math.floor(difference / 60000);
-  const hours = Math.floor(difference / 3600000);
-  const days = Math.floor(difference / 86400000);
+  const minutes = Math.floor(
+    difference / 60000
+  );
+
+  const hours = Math.floor(
+    difference / 3600000
+  );
+
+  const days = Math.floor(
+    difference / 86400000
+  );
 
   if (minutes < 1) {
     return "Just now";
@@ -94,10 +103,15 @@ const getNotificationIcon = (type) => {
 };
 
 const Notifications = () => {
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] =
+    useState([]);
 
-  const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] =
+    useState(0);
+
+  const [loading, setLoading] =
+    useState(true);
+
   const [error, setError] = useState("");
 
   const fetchNotifications = async () => {
@@ -105,7 +119,9 @@ const Notifications = () => {
       setLoading(true);
       setError("");
 
-      const response = await api.get("/notifications");
+      const response = await api.get(
+        "/notifications"
+      );
 
       setNotifications(
         response.data?.notifications || []
@@ -133,26 +149,36 @@ const Notifications = () => {
     fetchNotifications();
   }, []);
 
-  const markAsRead = async (notificationId) => {
+  const markAsRead = async (
+    notificationId
+  ) => {
     try {
       await api.patch(
         `/notifications/${notificationId}/read`
       );
 
-      setNotifications((previousNotifications) =>
-        previousNotifications.map(
-          (notification) =>
-            notification._id === notificationId
-              ? {
-                  ...notification,
-                  read: true,
-                }
-              : notification
-        )
+      setNotifications(
+        (previousNotifications) =>
+          previousNotifications.map(
+            (notification) =>
+              notification._id ===
+              notificationId
+                ? {
+                    ...notification,
+                    read: true,
+                  }
+                : notification
+          )
       );
 
-      setUnreadCount((previousCount) =>
-        Math.max(previousCount - 1, 0)
+      setUnreadCount(
+        (previousCount) =>
+          Math.max(previousCount - 1, 0)
+      );
+
+      // Tell Navbar to refresh its unread count.
+      window.dispatchEvent(
+        new CustomEvent("notification-read")
       );
     } catch (error) {
       console.error(
@@ -168,18 +194,28 @@ const Notifications = () => {
     }
 
     try {
-      await api.patch("/notifications/read-all");
+      await api.patch(
+        "/notifications/read-all"
+      );
 
-      setNotifications((previousNotifications) =>
-        previousNotifications.map(
-          (notification) => ({
-            ...notification,
-            read: true,
-          })
-        )
+      setNotifications(
+        (previousNotifications) =>
+          previousNotifications.map(
+            (notification) => ({
+              ...notification,
+              read: true,
+            })
+          )
       );
 
       setUnreadCount(0);
+
+      // Tell Navbar to refresh its unread count.
+      window.dispatchEvent(
+        new CustomEvent(
+          "notifications-all-read"
+        )
+      );
     } catch (error) {
       console.error(
         "Mark all notifications as read error:",
@@ -201,8 +237,9 @@ const Notifications = () => {
       <main className="notifications-page">
         <div className="notifications-loading">
           <div className="notifications-spinner" />
-
-          <p>Loading notifications...</p>
+          <p>
+            Loading notifications...
+          </p>
         </div>
       </main>
     );
@@ -216,7 +253,9 @@ const Notifications = () => {
             <FiRefreshCw />
           </div>
 
-          <h2>Unable to load notifications</h2>
+          <h2>
+            Unable to load notifications
+          </h2>
 
           <p>{error}</p>
 
@@ -238,6 +277,7 @@ const Notifications = () => {
       <div className="notifications-container">
 
         {/* Header */}
+
         <div className="notifications-header">
           <div>
             <p className="notifications-label">
@@ -270,17 +310,20 @@ const Notifications = () => {
         </div>
 
         {/* Notifications List */}
+
         {sortedNotifications.length === 0 ? (
           <div className="notifications-empty">
             <div className="notifications-empty-icon">
               <FiBell />
             </div>
 
-            <h2>No notifications</h2>
+            <h2>
+              No notifications
+            </h2>
 
             <p>
-              You're all caught up. New updates will
-              appear here.
+              You're all caught up. New updates
+              will appear here.
             </p>
 
             <Link
@@ -294,9 +337,10 @@ const Notifications = () => {
           <div className="notifications-list">
             {sortedNotifications.map(
               (notification) => {
-                const Icon = getNotificationIcon(
-                  notification.type
-                );
+                const Icon =
+                  getNotificationIcon(
+                    notification.type
+                  );
 
                 return (
                   <button
@@ -308,7 +352,9 @@ const Notifications = () => {
                         : ""
                     }`}
                     onClick={() =>
-                      markAsRead(notification._id)
+                      markAsRead(
+                        notification._id
+                      )
                     }
                   >
                     <div className="notification-card-icon">
@@ -332,14 +378,19 @@ const Notifications = () => {
                         {notification.message}
                       </p>
 
-                      {notification.item?.title && (
+                      {notification.item
+                        ?.title && (
                         <span className="notification-card-item">
-                          {notification.item.title}
+                          {
+                            notification.item
+                              .title
+                          }
                         </span>
                       )}
                     </div>
 
-                    {notification.read === false && (
+                    {notification.read ===
+                      false && (
                       <span className="notification-card-dot" />
                     )}
                   </button>
@@ -348,7 +399,6 @@ const Notifications = () => {
             )}
           </div>
         )}
-
       </div>
     </main>
   );
