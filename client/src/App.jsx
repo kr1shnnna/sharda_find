@@ -32,6 +32,10 @@ import Notifications from "./pages/Notifications/Notifications";
 import Messages from "./pages/Messages/Messages";
 import Chat from "./pages/Chat/Chat";
 
+import AdminRoute from "./components/routes/AdminRoute";
+import AdminLogin from "./pages/Admin/AdminLogin";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+
 const Home = () => {
   return (
     <>
@@ -83,66 +87,36 @@ const AppContent = () => {
 
         <Route path="/browse" element={<Browse />} />
 
-        <Route
-          path="/items/:id"
-          element={<ItemDetails />}
-        />
+        <Route path="/items/:id" element={<ItemDetails />} />
 
-        <Route
-          path="/register"
-          element={<Register />}
-        />
+        <Route path="/register" element={<Register />} />
 
-        <Route
-          path="/verify-email"
-          element={<VerifyEmail />}
-        />
+        <Route path="/verify-email" element={<VerifyEmail />} />
 
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+        <Route path="/login" element={<Login />} />
+
+        <Route path="/admin/login" element={<AdminLogin />} />
+
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Route>
 
         <Route element={<ProtectedRoute />}>
-          <Route
-            path="/dashboard"
-            element={<Dashboard />}
-          />
+          <Route path="/dashboard" element={<Dashboard />} />
 
-          <Route
-            path="/my-items"
-            element={<MyItems />}
-          />
+          <Route path="/my-items" element={<MyItems />} />
 
-          <Route
-            path="/my-claims"
-            element={<MyClaims />}
-          />
+          <Route path="/my-claims" element={<MyClaims />} />
 
-          <Route
-            path="/notifications"
-            element={<Notifications />}
-          />
+          <Route path="/notifications" element={<Notifications />} />
 
-          <Route
-            path="/report-lost"
-            element={<ReportItem type="lost" />}
-          />
+          <Route path="/report-lost" element={<ReportItem type="lost" />} />
 
-          <Route
-            path="/report-found"
-            element={<ReportItem type="found" />}
-          />
+          <Route path="/report-found" element={<ReportItem type="found" />} />
 
-          <Route
-            path="/messages"
-            element={<Messages />}
-          />
+          <Route path="/messages" element={<Messages />} />
 
-          <Route
-            path="/messages/:conversationId"
-            element={<Chat />}
-          />
+          <Route path="/messages/:conversationId" element={<Chat />} />
         </Route>
       </Routes>
 
