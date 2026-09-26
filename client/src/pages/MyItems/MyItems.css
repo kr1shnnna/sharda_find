@@ -1246,3 +1246,178 @@
     width: 100%;
   }
 }
+
+
+/* =========================================================
+   DEPARTMENT HANDOVER BUTTON
+   ========================================================= */
+
+.my-item-handover-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 38px;
+  padding: 0 13px;
+
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+
+  background: var(--primary);
+  color: var(--white);
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.my-item-handover-button:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+
+  box-shadow: 0 3px 8px rgba(22, 101, 52, 0.15);
+}
+
+.my-item-handover-button:active {
+  transform: translateY(1px);
+}
+
+.my-item-handover-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.my-item-handover-button svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+
+/* =========================================================
+   HANDOVER STATUS
+   ========================================================= */
+
+.my-item-handover-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 38px;
+  padding: 0 12px;
+
+  border-radius: var(--radius-sm);
+
+  font-size: 13px;
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+.my-item-handover-status svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+
+/* Waiting for department */
+
+.my-item-handover-status.pending {
+  border: 1px solid #fde68a;
+
+  background: #fffbeb;
+  color: #92400e;
+}
+
+
+/* Handover rejected */
+
+.my-item-handover-status.rejected {
+  border: 1px solid #fecaca;
+
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+
+/* Department confirmed */
+
+.my-item-handover-status.confirmed {
+  border: 1px solid #bbf7d0;
+
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+
+/* =========================================================
+   REJECTED HANDOVER
+   ========================================================= */
+
+.my-item-handover-rejected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   CARD ACTION LAYOUT
+   ========================================================= */
+
+.my-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  flex-wrap: wrap;
+}
+
+.my-item-actions button,
+.my-item-actions a {
+  flex-shrink: 0;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .my-item-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .my-item-handover-button,
+  .my-item-view-button {
+    width: 100%;
+  }
+
+  .my-item-handover-status {
+    width: 100%;
+  }
+
+  .my-item-handover-rejected {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
