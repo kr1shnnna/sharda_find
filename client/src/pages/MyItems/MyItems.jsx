@@ -547,32 +547,37 @@ const MyItems = () => {
 
                         {/* OWNER HANDOVER */}
 
-                        {isFinder && !item.finderHandedOver && (
-                          <button
-                            type="button"
-                            className="my-item-handover-button"
-                            disabled={ownerHandoverLoading === item._id}
-                            onClick={() => handleOwnerHandover(item._id)}
-                          >
-                            <FiCheckCircle />
+                        {isFinder &&
+                          item.status === "active" &&
+                          !item.finderHandedOver && (
+                            <button
+                              type="button"
+                              className="my-item-handover-button"
+                              disabled={ownerHandoverLoading === item._id}
+                              onClick={() => handleOwnerHandover(item._id)}
+                            >
+                              <FiCheckCircle />
 
-                            {ownerHandoverLoading === item._id
-                              ? "Confirming..."
-                              : "I Handed Over the Item"}
-                          </button>
-                        )}
+                              {ownerHandoverLoading === item._id
+                                ? "Confirming..."
+                                : "I Handed Over the Item"}
+                            </button>
+                          )}
 
-                        {isFinder && item.finderHandedOver && (
-                          <span className="my-item-handover-status pending">
-                            <FiCheckCircle />
-                            Handed Over — Waiting for Owner
-                          </span>
-                        )}
+                        {isFinder &&
+                          item.status === "active" &&
+                          item.finderHandedOver &&
+                          !item.returnConfirmedByOwner && (
+                            <span className="my-item-handover-status pending">
+                              <FiCheckCircle />
+                              Handed Over — Waiting for Owner
+                            </span>
+                          )}
 
                         {/* DEPARTMENT HANDOVER */}
 
-                        {item.type === "lost" &&
-                          item.foundBy &&
+                        {((item.type === "lost" && item.foundBy) ||
+                          item.type === "found") &&
                           item.itemLocation === "with-finder" &&
                           item.status !== "returned" && (
                             <>

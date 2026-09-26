@@ -16,24 +16,23 @@ const reportHandover = async (req, res) => {
       });
     }
 
-    // 2. Only lost items can have a handover
-    if (item.type !== "lost") {
+    if (!["lost", "found"].includes(item.type)) {
       return res.status(400).json({
-        message: "Handover can only be reported for lost items",
+        message: "Handover is not available for this item",
       });
     }
 
-    // 3. Someone must have already reported finding the item
-    if (!item.foundBy) {
+    const finderId = item.type === "found" ? item.reportedBy : item.foundBy;
+
+    if (!finderId) {
       return res.status(400).json({
-        message: "No finder has been reported for this item",
+        message: "No finder is associated with this item",
       });
     }
 
-    // 4. Only the recorded finder can report the handover
-    if (item.foundBy.toString() !== req.user._id.toString()) {
+    if (finderId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
-        message: "Only the recorded finder can report this handover",
+        message: "Only the person who has the item can report this handover",
       });
     }
 
@@ -55,8 +54,6 @@ const reportHandover = async (req, res) => {
       submittedBy: req.user._id,
       status: "pending",
     });
-
-
 
     const io = req.app.get("io");
 
@@ -92,7 +89,6 @@ const reportHandover = async (req, res) => {
 
 const reviewHandover = async (req, res) => {
   try {
-
     const io = req.app.get("io");
 
     const { status, note } = req.body;
@@ -146,18 +142,12 @@ const reviewHandover = async (req, res) => {
     await item.save();
     await handover.save();
 
-
     // 8. Notify the finder
     await createNotification({
       recipient: handover.submittedBy,
-      type:
-        status === "confirmed"
-          ? "handover-confirmed"
-          : "handover-rejected",
+      type: status === "confirmed" ? "handover-confirmed" : "handover-rejected",
       title:
-        status === "confirmed"
-          ? "Handover Confirmed"
-          : "Handover Rejected",
+        status === "confirmed" ? "Handover Confirmed" : "Handover Rejected",
       message:
         status === "confirmed"
           ? "The Lost & Found Department has confirmed receipt of the item."
