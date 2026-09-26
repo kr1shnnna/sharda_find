@@ -1,5 +1,6 @@
 import {
   BrowserRouter,
+  Navigate,
   Route,
   Routes,
 } from "react-router-dom";
@@ -17,13 +18,16 @@ const App = () => {
       <AuthProvider>
         <Routes>
 
-          {/* Public Admin Login */}
+          <Route
+            path="/"
+            element={<Navigate to="/admin" replace />}
+          />
+
           <Route
             path="/admin/login"
             element={<AdminLogin />}
           />
 
-          {/* Protected Admin Routes */}
           <Route element={<AdminRoute />}>
             <Route
               path="/admin"
