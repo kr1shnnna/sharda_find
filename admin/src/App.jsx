@@ -1,9 +1,38 @@
-import { BrowserRouter } from "react-router-dom";
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+} from "react-router-dom";
+
+import { AuthProvider } from "./context/AuthContext";
+
+import AdminRoute from "./components/AdminRoute/AdminRoute";
+
+import AdminLogin from "./pages/AdminLogin/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 
 const App = () => {
   return (
     <BrowserRouter>
-      <h1>ShardaFind Admin</h1>
+      <AuthProvider>
+        <Routes>
+
+          {/* Public Admin Login */}
+          <Route
+            path="/admin/login"
+            element={<AdminLogin />}
+          />
+
+          {/* Protected Admin Routes */}
+          <Route element={<AdminRoute />}>
+            <Route
+              path="/admin"
+              element={<AdminDashboard />}
+            />
+          </Route>
+
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 };
