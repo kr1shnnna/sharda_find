@@ -950,3 +950,17 @@
   background-color: var(--primary-light);
   border: 1px solid #bbf7d0;
 }
+
+/* Rejected */
+.my-item-handover-rejected {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.my-item-handover-status.rejected {
+  color: var(--danger);
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
