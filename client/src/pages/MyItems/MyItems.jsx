@@ -480,7 +480,8 @@ const MyItems = () => {
 
                         {item.type === "lost" &&
                           item.foundBy &&
-                          item.itemLocation === "with-finder" && (
+                          item.itemLocation === "with-finder" &&
+                          item.status !== "returned" && (
                             <>
                               {/* No previous handover */}
                               {!item.handover ? (
