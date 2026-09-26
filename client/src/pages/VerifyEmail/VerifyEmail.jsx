@@ -14,9 +14,7 @@ const VerifyEmail = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState(
-    location.state?.email || ""
-  );
+  const [email, setEmail] = useState(location.state?.email || "");
 
   const [otp, setOtp] = useState("");
 
@@ -60,30 +58,22 @@ const VerifyEmail = () => {
         {
           email: email.trim(),
           otp,
-        }
+        },
       );
 
-      console.log(
-        "Email verification successful:",
-        response.data
-      );
+      console.log("Email verification successful:", response.data);
 
-      setSuccess(
-        "Your email has been verified successfully."
-      );
+      setSuccess("Your email has been verified successfully.");
 
       setTimeout(() => {
         navigate("/login");
       }, 1200);
     } catch (error) {
-      console.error(
-        "Email verification error:",
-        error
-      );
+      console.error("Email verification error:", error);
 
       setError(
         error.response?.data?.message ||
-          "Invalid or expired OTP. Please try again."
+          "Invalid or expired OTP. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -106,26 +96,18 @@ const VerifyEmail = () => {
         "http://localhost:5000/api/auth/resend-otp",
         {
           email: email.trim(),
-        }
+        },
       );
 
-      console.log(
-        "OTP resent:",
-        response.data
-      );
+      console.log("OTP resent:", response.data);
 
-      setSuccess(
-        "A new OTP has been sent to your email."
-      );
+      setSuccess("A new OTP has been sent to your email.");
     } catch (error) {
-      console.error(
-        "Resend OTP error:",
-        error
-      );
+      console.error("Resend OTP error:", error);
 
       setError(
         error.response?.data?.message ||
-          "Unable to resend OTP. Please try again."
+          "Unable to resend OTP. Please try again.",
       );
     } finally {
       setResending(false);
@@ -135,89 +117,48 @@ const VerifyEmail = () => {
   return (
     <main className="verify-page">
       <div className="verify-container">
-
         <div className="verify-card">
-
           <div className="verify-header">
-
             <div className="verify-icon">
               <FiMail />
             </div>
 
-            <p className="verify-label">
-              Email Verification
-            </p>
+            <p className="verify-label">Email Verification</p>
 
-            <h1>
-              Verify your email
-            </h1>
+            <h1>Verify your email</h1>
 
-            <p>
-              Enter the 6-digit OTP sent to your
-              email address.
-            </p>
-
+            <p>Enter the 6-digit OTP sent to your email address.</p>
           </div>
 
           {(error || success) && (
-            <div
-              className={`verify-message ${
-                error
-                  ? "error"
-                  : "success"
-              }`}
-            >
-              {error ? (
-                <FiAlertCircle />
-              ) : (
-                <FiCheckCircle />
-              )}
+            <div className={`verify-message ${error ? "error" : "success"}`}>
+              {error ? <FiAlertCircle /> : <FiCheckCircle />}
 
-              <p>
-                {error || success}
-              </p>
+              <p>{error || success}</p>
             </div>
           )}
 
-          <form
-            className="verify-form"
-            onSubmit={handleVerify}
-          >
-
+          <form className="verify-form" onSubmit={handleVerify}>
             {/* Email */}
 
             <div className="form-group">
-
-              <label htmlFor="verify-email">
-                Email Address
-              </label>
+              <label htmlFor="verify-email">Email Address</label>
 
               <div className="verify-input-wrapper">
-
                 <FiMail />
 
-                <input
-                  id="verify-email"
-                  type="email"
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(event) =>
-                    setEmail(event.target.value)
-                  }
-                  disabled={loading}
-                />
-
+                <input id="verify-email" type="email" value={email} readOnly />
               </div>
 
+              <p className="verify-email-help">
+                This is the email address you used to create your account.
+              </p>
             </div>
 
             {/* OTP */}
 
             <div className="form-group">
-
-              <label htmlFor="otp">
-                Verification Code
-              </label>
+              <label htmlFor="otp">Verification Code</label>
 
               <input
                 id="otp"
@@ -233,50 +174,33 @@ const VerifyEmail = () => {
               />
 
               <p className="otp-help">
-                Enter the 6-digit code sent to your
-                email.
+                Enter the 6-digit code sent to your email.
+                If you don't see it, check your Spam or Promotions folder.
               </p>
-
             </div>
 
-            <button
-              type="submit"
-              className="verify-submit"
-              disabled={loading}
-            >
-              {loading
-                ? "Verifying..."
-                : "Verify Email"}
+            <button type="submit" className="verify-submit" disabled={loading}>
+              {loading ? "Verifying..." : "Verify Email"}
 
               {!loading && <FiArrowRight />}
             </button>
-
           </form>
 
           <div className="verify-footer">
-
             <button
               type="button"
               className="resend-button"
               onClick={handleResendOtp}
               disabled={resending}
             >
-              {resending
-                ? "Sending..."
-                : "Didn't receive the OTP? Resend"}
+              {resending ? "Sending..." : "Didn't receive the OTP? Resend"}
             </button>
 
-            <Link
-              to="/register"
-              className="back-register-link"
-            >
+            <Link to="/register" className="back-register-link">
               Back to registration
             </Link>
-
           </div>
-
         </div>
-
       </div>
     </main>
   );

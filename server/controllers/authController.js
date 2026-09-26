@@ -281,6 +281,8 @@ const resendOtp = async (req, res) => {
 
     await user.save();
 
+    
+
     // Send the new OTP email
     await sendEmail({
       to: email,
