@@ -933,3 +933,27 @@
     width: 100%;
   }
 }
+
+
+.my-item-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+}
+
+.my-item-category {
+  display: block;
+}
+
+.my-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.my-item-view-button,
+.my-item-handover-button {
+  white-space: nowrap;
+}

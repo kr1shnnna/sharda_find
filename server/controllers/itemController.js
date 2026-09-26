@@ -146,16 +146,11 @@ const getItems = async (req, res) => {
   }
 };
 
-
 const getMyItems = async (req, res) => {
   try {
     const items = await Item.find({
-      $or: [
-        { reportedBy: req.user._id },
-        { foundBy: req.user._id },
-      ],
+      $or: [{ reportedBy: req.user._id }, { foundBy: req.user._id }],
     }).sort({ createdAt: -1 });
-
 
     const itemsWithHandover = await Promise.all(
       items.map(async (item) => {
@@ -213,8 +208,15 @@ const getItemById = async (req, res) => {
         });
     }
 
+    const latestHandover = await Handover.findOne({
+      item: item._id,
+    }).sort({ createdAt: -1 });
+
     res.status(200).json({
-      item,
+      item: {
+        ...item.toObject(),
+        handover: latestHandover,
+      },
       eligibleClaim,
     });
   } catch (error) {
