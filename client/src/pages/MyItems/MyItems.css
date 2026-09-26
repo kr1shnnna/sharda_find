@@ -854,3 +854,99 @@
     height: 190px;
   }
 }
+
+
+
+/* ============================= */
+/* Handover Actions */
+/* ============================= */
+
+.my-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.my-item-handover-button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+
+  color: var(--white);
+  background-color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.my-item-handover-button:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.my-item-handover-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.my-item-handover-button svg {
+  width: 15px;
+  height: 15px;
+}
+
+
+/* ============================= */
+/* Handover Status */
+/* ============================= */
+
+.my-item-handover-status {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 0 12px;
+
+  border-radius: var(--radius-sm);
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.my-item-handover-status svg {
+  width: 15px;
+  height: 15px;
+}
+
+
+/* Pending */
+
+.my-item-handover-status.pending {
+  color: var(--warning);
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+
+/* Confirmed */
+
+.my-item-handover-status.confirmed {
+  color: var(--primary);
+  background-color: var(--primary-light);
+  border: 1px solid #bbf7d0;
+}

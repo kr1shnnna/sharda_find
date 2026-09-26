@@ -2,16 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import {
   FiAlertCircle,
   FiCalendar,
+  FiCheckCircle,
   FiEye,
   FiMapPin,
   FiPackage,
   FiPlus,
   FiRefreshCw,
 } from "react-icons/fi";
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import api from "../../api/axios";
 
@@ -71,11 +69,7 @@ const getCategoryLabel = (category) => {
 
   return category
     .split("-")
-    .map(
-      (word) =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1)
-    )
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 };
 
@@ -106,34 +100,54 @@ const MyItems = () => {
   const navigate = useNavigate();
 
   const [items, setItems] = useState([]);
-  const [activeFilter, setActiveFilter] =
-    useState("all");
+  const [activeFilter, setActiveFilter] = useState("all");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [handoverLoading, setHandoverLoading] = useState(null);
 
   const fetchMyItems = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await api.get(
-        "/items/my-items"
-      );
+      const response = await api.get("/items/my-items");
 
       setItems(response.data?.items || []);
     } catch (error) {
-      console.error(
-        "Fetch my items error:",
-        error
-      );
+      console.error("Fetch my items error:", error);
 
       setError(
         error.response?.data?.message ||
-          "Unable to load your items. Please try again."
+          "Unable to load your items. Please try again.",
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleHandover = async (itemId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to hand over this item to the Lost & Found Department?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setHandoverLoading(itemId);
+
+      await api.post(`/handovers/${itemId}`);
+
+      await fetchMyItems();
+    } catch (error) {
+      console.error("Report handover error:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Unable to report handover. Please try again.",
+      );
+    } finally {
+      setHandoverLoading(null);
     }
   };
 
@@ -146,9 +160,7 @@ const MyItems = () => {
       return items;
     }
 
-    return items.filter(
-      (item) => item.type === activeFilter
-    );
+    return items.filter((item) => item.type === activeFilter);
   }, [items, activeFilter]);
 
   const handleFilterChange = (filter) => {
@@ -158,20 +170,16 @@ const MyItems = () => {
   return (
     <main className="my-items-page">
       <div className="my-items-container">
-
         {/* HEADER */}
 
         <div className="my-items-header">
           <div>
-            <p className="my-items-label">
-              ShardaFind
-            </p>
+            <p className="my-items-label">ShardaFind</p>
 
             <h1>My Items</h1>
 
             <p className="my-items-description">
-              Manage the lost and found items you
-              have reported.
+              Manage the lost and found items you have reported.
             </p>
           </div>
 
@@ -184,10 +192,7 @@ const MyItems = () => {
               Report Lost
             </Link>
 
-            <Link
-              to="/report-found"
-              className="my-items-report-button primary"
-            >
+            <Link to="/report-found" className="my-items-report-button primary">
               <FiPlus />
               Report Found
             </Link>
@@ -203,43 +208,23 @@ const MyItems = () => {
                 key={filter.value}
                 type="button"
                 className={`my-items-filter ${
-                  activeFilter === filter.value
-                    ? "active"
-                    : ""
+                  activeFilter === filter.value ? "active" : ""
                 }`}
-                onClick={() =>
-                  handleFilterChange(
-                    filter.value
-                  )
-                }
+                onClick={() => handleFilterChange(filter.value)}
               >
                 {filter.label}
 
-                {filter.value === "all" && (
-                  <span>
-                    {items.length}
-                  </span>
-                )}
+                {filter.value === "all" && <span>{items.length}</span>}
 
                 {filter.value === "lost" && (
                   <span>
-                    {
-                      items.filter(
-                        (item) =>
-                          item.type === "lost"
-                      ).length
-                    }
+                    {items.filter((item) => item.type === "lost").length}
                   </span>
                 )}
 
                 {filter.value === "found" && (
                   <span>
-                    {
-                      items.filter(
-                        (item) =>
-                          item.type === "found"
-                      ).length
-                    }
+                    {items.filter((item) => item.type === "found").length}
                   </span>
                 )}
               </button>
@@ -249,9 +234,7 @@ const MyItems = () => {
           {!loading && items.length > 0 && (
             <span className="my-items-count">
               {filteredItems.length}{" "}
-              {filteredItems.length === 1
-                ? "item"
-                : "items"}
+              {filteredItems.length === 1 ? "item" : "items"}
             </span>
           )}
         </div>
@@ -260,27 +243,22 @@ const MyItems = () => {
 
         {loading && (
           <div className="my-items-grid">
-            {Array.from({ length: 6 }).map(
-              (_, index) => (
-                <div
-                  className="my-item-skeleton"
-                  key={index}
-                >
-                  <div className="skeleton-image" />
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div className="my-item-skeleton" key={index}>
+                <div className="skeleton-image" />
 
-                  <div className="skeleton-content">
-                    <div className="skeleton-line title" />
-                    <div className="skeleton-line" />
-                    <div className="skeleton-line short" />
+                <div className="skeleton-content">
+                  <div className="skeleton-line title" />
+                  <div className="skeleton-line" />
+                  <div className="skeleton-line short" />
 
-                    <div className="skeleton-footer">
-                      <div className="skeleton-small" />
-                      <div className="skeleton-button" />
-                    </div>
+                  <div className="skeleton-footer">
+                    <div className="skeleton-small" />
+                    <div className="skeleton-button" />
                   </div>
                 </div>
-              )
-            )}
+              </div>
+            ))}
           </div>
         )}
 
@@ -309,39 +287,29 @@ const MyItems = () => {
 
         {/* EMPTY */}
 
-        {!loading &&
-          !error &&
-          items.length === 0 && (
-            <div className="my-items-state">
-              <div className="my-items-state-icon">
-                <FiPackage />
-              </div>
-
-              <h2>No items reported yet</h2>
-
-              <p>
-                Items that you report will appear here.
-              </p>
-
-              <div className="empty-state-actions">
-                <Link
-                  to="/report-lost"
-                  className="empty-state-button secondary"
-                >
-                  <FiPlus />
-                  Report Lost Item
-                </Link>
-
-                <Link
-                  to="/report-found"
-                  className="empty-state-button primary"
-                >
-                  <FiPlus />
-                  Report Found Item
-                </Link>
-              </div>
+        {!loading && !error && items.length === 0 && (
+          <div className="my-items-state">
+            <div className="my-items-state-icon">
+              <FiPackage />
             </div>
-          )}
+
+            <h2>No items reported yet</h2>
+
+            <p>Items that you report will appear here.</p>
+
+            <div className="empty-state-actions">
+              <Link to="/report-lost" className="empty-state-button secondary">
+                <FiPlus />
+                Report Lost Item
+              </Link>
+
+              <Link to="/report-found" className="empty-state-button primary">
+                <FiPlus />
+                Report Found Item
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* FILTER EMPTY */}
 
@@ -356,17 +324,12 @@ const MyItems = () => {
 
               <h2>No {activeFilter} items</h2>
 
-              <p>
-                You haven't reported any{" "}
-                {activeFilter} items yet.
-              </p>
+              <p>You haven't reported any {activeFilter} items yet.</p>
 
               <button
                 type="button"
                 className="retry-button"
-                onClick={() =>
-                  setActiveFilter("all")
-                }
+                onClick={() => setActiveFilter("all")}
               >
                 View All Items
               </button>
@@ -375,119 +338,129 @@ const MyItems = () => {
 
         {/* ITEMS */}
 
-        {!loading &&
-          !error &&
-          filteredItems.length > 0 && (
-            <div className="my-items-grid">
-              {filteredItems.map((item) => {
-                const isLost =
-                  item.type === "lost";
+        {!loading && !error && filteredItems.length > 0 && (
+          <div className="my-items-grid">
+            {filteredItems.map((item) => {
+              const isLost = item.type === "lost";
 
-                const statusClass =
-                  statusClasses[item.status] ||
-                  "active";
+              const statusClass = statusClasses[item.status] || "active";
 
-                const statusLabel =
-                  statusLabels[item.status] ||
-                  "Active";
+              const statusLabel = statusLabels[item.status] || "Active";
 
-                return (
-                  <article
-                    className="my-item-card"
-                    key={item._id}
-                  >
-                    {/* IMAGE */}
+              return (
+                <article className="my-item-card" key={item._id}>
+                  {/* IMAGE */}
 
-                    <div className="my-item-image">
-                      <img
-                        src={getImageUrl(item)}
-                        alt={item.title}
-                        onError={(event) => {
-                          event.currentTarget.src =
-                            "https://placehold.co/800x600/f1f5f9/64748b?text=No+Image";
-                        }}
-                      />
+                  <div className="my-item-image">
+                    <img
+                      src={getImageUrl(item)}
+                      alt={item.title}
+                      onError={(event) => {
+                        event.currentTarget.src =
+                          "https://placehold.co/800x600/f1f5f9/64748b?text=No+Image";
+                      }}
+                    />
 
-                      <span
-                        className={`my-item-type-badge ${
-                          isLost
-                            ? "lost"
-                            : "found"
-                        }`}
-                      >
-                        {isLost
-                          ? "Lost"
-                          : "Found"}
+                    <span
+                      className={`my-item-type-badge ${
+                        isLost ? "lost" : "found"
+                      }`}
+                    >
+                      {isLost ? "Lost" : "Found"}
+                    </span>
+                  </div>
+
+                  {/* CONTENT */}
+
+                  <div className="my-item-content">
+                    <div className="my-item-title-row">
+                      <h2>{item.title}</h2>
+
+                      <span className={`my-item-status ${statusClass}`}>
+                        {statusLabel}
                       </span>
                     </div>
 
-                    {/* CONTENT */}
+                    <div className="my-item-details">
+                      <div className="my-item-detail">
+                        <FiMapPin />
 
-                    <div className="my-item-content">
-                      <div className="my-item-title-row">
-                        <h2>
-                          {item.title}
-                        </h2>
-
-                        <span
-                          className={`my-item-status ${statusClass}`}
-                        >
-                          {statusLabel}
-                        </span>
+                        <span>{item.location || "Location unavailable"}</span>
                       </div>
 
-                      <div className="my-item-details">
+                      <div className="my-item-detail">
+                        <FiCalendar />
 
-                        <div className="my-item-detail">
-                          <FiMapPin />
-
-                          <span>
-                            {item.location ||
-                              "Location unavailable"}
-                          </span>
-                        </div>
-
-                        <div className="my-item-detail">
-                          <FiCalendar />
-
-                          <span>
-                            {formatDate(
-                              item.itemDate
-                            )}
-                          </span>
-                        </div>
-
+                        <span>{formatDate(item.itemDate)}</span>
                       </div>
+                    </div>
 
-                      <div className="my-item-footer">
+                    <div className="my-item-footer">
+                      <span className="my-item-category">
+                        {getCategoryLabel(item.category)}
+                      </span>
 
-                        <span className="my-item-category">
-                          {getCategoryLabel(
-                            item.category
-                          )}
-                        </span>
-
+                      <div className="my-item-actions">
                         <button
                           type="button"
                           className="my-item-view-button"
-                          onClick={() =>
-                            navigate(
-                              `/items/${item._id}`
-                            )
-                          }
+                          onClick={() => navigate(`/items/${item._id}`)}
                         >
                           <FiEye />
                           View
                         </button>
 
+                        {item.type === "lost" &&
+                          item.foundBy &&
+                          item.itemLocation === "with-finder" && (
+                            <>
+                              {!item.handover ? (
+                                <button
+                                  type="button"
+                                  className="my-item-handover-button"
+                                  disabled={handoverLoading === item._id}
+                                  onClick={() => handleHandover(item._id)}
+                                >
+                                  <FiCheckCircle />
+                                  {handoverLoading === item._id
+                                    ? "Submitting..."
+                                    : "Hand over"}
+                                </button>
+                              ) : item.handover.status === "pending" ? (
+                                <span className="my-item-handover-status pending">
+                                  Waiting for Department
+                                </span>
+                              ) : item.handover.status === "rejected" ? (
+                                <button
+                                  type="button"
+                                  className="my-item-handover-button"
+                                  disabled={handoverLoading === item._id}
+                                  onClick={() => handleHandover(item._id)}
+                                >
+                                  <FiCheckCircle />
+                                  {handoverLoading === item._id
+                                    ? "Submitting..."
+                                    : "Hand over"}
+                                </button>
+                              ) : null}
+                            </>
+                          )}
+
+                        {item.type === "lost" &&
+                          item.itemLocation === "lost-found-department" && (
+                            <span className="my-item-handover-status confirmed">
+                              <FiCheckCircle />
+                              With Department
+                            </span>
+                          )}
                       </div>
                     </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </div>
     </main>
   );

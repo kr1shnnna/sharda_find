@@ -6,6 +6,8 @@ const Claim = require("../models/Claim");
 
 const createNotification = require("../utils/createNotification");
 
+const Handover = require("../models/Handover");
+
 const createItem = async (req, res) => {
   try {
     const {
@@ -29,15 +31,11 @@ const createItem = async (req, res) => {
       !itemDate
     ) {
       return res.status(400).json({
-        message:
-          "Please provide all required item details",
+        message: "Please provide all required item details",
       });
     }
 
-    const normalizedTitle = title
-      .trim()
-      .replace(/\s+/g, " ")
-      .toLowerCase();
+    const normalizedTitle = title.trim().replace(/\s+/g, " ").toLowerCase();
 
     const normalizedLocation = location
       .trim()
@@ -46,57 +44,42 @@ const createItem = async (req, res) => {
 
     const itemDateValue = new Date(itemDate);
 
-    if (
-      Number.isNaN(
-        itemDateValue.getTime()
-      )
-    ) {
+    if (Number.isNaN(itemDateValue.getTime())) {
       return res.status(400).json({
-        message:
-          "Please provide a valid item date",
+        message: "Please provide a valid item date",
       });
     }
 
-    const duplicateItem =
-      await Item.findOne({
-        reportedBy: req.user._id,
-        type,
-        category,
-        normalizedTitle,
-        normalizedLocation,
-        itemDate: itemDateValue,
-        status: {
-          $in: [
-            "active",
-            "claim-pending",
-          ],
-        },
-      });
+    const duplicateItem = await Item.findOne({
+      reportedBy: req.user._id,
+      type,
+      category,
+      normalizedTitle,
+      normalizedLocation,
+      itemDate: itemDateValue,
+      status: {
+        $in: ["active", "claim-pending"],
+      },
+    });
 
     if (duplicateItem) {
       return res.status(409).json({
-        message:
-          "You already have an active post for this item.",
+        message: "You already have an active post for this item.",
       });
     }
 
     const uploadResults = req.files?.length
       ? await Promise.all(
           req.files.map((file) =>
-            uploadToCloudinary(
-              file,
-              "sharda-find/items"
-            )
-          )
+            uploadToCloudinary(file, "sharda-find/items"),
+          ),
         )
       : [];
 
-    const images = uploadResults.map(
-      (result) => ({
-        url: result.secure_url,
-        publicId: result.public_id,
-      })
-    );
+    const images = uploadResults.map((result) => ({
+      url: result.secure_url,
+      publicId: result.public_id,
+    }));
 
     const item = await Item.create({
       title,
@@ -114,24 +97,19 @@ const createItem = async (req, res) => {
       // by the person who posted it.
       // For a found item, the creator can
       // specify where the item currently is.
-      itemLocation:
-        type === "found"
-          ? itemLocation
-          : null,
+      itemLocation: type === "found" ? itemLocation : null,
 
       images,
       reportedBy: req.user._id,
     });
 
     res.status(201).json({
-      message:
-        "Item posted successfully",
+      message: "Item posted successfully",
       item,
     });
   } catch (error) {
     res.status(500).json({
-      message:
-        "Unable to post item",
+      message: "Unable to post item",
       error: error.message,
     });
   }
@@ -139,11 +117,7 @@ const createItem = async (req, res) => {
 
 const getItems = async (req, res) => {
   try {
-    const {
-      type,
-      category,
-      location,
-    } = req.query;
+    const { type, category, location } = req.query;
 
     const filter = {
       status: "active",
@@ -165,10 +139,7 @@ const getItems = async (req, res) => {
     }
 
     const items = await Item.find(filter)
-      .populate(
-        "reportedBy",
-        "name email"
-      )
+      .populate("reportedBy", "name email")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -177,8 +148,7 @@ const getItems = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message:
-        "Unable to fetch items",
+      message: "Unable to fetch items",
       error: error.message,
     });
   }
@@ -190,14 +160,28 @@ const getMyItems = async (req, res) => {
       reportedBy: req.user._id,
     }).sort({ createdAt: -1 });
 
+    const itemsWithHandover = await Promise.all(
+      items.map(async (item) => {
+        const latestHandover = await Handover.findOne({
+          item: item._id,
+        }).sort({ createdAt: -1 });
+
+        return {
+          ...item.toObject(),
+          handover: latestHandover,
+        };
+      }),
+    );
+
     res.status(200).json({
-      count: items.length,
-      items,
+      count: itemsWithHandover.length,
+      items: itemsWithHandover,
     });
   } catch (error) {
+    console.error("Get my items error:", error);
+
     res.status(500).json({
-      message:
-        "Unable to fetch your items",
+      message: "Unable to fetch your items",
       error: error.message,
     });
   }
@@ -205,16 +189,9 @@ const getMyItems = async (req, res) => {
 
 const getItemById = async (req, res) => {
   try {
-    const item =
-      await Item.findById(req.params.id)
-        .populate(
-          "reportedBy",
-          "name email"
-        )
-        .populate(
-          "foundBy",
-          "name email"
-        );
+    const item = await Item.findById(req.params.id)
+      .populate("reportedBy", "name email")
+      .populate("foundBy", "name email");
 
     if (!item) {
       return res.status(404).json({
@@ -227,23 +204,16 @@ const getItemById = async (req, res) => {
     // For a found item, find the latest
     // pending/approved claim.
     if (item.type === "found") {
-      eligibleClaim =
-        await Claim.findOne({
-          item: item._id,
-          status: {
-            $in: [
-              "pending",
-              "approved",
-            ],
-          },
-        })
-          .populate(
-            "claimant",
-            "name email"
-          )
-          .sort({
-            createdAt: -1,
-          });
+      eligibleClaim = await Claim.findOne({
+        item: item._id,
+        status: {
+          $in: ["pending", "approved"],
+        },
+      })
+        .populate("claimant", "name email")
+        .sort({
+          createdAt: -1,
+        });
     }
 
     res.status(200).json({
@@ -252,17 +222,13 @@ const getItemById = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message:
-        "Unable to fetch item details",
+      message: "Unable to fetch item details",
       error: error.message,
     });
   }
 };
 
-const reportFoundItem = async (
-  req,
-  res
-) => {
+const reportFoundItem = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -278,20 +244,15 @@ const reportFoundItem = async (
     // 2. Only lost items can be reported as found
     if (item.type !== "lost") {
       return res.status(400).json({
-        message:
-          "This action is only available for lost items",
+        message: "This action is only available for lost items",
       });
     }
 
     // 3. The owner cannot report finding
     // their own item
-    if (
-      item.reportedBy.toString() ===
-      req.user._id.toString()
-    ) {
+    if (item.reportedBy.toString() === req.user._id.toString()) {
       return res.status(400).json({
-        message:
-          "You cannot report finding your own lost item",
+        message: "You cannot report finding your own lost item",
       });
     }
 
@@ -299,8 +260,7 @@ const reportFoundItem = async (
     // finding this item
     if (item.foundBy) {
       return res.status(409).json({
-        message:
-          "Someone has already reported finding this item",
+        message: "Someone has already reported finding this item",
       });
     }
 
@@ -310,8 +270,7 @@ const reportFoundItem = async (
     // The item is currently with the finder.
     // It has NOT been handed over to the
     // department yet.
-    item.itemLocation =
-      "with-finder";
+    item.itemLocation = "with-finder";
 
     await item.save();
 
@@ -338,35 +297,24 @@ const reportFoundItem = async (
      * to the original reporter's personal room.
      */
     if (io) {
-      io.to(
-        `user:${item.reportedBy.toString()}`
-      ).emit(
-        "new-notification",
-        {
-          type: "item-found",
-          title:
-            "Someone Found Your Item",
-          message:
-            "Someone has reported finding your lost item. You can now message them.",
-          item: item._id,
-        }
-      );
+      io.to(`user:${item.reportedBy.toString()}`).emit("new-notification", {
+        type: "item-found",
+        title: "Someone Found Your Item",
+        message:
+          "Someone has reported finding your lost item. You can now message them.",
+        item: item._id,
+      });
     }
 
     return res.status(200).json({
-      message:
-        "Thank you for reporting the found item",
+      message: "Thank you for reporting the found item",
       item,
     });
   } catch (error) {
-    console.error(
-      "Report found item error:",
-      error
-    );
+    console.error("Report found item error:", error);
 
     return res.status(500).json({
-      message:
-        "Unable to report found item",
+      message: "Unable to report found item",
     });
   }
 };
