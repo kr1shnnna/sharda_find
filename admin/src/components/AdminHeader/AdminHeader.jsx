@@ -3,7 +3,6 @@ import {
 } from "react-icons/fa";
 
 import {
-  FiArrowLeft,
   FiLogOut,
 } from "react-icons/fi";
 
@@ -111,21 +110,6 @@ const AdminHeader = () => {
 
 
           <div className="admin-header-divider" />
-
-
-          {/* Dashboard */}
-
-          <Link
-            to="/admin"
-            className="admin-header-dashboard-link"
-          >
-            <FiArrowLeft />
-
-            <span>
-              Dashboard
-            </span>
-          </Link>
-
 
           {/* Logout */}
 
