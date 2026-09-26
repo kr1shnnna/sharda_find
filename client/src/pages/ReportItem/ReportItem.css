@@ -1,32 +1,32 @@
-/* =========================================
-   REPORT ITEM PAGE
-========================================= */
-
 .report-item-page {
-  min-height: calc(100vh - 72px);
-  padding: 48px 20px 80px;
-  background-color: var(--background);
+  min-height: 100vh;
+  padding: 40px 20px 60px;
+  background: var(--background);
 }
 
 .report-item-container {
-  width: min(900px, 100%);
+  width: 100%;
+  max-width: 900px;
   margin: 0 auto;
 }
 
-
-/* =========================================
+/* =========================
    BACK LINK
-========================================= */
+========================= */
 
 .report-back-link {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  margin-bottom: 32px;
+  gap: 8px;
+
+  margin-bottom: 28px;
+
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 13px;
+
+  font-size: 14px;
   font-weight: 500;
+
   transition: color 0.2s ease;
 }
 
@@ -35,67 +35,69 @@
 }
 
 .report-back-link svg {
-  width: 16px;
-  height: 16px;
+  font-size: 17px;
 }
 
-
-/* =========================================
+/* =========================
    HEADER
-========================================= */
+========================= */
 
 .report-item-header {
-  margin-bottom: 36px;
   text-align: center;
+  margin-bottom: 36px;
 }
 
 .report-item-icon {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
+
+  margin: 0 auto 14px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 16px;
 
+  border-radius: 14px;
+
+  background: var(--primary-light);
   color: var(--primary);
-  background-color: var(--primary-light);
 
-  border-radius: 12px;
-}
-
-.report-item-icon svg {
-  width: 23px;
-  height: 23px;
+  font-size: 24px;
 }
 
 .report-item-label {
   margin-bottom: 8px;
+
   color: var(--primary);
-  font-size: 12px;
-  font-weight: 700;
+
+  font-size: 13px;
+  font-weight: 600;
   letter-spacing: 0.04em;
 }
 
 .report-item-header h1 {
   margin-bottom: 10px;
+
   color: var(--text-primary);
+
   font-size: 30px;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .report-item-header > p:last-child {
-  max-width: 560px;
+  max-width: 620px;
   margin: 0 auto;
+
   color: var(--text-secondary);
-  font-size: 14px;
-  line-height: 1.7;
+
+  font-size: 15px;
+  line-height: 1.6;
 }
 
-
-/* =========================================
-   SUCCESS / ERROR MESSAGES
-========================================= */
+/* =========================
+   SERVER / SUCCESS MESSAGES
+========================= */
 
 .report-server-error,
 .report-success-message {
@@ -104,42 +106,34 @@
   gap: 10px;
 
   margin-bottom: 20px;
-  padding: 13px 15px;
+  padding: 14px 16px;
 
   border-radius: var(--radius-md);
 
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
 .report-server-error {
-  color: var(--danger);
-  background-color: #fef2f2;
+  background: #fef2f2;
   border: 1px solid #fecaca;
+  color: var(--danger);
 }
 
 .report-success-message {
-  color: var(--primary-dark);
-  background-color: var(--primary-light);
+  background: var(--primary-light);
   border: 1px solid #bbf7d0;
+  color: var(--primary-dark);
 }
 
-.report-server-error p,
-.report-success-message p {
-  margin: 0;
-}
-
-.report-server-error svg,
 .report-success-message svg {
-  width: 17px;
-  height: 17px;
   flex-shrink: 0;
+  font-size: 18px;
 }
 
-
-/* =========================================
+/* =========================
    FORM
-========================================= */
+========================= */
 
 .report-item-form {
   display: flex;
@@ -147,21 +141,15 @@
   gap: 20px;
 }
 
-
-/* =========================================
-   FORM SECTION
-========================================= */
-
 .form-section {
   padding: 28px;
 
-  background-color: var(--white);
+  background: var(--white);
 
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
 
-  box-shadow:
-    0 4px 16px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
 }
 
 .form-section-header {
@@ -169,28 +157,28 @@
 }
 
 .form-section-header h2 {
-  margin-bottom: 5px;
+  margin-bottom: 6px;
+
   color: var(--text-primary);
-  font-size: 17px;
+
+  font-size: 18px;
   font-weight: 600;
 }
 
 .form-section-header p {
   color: var(--text-secondary);
-  font-size: 13px;
+
+  font-size: 14px;
   line-height: 1.5;
 }
 
-
-/* =========================================
+/* =========================
    FORM GRID
-========================================= */
+========================= */
 
 .form-grid {
   display: grid;
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -206,50 +194,31 @@
 
 .form-group label {
   color: var(--text-primary);
-  font-size: 13px;
+
+  font-size: 14px;
   font-weight: 600;
 }
-
-
-/* =========================================
-   INPUTS
-========================================= */
 
 .form-group input,
 .form-group textarea,
 .form-group select {
   width: 100%;
 
-  color: var(--text-primary);
-  background-color: var(--white);
+  padding: 12px 14px;
 
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 
-  outline: none;
+  background: var(--white);
+  color: var(--text-primary);
 
-  font-family: inherit;
-  font-size: 13px;
+  font-size: 14px;
+
+  outline: none;
 
   transition:
     border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.form-group input,
-.form-group select {
-  height: 44px;
-  padding: 0 13px;
-}
-
-.form-group textarea {
-  min-height: 120px;
-  padding: 12px 13px;
-
-  resize: vertical;
-
-  line-height: 1.6;
+    box-shadow 0.2s ease;
 }
 
 .form-group input::placeholder,
@@ -257,105 +226,95 @@
   color: #94a3b8;
 }
 
+.form-group textarea {
+  resize: vertical;
+  min-height: 130px;
+  line-height: 1.5;
+}
 
-/* =========================================
-   INPUT FOCUS
-========================================= */
+.form-group select {
+  cursor: pointer;
+}
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
-  border-color: #86efac;
+  border-color: var(--primary);
 
-  box-shadow:
-    0 0 0 3px rgba(34, 197, 94, 0.08);
+  box-shadow: 0 0 0 3px
+    rgba(22, 101, 52, 0.1);
 }
-
-
-/* =========================================
-   DISABLED INPUTS
-========================================= */
 
 .form-group input:disabled,
 .form-group textarea:disabled,
 .form-group select:disabled {
-  color: #94a3b8;
-  background-color: #f8fafc;
   cursor: not-allowed;
+  background: #f8fafc;
+  opacity: 0.7;
 }
 
-
-/* =========================================
+/* =========================
    INPUT WITH ICON
-========================================= */
+========================= */
 
 .input-with-icon {
   position: relative;
 }
 
-.input-with-icon > svg {
+.input-with-icon svg {
   position: absolute;
   top: 50%;
-  left: 13px;
+  left: 14px;
 
-  width: 16px;
-  height: 16px;
+  transform: translateY(-50%);
 
   color: var(--text-secondary);
 
-  pointer-events: none;
+  font-size: 17px;
 
-  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .input-with-icon input {
-  padding-left: 38px;
+  padding-left: 42px;
 }
 
-
-/* =========================================
-   VALIDATION ERROR
-========================================= */
+/* =========================
+   FIELD ERRORS
+========================= */
 
 .field-error {
-  margin: 0;
-
   color: var(--danger);
 
   font-size: 12px;
   line-height: 1.4;
 }
 
-
-/* =========================================
-   IMAGES HEADER
-========================================= */
+/* =========================
+   IMAGES
+========================= */
 
 .images-header-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+
   gap: 20px;
 }
 
 .image-count {
   flex-shrink: 0;
 
-  padding: 5px 9px;
+  padding: 5px 10px;
 
+  border-radius: 20px;
+
+  background: var(--primary-light);
   color: var(--primary);
-  background-color: var(--primary-light);
 
-  border-radius: 6px;
-
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
-
-
-/* =========================================
-   IMAGE UPLOAD
-========================================= */
 
 .image-upload-box {
   min-height: 170px;
@@ -367,11 +326,12 @@
 
   padding: 24px;
 
-  color: var(--text-secondary);
-  background-color: #f8fafc;
-
-  border: 1px dashed #cbd5e1;
+  border: 1.5px dashed #cbd5e1;
   border-radius: var(--radius-md);
+
+  background: #f8fafc;
+
+  color: var(--text-secondary);
 
   text-align: center;
 
@@ -383,17 +343,16 @@
 }
 
 .image-upload-box:hover {
-  background-color: #f0fdf4;
-  border-color: #86efac;
+  border-color: var(--primary);
+  background: #f0fdf4;
 }
 
 .image-upload-box > svg {
-  width: 28px;
-  height: 28px;
-
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 
   color: var(--primary);
+
+  font-size: 28px;
 }
 
 .image-upload-title {
@@ -401,7 +360,7 @@
 
   color: var(--text-primary);
 
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -415,34 +374,23 @@
   display: none;
 }
 
-
-/* =========================================
-   DISABLED IMAGE UPLOAD
-========================================= */
-
 .image-upload-box.upload-disabled {
-  background-color: #f8fafc;
-  border-color: #e2e8f0;
   cursor: not-allowed;
+  opacity: 0.65;
 }
 
-.image-upload-box.upload-disabled > svg {
-  color: #94a3b8;
+.image-upload-box.upload-disabled:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
 }
 
-.image-upload-box.upload-disabled .image-upload-title {
-  color: var(--text-secondary);
-}
-
-
-/* =========================================
+/* =========================
    SELECTED IMAGES
-========================================= */
+========================= */
 
 .selected-images {
   display: grid;
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 1fr);
 
   gap: 14px;
 
@@ -452,14 +400,14 @@
 .selected-image {
   position: relative;
 
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
 
   overflow: hidden;
 
-  background-color: #f1f5f9;
-
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
+
+  background: #f8fafc;
 }
 
 .selected-image img {
@@ -471,33 +419,28 @@
   object-fit: cover;
 }
 
-
-/* =========================================
-   REMOVE IMAGE BUTTON
-========================================= */
-
 .remove-image-button {
   position: absolute;
   top: 8px;
   right: 8px;
 
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.95);
   color: var(--danger);
-  background-color: rgba(255, 255, 255, 0.95);
 
-  border: 1px solid #fecaca;
-  border-radius: 7px;
+  font-size: 16px;
 
-  box-shadow:
-    0 3px 8px rgba(15, 23, 42, 0.12);
-
-  cursor: pointer;
+  box-shadow: 0 2px 8px
+    rgba(15, 23, 42, 0.15);
 
   transition:
     background-color 0.2s ease,
@@ -505,98 +448,42 @@
 }
 
 .remove-image-button:hover {
-  background-color: #fef2f2;
-  transform: translateY(-1px);
+  background: #fef2f2;
+  transform: scale(1.05);
 }
 
 .remove-image-button:disabled {
-  opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
+  opacity: 0.5;
 }
 
-.remove-image-button svg {
-  width: 15px;
-  height: 15px;
-}
+/* =========================
+   FORM ACTIONS
+========================= */
 
-
-/* =========================================
-   FORM FOOTER
-========================================= */
-
-.report-form-footer {
+.form-actions {
   display: flex;
-  align-items: center;
   justify-content: flex-end;
-  gap: 12px;
 
   padding-top: 4px;
 }
 
-
-/* =========================================
-   CANCEL BUTTON
-========================================= */
-
-.cancel-button {
-  height: 44px;
-
-  padding: 0 20px;
-
-  color: var(--text-secondary);
-  background-color: var(--white);
-
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    color 0.2s ease,
-    border-color 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.cancel-button:hover {
-  color: var(--text-primary);
-  background-color: #f8fafc;
-  border-color: #cbd5e1;
-}
-
-.cancel-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-
-/* =========================================
-   SUBMIT BUTTON
-========================================= */
-
-.submit-report-button {
-  min-width: 175px;
-  height: 44px;
+.submit-item-button {
+  min-width: 190px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
 
-  padding: 0 20px;
-
-  color: var(--white);
-  background-color: var(--primary);
+  padding: 13px 22px;
 
   border: 1px solid var(--primary);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
 
-  font-family: inherit;
-  font-size: 13px;
+  background: var(--primary);
+  color: var(--white);
+
+  font-size: 14px;
   font-weight: 600;
 
   cursor: pointer;
@@ -604,37 +491,40 @@
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.submit-report-button:hover {
-  background-color: var(--primary-dark);
+.submit-item-button:hover:not(:disabled) {
+  background: var(--primary-dark);
   border-color: var(--primary-dark);
+
+  box-shadow: 0 4px 12px
+    rgba(22, 101, 52, 0.18);
+
+  transform: translateY(-1px);
 }
 
-.submit-report-button:active {
-  transform: translateY(1px);
+.submit-item-button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
-.submit-report-button:disabled {
-  opacity: 0.7;
+.submit-item-button:disabled {
   cursor: not-allowed;
-  transform: none;
+
+  background: #94a3b8;
+  border-color: #94a3b8;
+
+  box-shadow: none;
 }
 
-.submit-report-button svg {
-  width: 16px;
-  height: 16px;
-}
-
-
-/* =========================================
+/* =========================
    RESPONSIVE
-========================================= */
+========================= */
 
 @media (max-width: 700px) {
   .report-item-page {
-    padding: 32px 16px 60px;
+    padding: 28px 16px 40px;
   }
 
   .report-item-header {
@@ -642,15 +532,16 @@
   }
 
   .report-item-header h1 {
-    font-size: 26px;
+    font-size: 25px;
   }
 
   .form-section {
-    padding: 22px;
+    padding: 22px 18px;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 18px;
   }
 
   .form-group-full {
@@ -658,31 +549,44 @@
   }
 
   .selected-images {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .report-form-footer {
-    flex-direction: column-reverse;
-    align-items: stretch;
+  .form-actions {
+    justify-content: stretch;
   }
 
-  .cancel-button,
-  .submit-report-button {
+  .submit-item-button {
     width: 100%;
   }
 }
 
-@media (max-width: 450px) {
+@media (max-width: 480px) {
+  .report-item-page {
+    padding: 22px 12px 32px;
+  }
+
+  .report-item-header h1 {
+    font-size: 23px;
+  }
+
+  .report-item-header > p:last-child {
+    font-size: 13px;
+  }
+
+  .form-section {
+    padding: 20px 15px;
+  }
+
+  .images-header-row {
+    align-items: center;
+  }
+
   .selected-images {
     grid-template-columns: 1fr;
   }
 
-  .report-item-header h1 {
-    font-size: 24px;
-  }
-
-  .form-section {
-    padding: 18px;
+  .image-upload-box {
+    min-height: 150px;
   }
 }

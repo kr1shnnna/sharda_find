@@ -73,25 +73,25 @@ const ItemDetails = () => {
         setError("");
 
         const response = await api.get(
-          `/items/${id}`
+          `/items/${id}`,
         );
 
         setItem(response.data.item);
 
         setEligibleClaim(
-          response.data.eligibleClaim || null
+          response.data.eligibleClaim || null,
         );
 
         setSelectedImage(0);
       } catch (error) {
         console.error(
           "Error fetching item:",
-          error
+          error,
         );
 
         setError(
           error.response?.data?.message ||
-            "Unable to load this item. It may no longer exist."
+            "Unable to load this item. It may no longer exist.",
         );
       } finally {
         setLoading(false);
@@ -110,7 +110,7 @@ const ItemDetails = () => {
 
     if (
       Number.isNaN(
-        formattedDate.getTime()
+        formattedDate.getTime(),
       )
     ) {
       return "Date unavailable";
@@ -122,7 +122,7 @@ const ItemDetails = () => {
         day: "numeric",
         month: "long",
         year: "numeric",
-      }
+      },
     );
   };
 
@@ -138,7 +138,7 @@ const ItemDetails = () => {
       setReportingFound(true);
 
       await api.post(
-        `/items/${item._id}/report-found`
+        `/items/${item._id}/report-found`,
       );
 
       /*
@@ -146,22 +146,22 @@ const ItemDetails = () => {
        * gets the latest foundBy information.
        */
       const response = await api.get(
-        `/items/${item._id}`
+        `/items/${item._id}`,
       );
 
       setItem(response.data.item);
 
       setEligibleClaim(
-        response.data.eligibleClaim || null
+        response.data.eligibleClaim || null,
       );
 
       toast.success(
-        "Item reported successfully. The owner has been notified."
+        "Item reported successfully. The owner has been notified.",
       );
     } catch (error) {
       console.error(
         "Report found error:",
-        error
+        error,
       );
 
       const message =
@@ -181,7 +181,7 @@ const ItemDetails = () => {
 
     try {
       const response = await api.get(
-        `/messages/conversation/${item._id}`
+        `/messages/conversation/${item._id}`,
       );
 
       const conversation =
@@ -189,18 +189,18 @@ const ItemDetails = () => {
 
       if (conversation?._id) {
         navigate(
-          `/messages/${conversation._id}`
+          `/messages/${conversation._id}`,
         );
       }
     } catch (error) {
       console.error(
         "Open conversation error:",
-        error
+        error,
       );
 
       toast.error(
         error.response?.data?.message ||
-          "Unable to open this conversation."
+          "Unable to open this conversation.",
       );
     }
   };
@@ -311,7 +311,7 @@ const ItemDetails = () => {
         Boolean(item.foundBy)) ||
       (!isLost &&
         Boolean(
-          eligibleClaim?.claimant
+          eligibleClaim?.claimant,
         ))
     );
 
@@ -323,7 +323,7 @@ const ItemDetails = () => {
     setSelectedImage((currentIndex) =>
       currentIndex === 0
         ? images.length - 1
-        : currentIndex - 1
+        : currentIndex - 1,
     );
   };
 
@@ -335,7 +335,7 @@ const ItemDetails = () => {
     setSelectedImage((currentIndex) =>
       currentIndex === images.length - 1
         ? 0
-        : currentIndex + 1
+        : currentIndex + 1,
     );
   };
 
@@ -370,9 +370,7 @@ const ItemDetails = () => {
                 alt={`${item.title} ${
                   selectedImage + 1
                 }`}
-                onError={
-                  handleImageError
-                }
+                onError={handleImageError}
               />
 
               <span
@@ -433,7 +431,7 @@ const ItemDetails = () => {
                       }`}
                       onClick={() =>
                         setSelectedImage(
-                          index
+                          index,
                         )
                       }
                     >
@@ -447,7 +445,7 @@ const ItemDetails = () => {
                         }
                       />
                     </button>
-                  )
+                  ),
                 )}
               </div>
             )}
@@ -512,7 +510,7 @@ const ItemDetails = () => {
 
                   <strong>
                     {formatDate(
-                      item.itemDate
+                      item.itemDate,
                     )}
                   </strong>
                 </div>
@@ -539,7 +537,7 @@ const ItemDetails = () => {
 
             </div>
 
-            {/* CURRENT LOCATION */}
+            {/* CURRENT ITEM LOCATION */}
 
             {!isLost &&
               item.itemLocation && (
@@ -580,7 +578,7 @@ const ItemDetails = () => {
                     !item.foundBy
                   ) {
                     setShowReportFoundModal(
-                      true
+                      true,
                     );
                   }
                 }}
@@ -629,7 +627,7 @@ const ItemDetails = () => {
               event.currentTarget
             ) {
               setShowReportFoundModal(
-                false
+                false,
               );
             }
           }}
@@ -646,7 +644,7 @@ const ItemDetails = () => {
               className="report-found-close"
               onClick={() =>
                 setShowReportFoundModal(
-                  false
+                  false,
                 )
               }
               aria-label="Close"
@@ -676,7 +674,7 @@ const ItemDetails = () => {
                 className="report-found-cancel"
                 onClick={() =>
                   setShowReportFoundModal(
-                    false
+                    false,
                   )
                 }
               >
@@ -688,7 +686,7 @@ const ItemDetails = () => {
                 className="report-found-confirm"
                 onClick={() => {
                   setShowReportFoundModal(
-                    false
+                    false,
                   );
 
                   handleReportFound();
@@ -701,6 +699,7 @@ const ItemDetails = () => {
               </button>
 
             </div>
+
           </div>
         </div>
       )}

@@ -17,8 +17,6 @@ const createItem = async (req, res) => {
       category,
       location,
       itemDate,
-      returnMethod,
-      pickupLocation,
       itemLocation,
     } = req.body;
 
@@ -35,7 +33,10 @@ const createItem = async (req, res) => {
       });
     }
 
-    const normalizedTitle = title.trim().replace(/\s+/g, " ").toLowerCase();
+    const normalizedTitle = title
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
 
     const normalizedLocation = location
       .trim()
@@ -90,11 +91,10 @@ const createItem = async (req, res) => {
       category,
       location,
       itemDate: itemDateValue,
-      returnMethod,
-      pickupLocation,
 
       // A lost item is not physically held
       // by the person who posted it.
+      //
       // For a found item, the creator can
       // specify where the item currently is.
       itemLocation: type === "found" ? itemLocation : null,
@@ -274,10 +274,8 @@ const reportFoundItem = async (req, res) => {
 
     await item.save();
 
-    /*
-     * 6. Create notification for the
-     * original person who reported the item.
-     */
+    // 6. Create notification for the
+    // original person who reported the item.
     await createNotification({
       recipient: item.reportedBy,
       type: "item-found",
@@ -287,23 +285,22 @@ const reportFoundItem = async (req, res) => {
       item: item._id,
     });
 
-    /*
-     * 7. Get Socket.IO instance
-     */
+    // 7. Get Socket.IO instance
     const io = req.app.get("io");
 
-    /*
-     * 8. Send the notification instantly
-     * to the original reporter's personal room.
-     */
+    // 8. Send the notification instantly
+    // to the original reporter's personal room.
     if (io) {
-      io.to(`user:${item.reportedBy.toString()}`).emit("new-notification", {
-        type: "item-found",
-        title: "Someone Found Your Item",
-        message:
-          "Someone has reported finding your lost item. You can now message them.",
-        item: item._id,
-      });
+      io.to(`user:${item.reportedBy.toString()}`).emit(
+        "new-notification",
+        {
+          type: "item-found",
+          title: "Someone Found Your Item",
+          message:
+            "Someone has reported finding your lost item. You can now message them.",
+          item: item._id,
+        },
+      );
     }
 
     return res.status(200).json({
