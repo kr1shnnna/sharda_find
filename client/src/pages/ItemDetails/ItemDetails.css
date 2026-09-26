@@ -1,20 +1,24 @@
+/* =========================================
+   ITEM DETAILS PAGE
+========================================= */
+
 .item-details-page {
   width: 100%;
   min-height: calc(100vh - 72px);
-
   padding: 48px 0 80px;
-
   background-color: var(--background);
 }
 
 .item-details-container {
   max-width: 1200px;
-
   margin: 0 auto;
   padding: 0 24px;
 }
 
-/* Back Link */
+
+/* =========================================
+   BACK LINK
+========================================= */
 
 .details-back-link {
   display: inline-flex;
@@ -42,11 +46,13 @@
   height: 17px;
 }
 
-/* Main Card */
+
+/* =========================================
+   MAIN CARD
+========================================= */
 
 .item-details-card {
   display: grid;
-
   grid-template-columns: 48% 52%;
 
   overflow: hidden;
@@ -59,7 +65,10 @@
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
 }
 
-/* Image Gallery */
+
+/* =========================================
+   IMAGE GALLERY
+========================================= */
 
 .item-details-gallery {
   min-width: 0;
@@ -87,7 +96,10 @@
   object-fit: cover;
 }
 
-/* Lost / Found Badge */
+
+/* =========================================
+   LOST / FOUND BADGE
+========================================= */
 
 .details-type-badge {
   position: absolute;
@@ -105,17 +117,18 @@
 
 .details-type-badge.lost {
   color: #b91c1c;
-
   background-color: #fee2e2;
 }
 
 .details-type-badge.found {
   color: var(--primary);
-
   background-color: var(--primary-light);
 }
 
-/* Gallery Arrows */
+
+/* =========================================
+   GALLERY ARROWS
+========================================= */
 
 .gallery-arrow {
   position: absolute;
@@ -136,7 +149,6 @@
   background-color: rgba(255, 255, 255, 0.9);
 
   border: 1px solid rgba(255, 255, 255, 0.7);
-
   border-radius: 50%;
 
   backdrop-filter: blur(4px);
@@ -159,7 +171,6 @@
   color: var(--white);
 
   background-color: var(--primary);
-
   border-color: var(--primary);
 }
 
@@ -173,11 +184,13 @@
 
 .gallery-arrow:disabled {
   opacity: 0.4;
-
   cursor: not-allowed;
 }
 
-/* Thumbnails */
+
+/* =========================================
+   THUMBNAILS
+========================================= */
 
 .item-image-thumbnails {
   display: flex;
@@ -232,7 +245,10 @@
   object-fit: cover;
 }
 
-/* Content */
+
+/* =========================================
+   ITEM CONTENT
+========================================= */
 
 .item-details-content {
   padding: 48px;
@@ -277,7 +293,6 @@
   padding: 6px 10px;
 
   color: var(--primary);
-
   background-color: var(--primary-light);
 
   border-radius: 7px;
@@ -291,7 +306,6 @@
 .details-status.returned,
 .details-status.closed {
   color: #64748b;
-
   background-color: #f1f5f9;
 }
 
@@ -304,7 +318,10 @@
   line-height: 1.7;
 }
 
-/* Information */
+
+/* =========================================
+   ITEM INFORMATION
+========================================= */
 
 .details-info {
   display: flex;
@@ -364,7 +381,10 @@
   font-weight: 600;
 }
 
-/* Pickup */
+
+/* =========================================
+   CURRENT ITEM LOCATION
+========================================= */
 
 .pickup-box {
   display: flex;
@@ -407,14 +427,26 @@
   font-size: 13px;
 }
 
-/* Actions */
+
+/* =========================================
+   ITEM ACTIONS
+========================================= */
 
 .details-actions {
-  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 24px;
 }
 
+
+/* Primary action */
+
 .claim-button {
-  width: 100%;
+  flex: 1;
+
+  min-width: 0;
   height: 48px;
 
   display: flex;
@@ -422,11 +454,12 @@
   justify-content: center;
   gap: 8px;
 
+  padding: 0 18px;
+
   border: none;
   border-radius: var(--radius-md);
 
   color: var(--white);
-
   background-color: var(--primary);
 
   font-family: inherit;
@@ -435,11 +468,30 @@
 
   cursor: pointer;
 
-  transition: background-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
-.claim-button:hover {
+.claim-button:hover:not(:disabled) {
   background-color: var(--primary-dark);
+}
+
+.claim-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.claim-button:disabled {
+  background-color: #94a3b8;
+
+  cursor: not-allowed;
+
+  opacity: 0.7;
+}
+
+.claim-button:disabled:hover {
+  background-color: #94a3b8;
 }
 
 .claim-button svg {
@@ -447,7 +499,63 @@
   height: 18px;
 }
 
-/* Loading */
+
+/* Message action */
+
+.message-button {
+  height: 48px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 18px;
+
+  color: var(--primary);
+  background-color: var(--white);
+
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.message-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.message-button:hover {
+  color: var(--white);
+
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.message-button:active {
+  transform: translateY(1px);
+}
+
+.message-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+
+/* =========================================
+   LOADING STATE
+========================================= */
 
 .item-details-loading {
   min-height: 500px;
@@ -482,7 +590,10 @@
   }
 }
 
-/* Error */
+
+/* =========================================
+   ERROR STATE
+========================================= */
 
 .item-details-error {
   min-height: 500px;
@@ -513,7 +624,6 @@
   justify-content: center;
 
   color: var(--primary);
-
   background-color: var(--primary-light);
 
   border-radius: 50%;
@@ -551,7 +661,6 @@
   padding: 9px 15px;
 
   color: var(--white);
-
   background-color: var(--primary);
 
   border-radius: 8px;
@@ -567,146 +676,15 @@
   height: 16px;
 }
 
-/* Responsive */
-
-@media (max-width: 900px) {
-  .item-details-card {
-    grid-template-columns: 1fr;
-  }
-
-  .item-details-image {
-    height: 420px;
-  }
-}
-
-@media (max-width: 600px) {
-  .item-details-page {
-    padding: 36px 0 60px;
-  }
-
-  .item-details-image {
-    height: 320px;
-  }
-
-  .item-details-content {
-    padding: 28px 24px;
-  }
-
-  .details-heading {
-    flex-direction: column;
-  }
-
-  .details-heading h1 {
-    font-size: 28px;
-  }
-
-  .item-image-thumbnail {
-    width: 64px;
-    height: 52px;
-  }
-
-  .gallery-arrow {
-    width: 36px;
-    height: 36px;
-  }
-
-  .gallery-arrow-left {
-    left: 10px;
-  }
-
-  .gallery-arrow-right {
-    right: 10px;
-  }
-}
-
-/* ============================= */
-/* ITEM ACTIONS */
-/* ============================= */
-
-.details-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 24px;
-}
-
-/* Message button */
-
-.message-button {
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  padding: 0 18px;
-
-  color: var(--primary);
-  background-color: var(--white);
-
-  border: 1px solid var(--primary);
-  border-radius: var(--radius-md);
-
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.message-button svg {
-  width: 17px;
-  height: 17px;
-}
-
-.message-button:hover {
-  color: var(--white);
-  background-color: var(--primary);
-  border-color: var(--primary);
-}
-
-.message-button:active {
-  transform: translateY(1px);
-}
-
-.message-button:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-
-/* ============================= */
-/* RESPONSIVE ITEM ACTIONS */
-/* ============================= */
-
-@media (max-width: 600px) {
-  .details-actions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
-  .details-actions .claim-button,
-  .details-actions .message-button {
-    width: 100%;
-  }
-}
-
-
 
 /* =========================================
    REPORT FOUND MODAL
-   ========================================= */
+========================================= */
 
 .report-found-overlay {
   position: fixed;
   inset: 0;
+
   z-index: 1000;
 
   display: flex;
@@ -727,6 +705,7 @@
   padding: 32px;
 
   background-color: var(--white);
+
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
 
@@ -737,6 +716,7 @@
 
 .report-found-close {
   position: absolute;
+
   top: 16px;
   right: 16px;
 
@@ -754,6 +734,8 @@
   border-radius: 8px;
 
   font-size: 18px;
+
+  cursor: pointer;
 
   transition:
     color 0.2s ease,
@@ -826,13 +808,16 @@
   font-size: 13px;
   font-weight: 600;
 
+  cursor: pointer;
+
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease,
     color 0.2s ease;
 }
 
-/* Cancel button */
+
+/* Cancel */
 
 .report-found-cancel {
   color: var(--text-primary);
@@ -846,7 +831,8 @@
   border-color: #cbd5e1;
 }
 
-/* Confirm button */
+
+/* Confirm */
 
 .report-found-confirm {
   color: var(--white);
@@ -855,7 +841,7 @@
   border: 1px solid var(--primary);
 }
 
-.report-found-confirm:hover {
+.report-found-confirm:hover:not(:disabled) {
   background-color: var(--primary-dark);
   border-color: var(--primary-dark);
 }
@@ -865,9 +851,71 @@
   cursor: not-allowed;
 }
 
-/* Mobile */
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+  .item-details-card {
+    grid-template-columns: 1fr;
+  }
+
+  .item-details-image {
+    height: 420px;
+  }
+}
 
 @media (max-width: 600px) {
+  .item-details-page {
+    padding: 36px 0 60px;
+  }
+
+  .item-details-image {
+    height: 320px;
+  }
+
+  .item-details-content {
+    padding: 28px 24px;
+  }
+
+  .details-heading {
+    flex-direction: column;
+  }
+
+  .details-heading h1 {
+    font-size: 28px;
+  }
+
+  .item-image-thumbnail {
+    width: 64px;
+    height: 52px;
+  }
+
+  .gallery-arrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  .gallery-arrow-left {
+    left: 10px;
+  }
+
+  .gallery-arrow-right {
+    right: 10px;
+  }
+
+  .details-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .details-actions .claim-button,
+  .details-actions .message-button {
+    width: 100%;
+  }
+
   .report-found-overlay {
     padding: 16px;
   }

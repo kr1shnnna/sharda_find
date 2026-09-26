@@ -257,6 +257,7 @@ const ReportItem = ({ type = "lost" }) => {
       images.forEach((image) => {
         requestData.append("images", image);
       });
+     
 
       const response = await api.post(
         "/items",
