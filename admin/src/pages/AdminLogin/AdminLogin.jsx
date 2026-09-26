@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { FiLock, FiLogIn, FiMail } from "react-icons/fi";
+import { FaLeaf } from "react-icons/fa";
+
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -130,7 +132,7 @@ const AdminLogin = () => {
 
             <div className="admin-login-logo">
               <span className="admin-login-logo-icon">
-                <FiLock />
+               <FaLeaf />
               </span>
 
               <span>ShardaFind</span>

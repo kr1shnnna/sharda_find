@@ -41,23 +41,24 @@
   text-align: center;
 }
 
+
 .admin-login-logo {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 9px;
+  gap: 10px;
 
   margin-bottom: 28px;
 
   color: var(--text-primary);
 
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 700;
 }
 
 .admin-login-logo-icon {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
 
   display: flex;
   align-items: center;
@@ -66,13 +67,14 @@
   color: var(--primary);
   background-color: var(--primary-light);
 
-  border-radius: 9px;
+  border-radius: 12px;
 }
 
 .admin-login-logo-icon svg {
-  width: 17px;
-  height: 17px;
+  width: 22px;
+  height: 22px;
 }
+
 
 .admin-login-heading {
   text-align: center;
