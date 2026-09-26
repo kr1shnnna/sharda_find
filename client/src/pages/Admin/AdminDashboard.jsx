@@ -19,6 +19,11 @@ const AdminDashboard = () => {
   const [loadingClaims, setLoadingClaims] = useState(true);
   const [loadingHandovers, setLoadingHandovers] = useState(true);
 
+  // Claim review state
+  const [selectedClaim, setSelectedClaim] = useState(null);
+  const [claimReviewNote, setClaimReviewNote] = useState("");
+  const [reviewingClaim, setReviewingClaim] = useState(false);
+
   const fetchClaims = async () => {
     try {
       setLoadingClaims(true);
@@ -70,6 +75,58 @@ const AdminDashboard = () => {
     (handover) => handover.status === "pending"
   );
 
+  // =========================
+  // Claim Review
+  // =========================
+
+  const openClaimReview = (claim) => {
+    setSelectedClaim(claim);
+    setClaimReviewNote("");
+  };
+
+  const closeClaimReview = () => {
+    if (reviewingClaim) return;
+
+    setSelectedClaim(null);
+    setClaimReviewNote("");
+  };
+
+  const handleClaimReview = async (status) => {
+    if (!selectedClaim) return;
+
+    try {
+      setReviewingClaim(true);
+
+      await api.patch(
+        `/admin/claims/${selectedClaim._id}`,
+        {
+          status,
+          reviewNote: claimReviewNote.trim(),
+        }
+      );
+
+      toast.success(
+        status === "approved"
+          ? "Claim approved successfully."
+          : "Claim rejected successfully."
+      );
+
+      setSelectedClaim(null);
+      setClaimReviewNote("");
+
+      await fetchClaims();
+    } catch (error) {
+      console.error("Review claim error:", error);
+
+      toast.error(
+        error.response?.data?.message ||
+          "Unable to review claim."
+      );
+    } finally {
+      setReviewingClaim(false);
+    }
+  };
+
   return (
     <div className="admin-dashboard">
       <AdminHeader />
@@ -77,7 +134,10 @@ const AdminDashboard = () => {
       <main className="admin-dashboard-main">
         <div className="admin-dashboard-container">
 
-          {/* Page Header */}
+          {/* =========================
+              Page Header
+          ========================= */}
+
           <section className="admin-dashboard-heading">
             <div>
               <p className="admin-dashboard-eyebrow">
@@ -93,7 +153,10 @@ const AdminDashboard = () => {
             </div>
           </section>
 
-          {/* Overview Cards */}
+          {/* =========================
+              Overview Cards
+          ========================= */}
+
           <section className="admin-dashboard-stats">
 
             <div className="admin-stat-card">
@@ -103,7 +166,10 @@ const AdminDashboard = () => {
 
               <div className="admin-stat-content">
                 <span>Pending Claims</span>
-                <strong>{pendingClaims.length}</strong>
+
+                <strong>
+                  {pendingClaims.length}
+                </strong>
               </div>
             </div>
 
@@ -114,7 +180,10 @@ const AdminDashboard = () => {
 
               <div className="admin-stat-content">
                 <span>Pending Handovers</span>
-                <strong>{pendingHandovers.length}</strong>
+
+                <strong>
+                  {pendingHandovers.length}
+                </strong>
               </div>
             </div>
 
@@ -125,7 +194,10 @@ const AdminDashboard = () => {
 
               <div className="admin-stat-content">
                 <span>Total Claims</span>
-                <strong>{claims.length}</strong>
+
+                <strong>
+                  {claims.length}
+                </strong>
               </div>
             </div>
 
@@ -136,13 +208,19 @@ const AdminDashboard = () => {
 
               <div className="admin-stat-content">
                 <span>Total Handovers</span>
-                <strong>{handovers.length}</strong>
+
+                <strong>
+                  {handovers.length}
+                </strong>
               </div>
             </div>
 
           </section>
 
-          {/* Claims Section */}
+          {/* =========================
+              Claims Section
+          ========================= */}
+
           <section className="admin-dashboard-section">
 
             <div className="admin-section-header">
@@ -226,6 +304,9 @@ const AdminDashboard = () => {
                       <button
                         type="button"
                         className="admin-review-button"
+                        onClick={() =>
+                          openClaimReview(claim)
+                        }
                       >
                         Review
                       </button>
@@ -238,7 +319,10 @@ const AdminDashboard = () => {
             </div>
           </section>
 
-          {/* Handovers Section */}
+          {/* =========================
+              Handovers Section
+          ========================= */}
+
           <section className="admin-dashboard-section">
 
             <div className="admin-section-header">
@@ -336,6 +420,237 @@ const AdminDashboard = () => {
 
         </div>
       </main>
+
+      {/* =========================
+          Claim Review Modal
+      ========================= */}
+
+      {selectedClaim && (
+        <div
+          className="admin-modal-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeClaimReview();
+            }
+          }}
+        >
+          <div className="admin-modal">
+
+            {/* Modal Header */}
+
+            <div className="admin-modal-header">
+              <div>
+                <p className="admin-modal-eyebrow">
+                  Claim Review
+                </p>
+
+                <h2>
+                  Review ownership claim
+                </h2>
+
+                <p>
+                  Verify the information and evidence
+                  provided by the claimant.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={closeClaimReview}
+                disabled={reviewingClaim}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Item Information */}
+
+            <div className="admin-modal-section">
+
+              <div className="admin-modal-section-heading">
+                <h3>Item Information</h3>
+              </div>
+
+              <div className="admin-modal-info-grid">
+
+                <div className="admin-modal-info-item">
+                  <span>Item</span>
+
+                  <strong>
+                    {selectedClaim.item?.title ||
+                      "Unknown item"}
+                  </strong>
+                </div>
+
+                <div className="admin-modal-info-item">
+                  <span>Category</span>
+
+                  <strong>
+                    {selectedClaim.item?.category ||
+                      "N/A"}
+                  </strong>
+                </div>
+
+                <div className="admin-modal-info-item">
+                  <span>Type</span>
+
+                  <strong>
+                    {selectedClaim.item?.type ||
+                      "N/A"}
+                  </strong>
+                </div>
+
+                <div className="admin-modal-info-item">
+                  <span>Location</span>
+
+                  <strong>
+                    {selectedClaim.item?.location ||
+                      "N/A"}
+                  </strong>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Claimant */}
+
+            <div className="admin-modal-section">
+
+              <div className="admin-modal-section-heading">
+                <h3>Claimant</h3>
+              </div>
+
+              <div className="admin-modal-info-grid">
+
+                <div className="admin-modal-info-item">
+                  <span>Name</span>
+
+                  <strong>
+                    {selectedClaim.claimant?.name ||
+                      "Unknown"}
+                  </strong>
+                </div>
+
+                <div className="admin-modal-info-item">
+                  <span>Email</span>
+
+                  <strong>
+                    {selectedClaim.claimant?.email ||
+                      "No email"}
+                  </strong>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Ownership Proof */}
+
+            <div className="admin-modal-section">
+
+              <div className="admin-modal-section-heading">
+                <h3>Ownership Proof</h3>
+              </div>
+
+              <div className="admin-proof-box">
+                {selectedClaim.ownershipProof ||
+                  "No ownership proof provided."}
+              </div>
+
+            </div>
+
+            {/* Evidence Images */}
+
+            {selectedClaim.evidenceImages?.length > 0 && (
+              <div className="admin-modal-section">
+
+                <div className="admin-modal-section-heading">
+                  <h3>Evidence Images</h3>
+                </div>
+
+                <div className="admin-evidence-grid">
+
+                  {selectedClaim.evidenceImages.map(
+                    (image, index) => (
+                      <a
+                        key={index}
+                        href={image}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="admin-evidence-image"
+                      >
+                        <img
+                          src={image}
+                          alt={`Evidence ${index + 1}`}
+                        />
+                      </a>
+                    )
+                  )}
+
+                </div>
+              </div>
+            )}
+
+            {/* Review Note */}
+
+            <div className="admin-modal-section">
+
+              <div className="admin-modal-section-heading">
+                <h3>Review Note</h3>
+
+                <span>Optional</span>
+              </div>
+
+              <textarea
+                value={claimReviewNote}
+                onChange={(event) =>
+                  setClaimReviewNote(event.target.value)
+                }
+                placeholder="Add a note about your decision..."
+                rows={4}
+                disabled={reviewingClaim}
+                className="admin-review-note"
+              />
+
+            </div>
+
+            {/* Actions */}
+
+            <div className="admin-modal-actions">
+
+              <button
+                type="button"
+                className="admin-modal-reject"
+                onClick={() =>
+                  handleClaimReview("rejected")
+                }
+                disabled={reviewingClaim}
+              >
+                {reviewingClaim
+                  ? "Processing..."
+                  : "Reject Claim"}
+              </button>
+
+              <button
+                type="button"
+                className="admin-modal-approve"
+                onClick={() =>
+                  handleClaimReview("approved")
+                }
+                disabled={reviewingClaim}
+              >
+                {reviewingClaim
+                  ? "Processing..."
+                  : "Approve Claim"}
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

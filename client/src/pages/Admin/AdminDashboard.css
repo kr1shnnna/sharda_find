@@ -458,3 +458,475 @@
     min-width: 700px;
   }
 }
+
+
+
+/* =========================
+   Claim Review Modal
+========================= */
+
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background-color: rgba(15, 23, 42, 0.45);
+
+  overflow-y: auto;
+}
+
+.admin-modal {
+  width: 100%;
+  max-width: 680px;
+  max-height: calc(100vh - 48px);
+
+  display: flex;
+  flex-direction: column;
+
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+
+  overflow-y: auto;
+}
+
+/* =========================
+   Modal Header
+========================= */
+
+.admin-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding: 24px;
+
+  background-color: var(--white);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-modal-eyebrow {
+  margin-bottom: 6px;
+
+  color: var(--primary);
+
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-modal-header h2 {
+  margin-bottom: 6px;
+
+  color: var(--text-primary);
+
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.admin-modal-header > div > p:last-child {
+  max-width: 500px;
+
+  color: var(--text-secondary);
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.admin-modal-close {
+  width: 32px;
+  height: 32px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--text-secondary);
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.admin-modal-close:hover {
+  color: var(--danger);
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+.admin-modal-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================
+   Modal Sections
+========================= */
+
+.admin-modal-section {
+  padding: 20px 24px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-modal-section:last-of-type {
+  border-bottom: none;
+}
+
+.admin-modal-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+}
+
+.admin-modal-section-heading h3 {
+  color: var(--text-primary);
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-modal-section-heading span {
+  color: var(--text-secondary);
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* =========================
+   Information Grid
+========================= */
+
+.admin-modal-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.admin-modal-info-item {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  padding: 12px;
+
+  background-color: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.admin-modal-info-item span {
+  color: var(--text-secondary);
+
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-modal-info-item strong {
+  overflow: hidden;
+
+  color: var(--text-primary);
+
+  font-size: 12px;
+  font-weight: 600;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* =========================
+   Ownership Proof
+========================= */
+
+.admin-proof-box {
+  min-height: 80px;
+
+  padding: 14px;
+
+  color: var(--text-primary);
+  background-color: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  font-size: 13px;
+  line-height: 1.6;
+
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* =========================
+   Evidence Images
+========================= */
+
+.admin-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.admin-evidence-image {
+  height: 150px;
+
+  display: block;
+
+  background-color: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  overflow: hidden;
+
+  text-decoration: none;
+}
+
+.admin-evidence-image img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition: transform 0.2s ease;
+}
+
+.admin-evidence-image:hover img {
+  transform: scale(1.03);
+}
+
+/* =========================
+   Review Note
+========================= */
+
+.admin-review-note {
+  width: 100%;
+  min-height: 100px;
+
+  padding: 12px 13px;
+
+  color: var(--text-primary);
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  outline: none;
+  resize: vertical;
+
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.6;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-review-note::placeholder {
+  color: #94a3b8;
+}
+
+.admin-review-note:hover {
+  border-color: #cbd5e1;
+}
+
+.admin-review-note:focus {
+  border-color: var(--primary);
+
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.admin-review-note:disabled {
+  background-color: #f8fafc;
+  cursor: not-allowed;
+}
+
+/* =========================
+   Modal Actions
+========================= */
+
+.admin-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+
+  padding: 18px 24px;
+
+  background-color: #f8fafc;
+  border-top: 1px solid var(--border);
+}
+
+.admin-modal-reject,
+.admin-modal-approve {
+  min-height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 16px;
+
+  border-radius: var(--radius-sm);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+/* Reject */
+
+.admin-modal-reject {
+  color: var(--danger);
+  background-color: var(--white);
+  border: 1px solid #fecaca;
+}
+
+.admin-modal-reject:hover {
+  color: var(--danger);
+  background-color: #fef2f2;
+  border-color: #fca5a5;
+}
+
+/* Approve */
+
+.admin-modal-approve {
+  color: var(--white);
+  background-color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.admin-modal-approve:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+/* Disabled */
+
+.admin-modal-reject:disabled,
+.admin-modal-approve:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================
+   Responsive Modal
+========================= */
+
+@media (max-width: 640px) {
+  .admin-modal-overlay {
+    align-items: flex-start;
+
+    padding: 16px;
+  }
+
+  .admin-modal {
+    max-height: calc(100vh - 32px);
+
+    border-radius: var(--radius-md);
+  }
+
+  .admin-modal-header {
+    padding: 20px;
+  }
+
+  .admin-modal-header h2 {
+    font-size: 18px;
+  }
+
+  .admin-modal-section {
+    padding: 18px 20px;
+  }
+
+  .admin-modal-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-evidence-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-evidence-image {
+    height: 140px;
+  }
+
+  .admin-modal-actions {
+    padding: 16px 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .admin-modal-overlay {
+    padding: 10px;
+  }
+
+  .admin-modal {
+    max-height: calc(100vh - 20px);
+  }
+
+  .admin-modal-header {
+    padding: 18px;
+  }
+
+  .admin-modal-section {
+    padding: 16px 18px;
+  }
+
+  .admin-evidence-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-evidence-image {
+    height: 180px;
+  }
+
+  .admin-modal-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .admin-modal-reject,
+  .admin-modal-approve {
+    width: 100%;
+  }
+}
