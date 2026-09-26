@@ -49,13 +49,12 @@ const getOrCreateConversation = async (req, res) => {
 
       participants = [item.reportedBy, item.foundBy];
     } else if (item.type === "found") {
-
-    /*
-     * FOUND ITEM
-     *
-     * Conversation is between:
-     * reportedBy + claimant
-     */
+      /*
+       * FOUND ITEM
+       *
+       * Conversation is between:
+       * reportedBy + claimant
+       */
       claim = await Claim.findOne({
         item: item._id,
         status: {
@@ -133,13 +132,29 @@ const getOrCreateConversation = async (req, res) => {
 /*
  * GET CONVERSATION BY ID
  */
+
 const getConversationById = async (req, res) => {
   try {
     const { conversationId } = req.params;
 
     const conversation = await Conversation.findById(conversationId)
       .populate("participants", "name email")
-      .populate("item", "title type category location itemLocation")
+      .populate(
+        "item",
+        [
+          "title",
+          "type",
+          "category",
+          "location",
+          "itemLocation",
+          "status",
+          "reportedBy",
+          "foundBy",
+          "finderHandedOver",
+          "returnConfirmedByOwner",
+          "returnConfirmedAt",
+        ].join(" "),
+      )
       .populate("claim");
 
     if (!conversation) {

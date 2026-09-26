@@ -6,9 +6,15 @@ import {
   FiRefreshCw,
   FiSend,
   FiUser,
+  FiPackage,
+  FiCheckCircle,
+  FiX,
 } from "react-icons/fi";
 
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 import { io } from "socket.io-client";
 
@@ -28,7 +34,8 @@ const Chat = () => {
 
   const [messages, setMessages] = useState([]);
 
-  const [conversation, setConversation] = useState(null);
+  const [conversation, setConversation] =
+    useState(null);
 
   const [text, setText] = useState("");
 
@@ -38,7 +45,14 @@ const Chat = () => {
 
   const [error, setError] = useState("");
 
-  const [socketError, setSocketError] = useState("");
+  const [socketError, setSocketError] =
+    useState("");
+
+  const [handoverLoading, setHandoverLoading] =
+    useState(false);
+
+  const [confirmationModal, setConfirmationModal] =
+    useState(null);
 
   const messagesEndRef = useRef(null);
 
@@ -46,13 +60,13 @@ const Chat = () => {
 
   const socketRef = useRef(null);
 
-  const [handoverLoading, setHandoverLoading] = useState(false);
-
   const getUserId = () => {
     return user?._id || user?.id;
   };
 
-  const getOtherParticipant = (participants = []) => {
+  const getOtherParticipant = (
+    participants = []
+  ) => {
     const currentUserId = getUserId();
 
     if (!currentUserId) {
@@ -62,13 +76,17 @@ const Chat = () => {
     return (
       participants.find(
         (participant) =>
-          participant?._id?.toString() !== currentUserId.toString(),
+          participant?._id?.toString() !==
+          currentUserId.toString()
       ) || null
     );
   };
 
-  const getParticipantName = (participants = []) => {
-    const participant = getOtherParticipant(participants);
+  const getParticipantName = (
+    participants = []
+  ) => {
+    const participant =
+      getOtherParticipant(participants);
 
     if (participant?.name) {
       return participant.name;
@@ -88,15 +106,21 @@ const Chat = () => {
   const fetchConversation = async () => {
     try {
       const response = await api.get(
-        `/messages/conversation-by-id/${conversationId}`,
+        `/messages/conversation-by-id/${conversationId}`
       );
 
-      setConversation(response.data?.conversation || null);
+      setConversation(
+        response.data?.conversation || null
+      );
     } catch (error) {
-      console.error("Fetch conversation error:", error);
+      console.error(
+        "Fetch conversation error:",
+        error
+      );
 
       throw new Error(
-        error.response?.data?.message || "Unable to load this conversation.",
+        error.response?.data?.message ||
+          "Unable to load this conversation."
       );
     }
   };
@@ -108,15 +132,21 @@ const Chat = () => {
   const fetchMessages = async () => {
     try {
       const response = await api.get(
-        `/messages/conversation/${conversationId}/messages`,
+        `/messages/conversation/${conversationId}/messages`
       );
 
-      setMessages(response.data?.messages || []);
+      setMessages(
+        response.data?.messages || []
+      );
     } catch (error) {
-      console.error("Fetch messages error:", error);
+      console.error(
+        "Fetch messages error:",
+        error
+      );
 
       throw new Error(
-        error.response?.data?.message || "Unable to load messages.",
+        error.response?.data?.message ||
+          "Unable to load messages."
       );
     }
   };
@@ -127,9 +157,14 @@ const Chat = () => {
 
   const markMessagesAsRead = async () => {
     try {
-      await api.patch(`/messages/conversation/${conversationId}/read`);
+      await api.patch(
+        `/messages/conversation/${conversationId}/read`
+      );
     } catch (error) {
-      console.error("Mark messages as read error:", error);
+      console.error(
+        "Mark messages as read error:",
+        error
+      );
     }
   };
 
@@ -143,13 +178,22 @@ const Chat = () => {
 
       setError("");
 
-      await Promise.all([fetchConversation(), fetchMessages()]);
+      await Promise.all([
+        fetchConversation(),
+        fetchMessages(),
+      ]);
 
       await markMessagesAsRead();
     } catch (error) {
-      console.error("Load chat error:", error);
+      console.error(
+        "Load chat error:",
+        error
+      );
 
-      setError(error.message || "Unable to load conversation.");
+      setError(
+        error.message ||
+          "Unable to load conversation."
+      );
     } finally {
       setLoading(false);
     }
@@ -164,7 +208,8 @@ const Chat = () => {
       return;
     }
 
-    const token = localStorage.getItem("token");
+    const token =
+      localStorage.getItem("token");
 
     if (!token) {
       return;
@@ -183,87 +228,142 @@ const Chat = () => {
      */
 
     socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
+      console.log(
+        "Socket connected:",
+        socket.id
+      );
 
       setSocketError("");
 
-      socket.emit("join-conversation", conversationId);
+      socket.emit(
+        "join-conversation",
+        conversationId
+      );
     });
 
     /*
      * Successfully joined conversation
      */
 
-    socket.on("conversation-joined", (data) => {
-      console.log("Joined conversation:", data.conversationId);
-    });
+    socket.on(
+      "conversation-joined",
+      (data) => {
+        console.log(
+          "Joined conversation:",
+          data.conversationId
+        );
+      }
+    );
 
     /*
      * Receive new message
      */
 
-    socket.on("new-message", (newMessage) => {
-      if (newMessage?.conversation?.toString() !== conversationId.toString()) {
-        return;
-      }
-
-      setMessages((previousMessages) => {
-        const alreadyExists = previousMessages.some(
-          (message) => message._id === newMessage._id,
-        );
-
-        if (alreadyExists) {
-          return previousMessages;
+    socket.on(
+      "new-message",
+      (newMessage) => {
+        if (
+          newMessage?.conversation?.toString() !==
+          conversationId.toString()
+        ) {
+          return;
         }
 
-        return [...previousMessages, newMessage];
-      });
+        setMessages(
+          (previousMessages) => {
+            const alreadyExists =
+              previousMessages.some(
+                (message) =>
+                  message._id ===
+                  newMessage._id
+              );
 
-      /*
-       * If the other user sends a message
-       * while this chat is open, mark it
-       * as read.
-       */
+            if (alreadyExists) {
+              return previousMessages;
+            }
 
-      if (newMessage.sender?._id?.toString() !== getUserId()?.toString()) {
-        markMessagesAsRead();
+            return [
+              ...previousMessages,
+              newMessage,
+            ];
+          }
+        );
+
+        /*
+         * If the other user sends a message
+         * while this chat is open, mark it
+         * as read.
+         */
+
+        if (
+          newMessage.sender?._id?.toString() !==
+          getUserId()?.toString()
+        ) {
+          markMessagesAsRead();
+        }
       }
-    });
+    );
 
     /*
      * Server rejected conversation join
      */
 
-    socket.on("conversation-error", (data) => {
-      console.error("Conversation socket error:", data?.message);
+    socket.on(
+      "conversation-error",
+      (data) => {
+        console.error(
+          "Conversation socket error:",
+          data?.message
+        );
 
-      setSocketError(data?.message || "Unable to join conversation.");
-    });
+        setSocketError(
+          data?.message ||
+            "Unable to join conversation."
+        );
+      }
+    );
 
     /*
      * Socket authentication error
      */
 
-    socket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error.message);
+    socket.on(
+      "connect_error",
+      (error) => {
+        console.error(
+          "Socket connection error:",
+          error.message
+        );
 
-      setSocketError("Real-time connection could not be established.");
-    });
+        setSocketError(
+          "Real-time connection could not be established."
+        );
+      }
+    );
 
     /*
      * Socket disconnected
      */
 
-    socket.on("disconnect", (reason) => {
-      console.log("Socket disconnected:", reason);
-    });
+    socket.on(
+      "disconnect",
+      (reason) => {
+        console.log(
+          "Socket disconnected:",
+          reason
+        );
+      }
+    );
 
     /*
      * Cleanup
      */
 
     return () => {
-      socket.emit("leave-conversation", conversationId);
+      socket.emit(
+        "leave-conversation",
+        conversationId
+      );
 
       socket.disconnect();
 
@@ -294,44 +394,100 @@ const Chat = () => {
   }, [messages]);
 
   /*
-   * Send message
+   * Finder handover
    */
 
   const handleFinderHandover = async () => {
-    const itemId = conversation?.item?._id;
+    const itemId =
+      conversation?.item?._id;
 
     if (!itemId) {
       return;
     }
 
-    const confirmed = window.confirm(
-      "Have you handed this item over to the owner?",
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     try {
       setHandoverLoading(true);
+
       setError("");
 
-      const response = await api.patch(`/items/${itemId}/confirm-handover`);
+      const response = await api.patch(
+        `/items/${itemId}/confirm-handover`
+      );
 
-      setConversation((previousConversation) => ({
-        ...previousConversation,
-        item: response.data?.item || previousConversation.item,
-      }));
+      setConversation(
+        (previousConversation) => ({
+          ...previousConversation,
+          item:
+            response.data?.item ||
+            previousConversation.item,
+        })
+      );
+
+      setConfirmationModal(null);
     } catch (error) {
-      console.error("Confirm finder handover error:", error);
+      console.error(
+        "Confirm finder handover error:",
+        error
+      );
 
       setError(
-        error.response?.data?.message || "Unable to confirm the handover.",
+        error.response?.data?.message ||
+          "Unable to confirm the handover."
       );
     } finally {
       setHandoverLoading(false);
     }
   };
+
+  /*
+   * Owner confirms receiving item
+   */
+
+  const handleOwnerReceived = async () => {
+    const itemId =
+      conversation?.item?._id;
+
+    if (!itemId) {
+      return;
+    }
+
+    try {
+      setHandoverLoading(true);
+
+      setError("");
+
+      const response = await api.patch(
+        `/items/${itemId}/confirm-received`
+      );
+
+      setConversation(
+        (previousConversation) => ({
+          ...previousConversation,
+          item:
+            response.data?.item ||
+            previousConversation.item,
+        })
+      );
+
+      setConfirmationModal(null);
+    } catch (error) {
+      console.error(
+        "Confirm item receipt error:",
+        error
+      );
+
+      setError(
+        error.response?.data?.message ||
+          "Unable to confirm receiving the item."
+      );
+    } finally {
+      setHandoverLoading(false);
+    }
+  };
+
+  /*
+   * Send message
+   */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -351,10 +507,11 @@ const Chat = () => {
         `/messages/conversation/${conversationId}`,
         {
           text: trimmedText,
-        },
+        }
       );
 
-      const newMessage = response.data?.data;
+      const newMessage =
+        response.data?.data;
 
       /*
        * Add our own message immediately.
@@ -365,26 +522,40 @@ const Chat = () => {
        */
 
       if (newMessage) {
-        setMessages((previousMessages) => {
-          const alreadyExists = previousMessages.some(
-            (message) => message._id === newMessage._id,
-          );
+        setMessages(
+          (previousMessages) => {
+            const alreadyExists =
+              previousMessages.some(
+                (message) =>
+                  message._id ===
+                  newMessage._id
+              );
 
-          if (alreadyExists) {
-            return previousMessages;
+            if (alreadyExists) {
+              return previousMessages;
+            }
+
+            return [
+              ...previousMessages,
+              newMessage,
+            ];
           }
-
-          return [...previousMessages, newMessage];
-        });
+        );
       }
 
       setText("");
 
       textareaRef.current?.focus();
     } catch (error) {
-      console.error("Send message error:", error);
+      console.error(
+        "Send message error:",
+        error
+      );
 
-      setError(error.response?.data?.message || "Unable to send message.");
+      setError(
+        error.response?.data?.message ||
+          "Unable to send message."
+      );
     } finally {
       setSending(false);
     }
@@ -395,8 +566,13 @@ const Chat = () => {
    * Shift + Enter creates a new line.
    */
 
-  const handleTextareaKeyDown = (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
+  const handleTextareaKeyDown = (
+    event
+  ) => {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey
+    ) {
       event.preventDefault();
 
       handleSubmit(event);
@@ -407,21 +583,29 @@ const Chat = () => {
    * Format message timestamp
    */
 
-  const formatMessageTime = (dateString) => {
+  const formatMessageTime = (
+    dateString
+  ) => {
     if (!dateString) {
       return "";
     }
 
-    const date = new Date(dateString);
+    const date =
+      new Date(dateString);
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+      Number.isNaN(date.getTime())
+    ) {
       return "";
     }
 
-    return date.toLocaleTimeString([], {
-      hour: "numeric",
-      minute: "2-digit",
-    });
+    return date.toLocaleTimeString(
+      [],
+      {
+        hour: "numeric",
+        minute: "2-digit",
+      }
+    );
   };
 
   /*
@@ -429,16 +613,24 @@ const Chat = () => {
    * to current user
    */
 
-  const isOwnMessage = (message) => {
-    const currentUserId = getUserId();
+  const isOwnMessage = (
+    message
+  ) => {
+    const currentUserId =
+      getUserId();
 
     if (!currentUserId) {
       return false;
     }
 
-    const senderId = message?.sender?._id || message?.sender;
+    const senderId =
+      message?.sender?._id ||
+      message?.sender;
 
-    return senderId?.toString() === currentUserId.toString();
+    return (
+      senderId?.toString() ===
+      currentUserId.toString()
+    );
   };
 
   /*
@@ -486,7 +678,9 @@ const Chat = () => {
               <FiMessageSquare />
             </div>
 
-            <h1>Unable to open conversation</h1>
+            <h1>
+              Unable to open conversation
+            </h1>
 
             <p>{error}</p>
 
@@ -498,7 +692,9 @@ const Chat = () => {
               >
                 <FiArrowLeft />
 
-                <span>Back to Messages</span>
+                <span>
+                  Back to Messages
+                </span>
               </button>
 
               <button
@@ -508,7 +704,9 @@ const Chat = () => {
               >
                 <FiRefreshCw />
 
-                <span>Try again</span>
+                <span>
+                  Try again
+                </span>
               </button>
             </div>
           </div>
@@ -517,26 +715,38 @@ const Chat = () => {
     );
   }
 
-  const participantName = getParticipantName(conversation?.participants);
+  const participantName =
+    getParticipantName(
+      conversation?.participants
+    );
 
-  const otherParticipant = getOtherParticipant(conversation?.participants);
+  const otherParticipant =
+    getOtherParticipant(
+      conversation?.participants
+    );
 
-  const currentUserId = getUserId();
+  const currentUserId =
+    getUserId();
 
-  const conversationItem = conversation?.item;
+  const conversationItem =
+    conversation?.item;
 
   const isFinder =
-    conversationItem?.type === "lost" &&
-    conversationItem?.foundBy?.toString() === currentUserId?.toString();
+    conversationItem?.type ===
+      "lost" &&
+    conversationItem?.foundBy?.toString() ===
+      currentUserId?.toString();
 
   const isOwner =
-    conversationItem?.type === "lost" &&
-    conversationItem?.reportedBy?.toString() === currentUserId?.toString();
-    
+    conversationItem?.type ===
+      "lost" &&
+    conversationItem?.reportedBy?.toString() ===
+      currentUserId?.toString();
 
   return (
     <main className="chat-page">
       <div className="chat-container">
+
         {/* Header */}
 
         <header className="chat-header">
@@ -552,16 +762,23 @@ const Chat = () => {
 
           <div className="chat-user-avatar">
             {otherParticipant?.name ? (
-              otherParticipant.name.charAt(0).toUpperCase()
+              otherParticipant.name
+                .charAt(0)
+                .toUpperCase()
             ) : (
               <FiUser />
             )}
           </div>
 
           <div className="chat-header-info">
-            <h1>{participantName}</h1>
+            <h1>
+              {participantName}
+            </h1>
 
-            <p>{conversation?.item?.title || "Lost & Found Item"}</p>
+            <p>
+              {conversation?.item?.title ||
+                "Lost & Found Item"}
+            </p>
           </div>
         </header>
 
@@ -572,17 +789,109 @@ const Chat = () => {
             <FiMessageSquare />
 
             <div>
-              <span>Conversation about</span>
+              <span>
+                Conversation about
+              </span>
 
-              <strong>{conversation.item.title}</strong>
+              <strong>
+                {conversation.item.title}
+              </strong>
             </div>
           </div>
         )}
 
+        {/* Finder handover */}
+
+        {isFinder &&
+          conversationItem?.status ===
+            "active" &&
+          !conversationItem?.finderHandedOver && (
+            <div className="chat-handover-section">
+              <div className="chat-handover-content">
+                <div className="chat-handover-icon">
+                  <FiPackage />
+                </div>
+
+                <div>
+                  <h3>
+                    Ready to hand over the item?
+                  </h3>
+
+                  <p>
+                    Once you have physically
+                    given the item to the owner,
+                    confirm the handover here.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="chat-handover-button"
+                onClick={() =>
+                  setConfirmationModal(
+                    "finder"
+                  )
+                }
+                disabled={
+                  handoverLoading
+                }
+              >
+                I Handed Over the Item
+              </button>
+            </div>
+          )}
+
+        {/* Owner confirmation */}
+
+        {isOwner &&
+          conversationItem?.status ===
+            "active" &&
+          conversationItem?.finderHandedOver &&
+          !conversationItem?.returnConfirmedByOwner && (
+            <div className="chat-handover-section">
+              <div className="chat-handover-content">
+                <div className="chat-handover-icon">
+                  <FiCheckCircle />
+                </div>
+
+                <div>
+                  <h3>
+                    Did you receive the item?
+                  </h3>
+
+                  <p>
+                    The finder has confirmed
+                    handing over the item.
+                    Confirm once you have
+                    received it.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="chat-handover-button"
+                onClick={() =>
+                  setConfirmationModal(
+                    "owner"
+                  )
+                }
+                disabled={
+                  handoverLoading
+                }
+              >
+                Yes, I Got It
+              </button>
+            </div>
+          )}
+
         {/* Socket status */}
 
         {socketError && (
-          <div className="chat-socket-warning">{socketError}</div>
+          <div className="chat-socket-warning">
+            {socketError}
+          </div>
         )}
 
         {/* Messages */}
@@ -611,48 +920,77 @@ const Chat = () => {
                 <FiMessageSquare />
               </div>
 
-              <h2>No messages yet</h2>
+              <h2>
+                No messages yet
+              </h2>
 
-              <p>Start the conversation by sending a message below.</p>
+              <p>
+                Start the conversation by
+                sending a message below.
+              </p>
             </div>
           ) : (
             <div className="message-list">
-              {messages.map((message) => {
-                const ownMessage = isOwnMessage(message);
+              {messages.map(
+                (message) => {
+                  const ownMessage =
+                    isOwnMessage(
+                      message
+                    );
 
-                return (
-                  <div
-                    key={message._id}
-                    className={`message-row ${ownMessage ? "own" : "other"}`}
-                  >
+                  return (
                     <div
-                      className={`message-bubble ${
-                        ownMessage ? "own" : "other"
+                      key={message._id}
+                      className={`message-row ${
+                        ownMessage
+                          ? "own"
+                          : "other"
                       }`}
                     >
-                      <p>{message.text}</p>
+                      <div
+                        className={`message-bubble ${
+                          ownMessage
+                            ? "own"
+                            : "other"
+                        }`}
+                      >
+                        <p>
+                          {message.text}
+                        </p>
 
-                      <span className="message-time">
-                        {formatMessageTime(message.createdAt)}
-                      </span>
+                        <span className="message-time">
+                          {formatMessageTime(
+                            message.createdAt
+                          )}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                }
+              )}
 
-              <div ref={messagesEndRef} />
+              <div
+                ref={messagesEndRef}
+              />
             </div>
           )}
         </section>
 
         {/* Message input */}
 
-        <form className="chat-input-container" onSubmit={handleSubmit}>
+        <form
+          className="chat-input-container"
+          onSubmit={handleSubmit}
+        >
           <textarea
             ref={textareaRef}
             value={text}
-            onChange={(event) => setText(event.target.value)}
-            onKeyDown={handleTextareaKeyDown}
+            onChange={(event) =>
+              setText(event.target.value)
+            }
+            onKeyDown={
+              handleTextareaKeyDown
+            }
             placeholder="Write a message..."
             rows={1}
             disabled={sending}
@@ -661,13 +999,114 @@ const Chat = () => {
           <button
             type="submit"
             className="chat-send-button"
-            disabled={sending || !text.trim()}
+            disabled={
+              sending ||
+              !text.trim()
+            }
             aria-label="Send message"
             title="Send message"
           >
             <FiSend />
           </button>
         </form>
+
+        {/* Confirmation Modal */}
+
+        {confirmationModal && (
+          <div
+            className="chat-confirmation-overlay"
+            onClick={() => {
+              if (!handoverLoading) {
+                setConfirmationModal(
+                  null
+                );
+              }
+            }}
+          >
+            <div
+              className="chat-confirmation-modal"
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+            >
+              <button
+                type="button"
+                className="chat-confirmation-close"
+                onClick={() =>
+                  !handoverLoading &&
+                  setConfirmationModal(
+                    null
+                  )
+                }
+                aria-label="Close confirmation"
+                title="Close"
+                disabled={
+                  handoverLoading
+                }
+              >
+                <FiX />
+              </button>
+
+              <div className="chat-confirmation-icon">
+                {confirmationModal ===
+                "finder" ? (
+                  <FiPackage />
+                ) : (
+                  <FiCheckCircle />
+                )}
+              </div>
+
+              <h2>
+                {confirmationModal ===
+                "finder"
+                  ? "Confirm Handover"
+                  : "Confirm Receipt"}
+              </h2>
+
+              <p>
+                {confirmationModal ===
+                "finder"
+                  ? "Please confirm that you have physically handed the item over to the owner."
+                  : "Please confirm that you have received the item from the finder."}
+              </p>
+
+              <div className="chat-confirmation-actions">
+                <button
+                  type="button"
+                  className="chat-confirmation-cancel"
+                  onClick={() =>
+                    setConfirmationModal(
+                      null
+                    )
+                  }
+                  disabled={
+                    handoverLoading
+                  }
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="chat-confirmation-confirm"
+                  onClick={
+                    confirmationModal ===
+                    "finder"
+                      ? handleFinderHandover
+                      : handleOwnerReceived
+                  }
+                  disabled={
+                    handoverLoading
+                  }
+                >
+                  {handoverLoading
+                    ? "Confirming..."
+                    : "Confirm"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
