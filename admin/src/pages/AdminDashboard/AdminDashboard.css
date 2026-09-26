@@ -1219,3 +1219,89 @@
       repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* =========================
+   Handover Review
+========================= */
+
+.admin-review-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-review-person-avatar {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  color: var(--primary);
+  background-color: var(--primary-light);
+
+  border-radius: 50%;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-review-person-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-review-person-info strong {
+  color: var(--text-primary);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-review-person-info span {
+  color: var(--text-secondary);
+
+  font-size: 11px;
+}
+
+.admin-handover-info {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.admin-handover-info-item {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  padding: 13px;
+
+  background-color: #f8fafc;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.admin-handover-info-item strong {
+  color: var(--text-primary);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .admin-handover-info {
+    grid-template-columns: 1fr;
+  }
+}
+

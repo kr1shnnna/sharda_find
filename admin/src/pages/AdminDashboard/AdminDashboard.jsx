@@ -1,4 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import {
   FiAlertCircle,
@@ -14,22 +18,147 @@ import {
 import toast from "react-hot-toast";
 
 import api from "../../api/axios";
+
 import AdminHeader from "../../components/AdminHeader/AdminHeader";
 
 import "./AdminDashboard.css";
 
 
+/* =========================
+   Helpers
+========================= */
+
+const formatDate = (dateString) => {
+  if (!dateString) {
+    return "Date unavailable";
+  }
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date unavailable";
+  }
+
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+
+const formatCategory = (category) => {
+  if (!category) {
+    return "Other";
+  }
+
+  return category
+    .split("-")
+    .map(
+      (word) =>
+        word.charAt(0).toUpperCase() +
+        word.slice(1)
+    )
+    .join(" ");
+};
+
+
+const formatItemType = (type) => {
+  if (!type) {
+    return "Unknown";
+  }
+
+  return (
+    type.charAt(0).toUpperCase() +
+    type.slice(1)
+  );
+};
+
+
+const formatItemLocation = (location) => {
+  if (location === "with-finder") {
+    return "With Finder";
+  }
+
+  if (
+    location ===
+    "lost-found-department"
+  ) {
+    return "Lost & Found Department";
+  }
+
+  return "Location unavailable";
+};
+
+
+const getImageUrl = (image) => {
+  if (typeof image === "string") {
+    return image;
+  }
+
+  if (image?.url) {
+    return image.url;
+  }
+
+  return "";
+};
+
+
+/* =========================
+   Component
+========================= */
+
 const AdminDashboard = () => {
+
+  /* =========================
+     Dashboard State
+  ========================= */
+
   const [claims, setClaims] = useState([]);
   const [handovers, setHandovers] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [selectedClaim, setSelectedClaim] = useState(null);
-  const [reviewNote, setReviewNote] = useState("");
-  const [reviewNoteError, setReviewNoteError] = useState("");
-  const [reviewingClaim, setReviewingClaim] = useState(false);
+
+  /* =========================
+     Claim Review State
+  ========================= */
+
+  const [selectedClaim, setSelectedClaim] =
+    useState(null);
+
+  const [reviewNote, setReviewNote] =
+    useState("");
+
+  const [reviewNoteError, setReviewNoteError] =
+    useState("");
+
+  const [reviewingClaim, setReviewingClaim] =
+    useState(false);
+
+
+  /* =========================
+     Handover Review State
+  ========================= */
+
+  const [selectedHandover, setSelectedHandover] =
+    useState(null);
+
+  const [
+    handoverReviewNote,
+    setHandoverReviewNote,
+  ] = useState("");
+
+  const [
+    handoverReviewNoteError,
+    setHandoverReviewNoteError,
+  ] = useState("");
+
+  const [
+    reviewingHandover,
+    setReviewingHandover,
+  ] = useState(false);
 
 
   /* =========================
@@ -49,26 +178,16 @@ const AdminDashboard = () => {
         api.get("/admin/handovers"),
       ]);
 
-      const claimsData =
-        claimsResponse.data?.claims ||
-        claimsResponse.data?.data ||
-        [];
-
-      const handoversData =
-        handoversResponse.data?.handovers ||
-        handoversResponse.data?.data ||
-        [];
-
       setClaims(
-        Array.isArray(claimsData)
-          ? claimsData
-          : []
+        claimsResponse.data?.claims ||
+          claimsResponse.data?.data ||
+          []
       );
 
       setHandovers(
-        Array.isArray(handoversData)
-          ? handoversData
-          : []
+        handoversResponse.data?.handovers ||
+          handoversResponse.data?.data ||
+          []
       );
 
     } catch (error) {
@@ -77,14 +196,10 @@ const AdminDashboard = () => {
         error
       );
 
-      const message =
+      setError(
         error.response?.data?.message ||
-        "Unable to load dashboard data.";
-
-      setError(message);
-
-      toast.error(message);
-
+          "Unable to load the admin dashboard."
+      );
     } finally {
       setLoading(false);
     }
@@ -97,7 +212,7 @@ const AdminDashboard = () => {
 
 
   /* =========================
-     Summary Data
+     Filter Pending Data
   ========================= */
 
   const pendingClaims = useMemo(() => {
@@ -117,59 +232,37 @@ const AdminDashboard = () => {
 
 
   /* =========================
-     Helpers
+     Summary Statistics
   ========================= */
 
-  const getItemTitle = (item) => {
-    return item?.title || "Unknown item";
-  };
+  const statistics = useMemo(() => {
+    return {
+      totalClaims: claims.length,
 
+      pendingClaims:
+        pendingClaims.length,
 
-  const getUserName = (user) => {
-    return user?.name || "Unknown user";
-  };
-
-
-  const getCategory = (item) => {
-    if (!item?.category) {
-      return "—";
-    }
-
-    return (
-      item.category.charAt(0).toUpperCase() +
-      item.category.slice(1)
-    );
-  };
-
-
-  const formatDate = (date) => {
-    if (!date) {
-      return "—";
-    }
-
-    return new Date(date).toLocaleDateString(
-      "en-IN",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
-    );
-  };
-
-
-  const getStatusClass = (status) => {
-    return `admin-status admin-status-${status}`;
-  };
+      pendingHandovers:
+        pendingHandovers.length,
+    };
+  }, [
+    claims,
+    pendingClaims,
+    pendingHandovers,
+  ]);
 
 
   /* =========================
      Claim Review
   ========================= */
 
-  const handleOpenClaimReview = (claim) => {
+  const handleOpenClaimReview = (
+    claim
+  ) => {
     setSelectedClaim(claim);
+
     setReviewNote("");
+
     setReviewNoteError("");
   };
 
@@ -180,17 +273,19 @@ const AdminDashboard = () => {
     }
 
     setSelectedClaim(null);
+
     setReviewNote("");
+
     setReviewNoteError("");
   };
 
 
-  const handleReviewClaim = async (decision) => {
+  const handleReviewClaim = async (
+    decision
+  ) => {
     if (!selectedClaim) {
       return;
     }
-
-    /* Rejection requires a note */
 
     if (
       decision === "rejected" &&
@@ -212,7 +307,8 @@ const AdminDashboard = () => {
         `/admin/claims/${selectedClaim._id}`,
         {
           decision,
-          reviewNote: reviewNote.trim(),
+          reviewNote:
+            reviewNote.trim(),
         }
       );
 
@@ -223,7 +319,9 @@ const AdminDashboard = () => {
       );
 
       setSelectedClaim(null);
+
       setReviewNote("");
+
       setReviewNoteError("");
 
       await fetchDashboardData();
@@ -247,6 +345,98 @@ const AdminDashboard = () => {
 
 
   /* =========================
+     Handover Review
+  ========================= */
+
+  const handleOpenHandoverReview = (
+    handover
+  ) => {
+    setSelectedHandover(handover);
+
+    setHandoverReviewNote("");
+
+    setHandoverReviewNoteError("");
+  };
+
+
+  const handleCloseHandoverReview = () => {
+    if (reviewingHandover) {
+      return;
+    }
+
+    setSelectedHandover(null);
+
+    setHandoverReviewNote("");
+
+    setHandoverReviewNoteError("");
+  };
+
+
+  const handleReviewHandover = async (
+    decision
+  ) => {
+    if (!selectedHandover) {
+      return;
+    }
+
+    if (
+      decision === "rejected" &&
+      !handoverReviewNote.trim()
+    ) {
+      setHandoverReviewNoteError(
+        "Please provide a reason for rejecting this handover."
+      );
+
+      return;
+    }
+
+    setHandoverReviewNoteError("");
+
+    try {
+      setReviewingHandover(true);
+
+      await api.patch(
+        `/admin/handovers/${selectedHandover._id}`,
+        {
+          decision,
+          reviewNote:
+            handoverReviewNote.trim(),
+        }
+      );
+
+      toast.success(
+        decision === "confirmed"
+          ? "Handover confirmed successfully."
+          : "Handover rejected successfully."
+      );
+
+      setSelectedHandover(null);
+
+      setHandoverReviewNote("");
+
+      setHandoverReviewNoteError("");
+
+      await fetchDashboardData();
+
+    } catch (error) {
+      console.error(
+        "Unable to review handover:",
+        error
+      );
+
+      const message =
+        error.response?.data?.message ||
+        "Unable to review the handover.";
+
+      toast.error(message);
+
+    } finally {
+      setReviewingHandover(false);
+    }
+  };
+
+
+  /* =========================
      Loading State
   ========================= */
 
@@ -263,7 +453,7 @@ const AdminDashboard = () => {
             <FiRefreshCw className="admin-loading-icon" />
 
             <p>
-              Loading dashboard...
+              Loading admin dashboard...
             </p>
 
           </div>
@@ -274,6 +464,10 @@ const AdminDashboard = () => {
     );
   }
 
+
+  /* =========================
+     Dashboard
+  ========================= */
 
   return (
     <div className="admin-dashboard-page">
@@ -287,17 +481,17 @@ const AdminDashboard = () => {
             Dashboard Heading
         ========================= */}
 
-        <section className="admin-dashboard-heading">
+        <div className="admin-dashboard-heading">
 
           <div>
 
             <h1>
-              Dashboard
+              Admin Dashboard
             </h1>
 
             <p>
-              Manage claims and department
-              handovers.
+              Review and manage claims and
+              department handover requests.
             </p>
 
           </div>
@@ -315,7 +509,7 @@ const AdminDashboard = () => {
             </span>
           </button>
 
-        </section>
+        </div>
 
 
         {/* =========================
@@ -340,13 +534,18 @@ const AdminDashboard = () => {
             Summary Cards
         ========================= */}
 
-        <section className="admin-summary-grid">
+        <div className="admin-summary-grid">
+
+          {/* Total Claims */}
 
           <div className="admin-summary-card">
 
             <div className="admin-summary-icon">
+
               <FiClipboard />
+
             </div>
+
 
             <div className="admin-summary-content">
 
@@ -355,7 +554,7 @@ const AdminDashboard = () => {
               </span>
 
               <strong className="admin-summary-value">
-                {claims.length}
+                {statistics.totalClaims}
               </strong>
 
             </div>
@@ -363,11 +562,16 @@ const AdminDashboard = () => {
           </div>
 
 
+          {/* Pending Claims */}
+
           <div className="admin-summary-card">
 
             <div className="admin-summary-icon admin-summary-icon-warning">
+
               <FiClock />
+
             </div>
+
 
             <div className="admin-summary-content">
 
@@ -376,7 +580,7 @@ const AdminDashboard = () => {
               </span>
 
               <strong className="admin-summary-value">
-                {pendingClaims.length}
+                {statistics.pendingClaims}
               </strong>
 
             </div>
@@ -384,11 +588,16 @@ const AdminDashboard = () => {
           </div>
 
 
+          {/* Pending Handovers */}
+
           <div className="admin-summary-card">
 
             <div className="admin-summary-icon admin-summary-icon-package">
+
               <FiPackage />
+
             </div>
+
 
             <div className="admin-summary-content">
 
@@ -397,14 +606,14 @@ const AdminDashboard = () => {
               </span>
 
               <strong className="admin-summary-value">
-                {pendingHandovers.length}
+                {statistics.pendingHandovers}
               </strong>
 
             </div>
 
           </div>
 
-        </section>
+        </div>
 
 
         {/* =========================
@@ -422,34 +631,34 @@ const AdminDashboard = () => {
               </h2>
 
               <p>
-                Review ownership claims submitted
-                by students.
+                Claims waiting for department review.
               </p>
 
             </div>
 
+
             <span className="admin-section-count">
-              {pendingClaims.length}
+              {statistics.pendingClaims}
             </span>
 
           </div>
 
 
-          <div className="admin-table-wrapper">
+          {pendingClaims.length === 0 ? (
 
-            {pendingClaims.length === 0 ? (
+            <div className="admin-empty-state">
 
-              <div className="admin-empty-state">
+              <FiCheckCircle />
 
-                <FiCheckCircle />
+              <p>
+                No pending claims.
+              </p>
 
-                <p>
-                  No pending claims.
-                </p>
+            </div>
 
-              </div>
+          ) : (
 
-            ) : (
+            <div className="admin-table-wrapper">
 
               <table className="admin-table">
 
@@ -462,7 +671,7 @@ const AdminDashboard = () => {
                     </th>
 
                     <th>
-                      Student
+                      Claimant
                     </th>
 
                     <th>
@@ -471,10 +680,6 @@ const AdminDashboard = () => {
 
                     <th>
                       Submitted
-                    </th>
-
-                    <th>
-                      Status
                     </th>
 
                     <th>
@@ -498,18 +703,14 @@ const AdminDashboard = () => {
                           <div className="admin-table-item">
 
                             <strong>
-                              {getItemTitle(
-                                claim.item
-                              )}
+                              {claim.item?.title ||
+                                "Item unavailable"}
                             </strong>
 
                             <span>
-                              {claim.item?.type
-                                ? claim.item.type
-                                    .charAt(0)
-                                    .toUpperCase() +
-                                  claim.item.type.slice(1)
-                                : "—"}
+                              {formatItemType(
+                                claim.item?.type
+                              )}
                             </span>
 
                           </div>
@@ -522,14 +723,13 @@ const AdminDashboard = () => {
                           <div className="admin-table-user">
 
                             <strong>
-                              {getUserName(
-                                claim.claimant
-                              )}
+                              {claim.claimant?.name ||
+                                "Student"}
                             </strong>
 
                             <span>
                               {claim.claimant?.email ||
-                                "—"}
+                                "Email unavailable"}
                             </span>
 
                           </div>
@@ -538,8 +738,8 @@ const AdminDashboard = () => {
 
 
                         <td>
-                          {getCategory(
-                            claim.item
+                          {formatCategory(
+                            claim.item?.category
                           )}
                         </td>
 
@@ -548,22 +748,6 @@ const AdminDashboard = () => {
                           {formatDate(
                             claim.createdAt
                           )}
-                        </td>
-
-
-                        <td>
-
-                          <span
-                            className={getStatusClass(
-                              claim.status
-                            )}
-                          >
-                            {claim.status
-                              .charAt(0)
-                              .toUpperCase() +
-                              claim.status.slice(1)}
-                          </span>
-
                         </td>
 
 
@@ -592,9 +776,9 @@ const AdminDashboard = () => {
 
               </table>
 
-            )}
+            </div>
 
-          </div>
+          )}
 
         </section>
 
@@ -614,34 +798,35 @@ const AdminDashboard = () => {
               </h2>
 
               <p>
-                Review requests to hand items
-                over to the department.
+                Requests to hand items over to
+                the Lost &amp; Found Department.
               </p>
 
             </div>
 
+
             <span className="admin-section-count">
-              {pendingHandovers.length}
+              {statistics.pendingHandovers}
             </span>
 
           </div>
 
 
-          <div className="admin-table-wrapper">
+          {pendingHandovers.length === 0 ? (
 
-            {pendingHandovers.length === 0 ? (
+            <div className="admin-empty-state">
 
-              <div className="admin-empty-state">
+              <FiCheckCircle />
 
-                <FiCheckCircle />
+              <p>
+                No pending handovers.
+              </p>
 
-                <p>
-                  No pending handovers.
-                </p>
+            </div>
 
-              </div>
+          ) : (
 
-            ) : (
+            <div className="admin-table-wrapper">
 
               <table className="admin-table">
 
@@ -658,15 +843,11 @@ const AdminDashboard = () => {
                     </th>
 
                     <th>
-                      Item Location
+                      Current Location
                     </th>
 
                     <th>
                       Submitted
-                    </th>
-
-                    <th>
-                      Status
                     </th>
 
                     <th>
@@ -684,9 +865,7 @@ const AdminDashboard = () => {
                     (handover) => (
 
                       <tr
-                        key={
-                          handover._id
-                        }
+                        key={handover._id}
                       >
 
                         <td>
@@ -694,18 +873,14 @@ const AdminDashboard = () => {
                           <div className="admin-table-item">
 
                             <strong>
-                              {getItemTitle(
-                                handover.item
-                              )}
+                              {handover.item?.title ||
+                                "Item unavailable"}
                             </strong>
 
                             <span>
-                              {handover.item?.type
-                                ? handover.item.type
-                                    .charAt(0)
-                                    .toUpperCase() +
-                                  handover.item.type.slice(1)
-                                : "—"}
+                              {formatItemType(
+                                handover.item?.type
+                              )}
                             </span>
 
                           </div>
@@ -718,14 +893,13 @@ const AdminDashboard = () => {
                           <div className="admin-table-user">
 
                             <strong>
-                              {getUserName(
-                                handover.submittedBy
-                              )}
+                              {handover.submittedBy?.name ||
+                                "Student"}
                             </strong>
 
                             <span>
-                              {handover.submittedBy
-                                ?.email || "—"}
+                              {handover.submittedBy?.email ||
+                                "Email unavailable"}
                             </span>
 
                           </div>
@@ -734,20 +908,11 @@ const AdminDashboard = () => {
 
 
                         <td>
-                          {handover.item
-                            ?.itemLocation
-                            ? handover.item
-                                .itemLocation
-                                .split("-")
-                                .map(
-                                  (word) =>
-                                    word
-                                      .charAt(0)
-                                      .toUpperCase() +
-                                    word.slice(1)
-                                )
-                                .join(" ")
-                            : "—"}
+
+                          {formatItemLocation(
+                            handover.item?.itemLocation
+                          )}
+
                         </td>
 
 
@@ -760,25 +925,14 @@ const AdminDashboard = () => {
 
                         <td>
 
-                          <span
-                            className={getStatusClass(
-                              handover.status
-                            )}
-                          >
-                            {handover.status
-                              .charAt(0)
-                              .toUpperCase() +
-                              handover.status.slice(1)}
-                          </span>
-
-                        </td>
-
-
-                        <td>
-
                           <button
                             type="button"
                             className="admin-table-action"
+                            onClick={() =>
+                              handleOpenHandoverReview(
+                                handover
+                              )
+                            }
                           >
                             Review
                           </button>
@@ -794,9 +948,9 @@ const AdminDashboard = () => {
 
               </table>
 
-            )}
+            </div>
 
-          </div>
+          )}
 
         </section>
 
@@ -830,21 +984,19 @@ const AdminDashboard = () => {
             aria-labelledby="claim-review-title"
           >
 
-            {/* =========================
-                Modal Header
-            ========================= */}
+            {/* Modal Header */}
 
             <div className="admin-modal-header">
 
               <div>
 
                 <h2 id="claim-review-title">
-                  Review Claim
+                  Claim Review
                 </h2>
 
                 <p>
-                  Verify the student's ownership
-                  information before making a decision.
+                  Review the ownership claim
+                  before making a decision.
                 </p>
 
               </div>
@@ -863,9 +1015,7 @@ const AdminDashboard = () => {
             </div>
 
 
-            {/* =========================
-                Claim Information
-            ========================= */}
+            {/* Claim Details */}
 
             <div className="admin-claim-details">
 
@@ -876,9 +1026,8 @@ const AdminDashboard = () => {
                 </span>
 
                 <strong>
-                  {getItemTitle(
-                    selectedClaim.item
-                  )}
+                  {selectedClaim.item?.title ||
+                    "Item unavailable"}
                 </strong>
 
               </div>
@@ -891,15 +1040,9 @@ const AdminDashboard = () => {
                 </span>
 
                 <strong>
-                  {getUserName(
-                    selectedClaim.claimant
-                  )}
+                  {selectedClaim.claimant?.name ||
+                    "Student"}
                 </strong>
-
-                <span className="admin-detail-secondary">
-                  {selectedClaim.claimant?.email ||
-                    "—"}
-                </span>
 
               </div>
 
@@ -911,8 +1054,8 @@ const AdminDashboard = () => {
                 </span>
 
                 <strong>
-                  {getCategory(
-                    selectedClaim.item
+                  {formatCategory(
+                    selectedClaim.item?.category
                   )}
                 </strong>
 
@@ -936,9 +1079,37 @@ const AdminDashboard = () => {
             </div>
 
 
-            {/* =========================
-                Ownership Proof
-            ========================= */}
+            {/* Claimant Information */}
+
+            <div className="admin-review-section">
+
+              <div className="admin-review-section-heading">
+
+                <h3>
+                  Claimant Information
+                </h3>
+
+              </div>
+
+
+              <div className="admin-table-user">
+
+                <strong>
+                  {selectedClaim.claimant?.name ||
+                    "Student"}
+                </strong>
+
+                <span>
+                  {selectedClaim.claimant?.email ||
+                    "Email unavailable"}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            {/* Ownership Proof */}
 
             <div className="admin-review-section">
 
@@ -954,16 +1125,14 @@ const AdminDashboard = () => {
               <div className="admin-ownership-proof">
 
                 {selectedClaim.ownershipProof ||
-                  "No ownership proof was provided."}
+                  "No ownership proof provided."}
 
               </div>
 
             </div>
 
 
-            {/* =========================
-                Evidence Images
-            ========================= */}
+            {/* Evidence Images */}
 
             <div className="admin-review-section">
 
@@ -973,15 +1142,28 @@ const AdminDashboard = () => {
                   Evidence Images
                 </h3>
 
-                <span>
-                  {selectedClaim.evidenceImages
-                    ?.length || 0}
-                </span>
+                {Array.isArray(
+                  selectedClaim.evidenceImages
+                ) &&
+                  selectedClaim.evidenceImages.length >
+                    0 && (
+                    <span>
+                      {
+                        selectedClaim
+                          .evidenceImages
+                          .length
+                      }
+                    </span>
+                  )}
 
               </div>
 
 
-              {selectedClaim.evidenceImages?.length ? (
+              {Array.isArray(
+                selectedClaim.evidenceImages
+              ) &&
+              selectedClaim.evidenceImages.length >
+                0 ? (
 
                 <div className="admin-evidence-grid">
 
@@ -989,9 +1171,7 @@ const AdminDashboard = () => {
                     (image, index) => {
 
                       const imageUrl =
-                        typeof image === "string"
-                          ? image
-                          : image?.url;
+                        getImageUrl(image);
 
                       if (!imageUrl) {
                         return null;
@@ -999,20 +1179,16 @@ const AdminDashboard = () => {
 
                       return (
                         <a
-                          key={
-                            image?._id ||
-                            imageUrl ||
-                            index
-                          }
+                          key={`${imageUrl}-${index}`}
                           href={imageUrl}
                           target="_blank"
-                          rel="noopener noreferrer"
+                          rel="noreferrer"
                           className="admin-evidence-image"
                         >
 
                           <img
                             src={imageUrl}
-                            alt={`Ownership evidence ${
+                            alt={`Evidence ${
                               index + 1
                             }`}
                           />
@@ -1023,7 +1199,6 @@ const AdminDashboard = () => {
 
                         </a>
                       );
-
                     }
                   )}
 
@@ -1032,7 +1207,7 @@ const AdminDashboard = () => {
               ) : (
 
                 <div className="admin-no-evidence">
-                  No evidence images were submitted.
+                  No evidence images were provided.
                 </div>
 
               )}
@@ -1040,9 +1215,7 @@ const AdminDashboard = () => {
             </div>
 
 
-            {/* =========================
-                Review Note
-            ========================= */}
+            {/* Review Note */}
 
             <div className="admin-review-section">
 
@@ -1082,9 +1255,9 @@ const AdminDashboard = () => {
                 rows={4}
                 disabled={reviewingClaim}
                 aria-describedby="claim-review-note-help"
-                aria-invalid={
-                  Boolean(reviewNoteError)
-                }
+                aria-invalid={Boolean(
+                  reviewNoteError
+                )}
               />
 
 
@@ -1111,9 +1284,7 @@ const AdminDashboard = () => {
             </div>
 
 
-            {/* =========================
-                Modal Actions
-            ========================= */}
+            {/* Modal Actions */}
 
             <div className="admin-modal-actions">
 
@@ -1156,6 +1327,414 @@ const AdminDashboard = () => {
                 {reviewingClaim
                   ? "Processing..."
                   : "Approve Claim"}
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+
+
+      {/* ==================================================
+          HANDOVER REVIEW MODAL
+      ================================================== */}
+
+      {selectedHandover && (
+
+        <div
+          className="admin-modal-overlay"
+          onMouseDown={(event) => {
+
+            if (
+              event.target ===
+              event.currentTarget
+            ) {
+              handleCloseHandoverReview();
+            }
+
+          }}
+        >
+
+          <div
+            className="admin-claim-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="handover-review-title"
+          >
+
+            {/* Modal Header */}
+
+            <div className="admin-modal-header">
+
+              <div>
+
+                <h2 id="handover-review-title">
+                  Handover Review
+                </h2>
+
+                <p>
+                  Review the request to hand this
+                  item over to the Lost &amp; Found
+                  Department.
+                </p>
+
+              </div>
+
+
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={handleCloseHandoverReview}
+                disabled={reviewingHandover}
+                aria-label="Close handover review"
+              >
+                <FiX />
+              </button>
+
+            </div>
+
+
+            {/* Handover Details */}
+
+            <div className="admin-claim-details">
+
+              <div className="admin-claim-detail">
+
+                <span className="admin-detail-label">
+                  Item
+                </span>
+
+                <strong>
+                  {selectedHandover.item?.title ||
+                    "Item unavailable"}
+                </strong>
+
+              </div>
+
+
+              <div className="admin-claim-detail">
+
+                <span className="admin-detail-label">
+                  Type
+                </span>
+
+                <strong>
+                  {formatItemType(
+                    selectedHandover.item?.type
+                  )}
+                </strong>
+
+              </div>
+
+
+              <div className="admin-claim-detail">
+
+                <span className="admin-detail-label">
+                  Category
+                </span>
+
+                <strong>
+                  {formatCategory(
+                    selectedHandover.item?.category
+                  )}
+                </strong>
+
+              </div>
+
+
+              <div className="admin-claim-detail">
+
+                <span className="admin-detail-label">
+                  Submitted
+                </span>
+
+                <strong>
+                  {formatDate(
+                    selectedHandover.createdAt
+                  )}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            {/* Submitted By */}
+
+            <div className="admin-review-section">
+
+              <div className="admin-review-section-heading">
+
+                <h3>
+                  Submitted By
+                </h3>
+
+              </div>
+
+
+              <div className="admin-review-person">
+
+                <div className="admin-review-person-avatar">
+
+                  {selectedHandover.submittedBy?.name
+                    ?.charAt(0)
+                    .toUpperCase() || "S"}
+
+                </div>
+
+
+                <div className="admin-review-person-info">
+
+                  <strong>
+                    {selectedHandover.submittedBy?.name ||
+                      "Student"}
+                  </strong>
+
+                  <span>
+                    {selectedHandover.submittedBy?.email ||
+                      "Email unavailable"}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            {/* Item Information */}
+
+            <div className="admin-review-section">
+
+              <div className="admin-review-section-heading">
+
+                <h3>
+                  Item Information
+                </h3>
+
+              </div>
+
+
+              <div className="admin-handover-info">
+
+                <div className="admin-handover-info-item">
+
+                  <span className="admin-detail-label">
+                    Current Location
+                  </span>
+
+                  <strong>
+                    {formatItemLocation(
+                      selectedHandover.item
+                        ?.itemLocation
+                    )}
+                  </strong>
+
+                </div>
+
+
+                <div className="admin-handover-info-item">
+
+                  <span className="admin-detail-label">
+                    Item Location
+                  </span>
+
+                  <strong>
+                    {selectedHandover.item
+                      ?.location ||
+                      "Location unavailable"}
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            {/* Item Image */}
+
+            {Array.isArray(
+              selectedHandover.item?.images
+            ) &&
+            selectedHandover.item.images.length >
+              0 && (
+
+              <div className="admin-review-section">
+
+                <div className="admin-review-section-heading">
+
+                  <h3>
+                    Item Image
+                  </h3>
+
+                </div>
+
+
+                <div className="admin-evidence-grid">
+
+                  {selectedHandover.item.images
+                    .slice(0, 4)
+                    .map((image, index) => {
+
+                      const imageUrl =
+                        getImageUrl(image);
+
+                      if (!imageUrl) {
+                        return null;
+                      }
+
+                      return (
+                        <a
+                          key={`${imageUrl}-${index}`}
+                          href={imageUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="admin-evidence-image"
+                        >
+
+                          <img
+                            src={imageUrl}
+                            alt={`Item ${
+                              index + 1
+                            }`}
+                          />
+
+                          <span>
+                            <FiExternalLink />
+                          </span>
+
+                        </a>
+                      );
+
+                    })}
+
+                </div>
+
+              </div>
+
+            )}
+
+
+            {/* Review Note */}
+
+            <div className="admin-review-section">
+
+              <label
+                htmlFor="handover-review-note"
+                className="admin-review-note-label"
+              >
+
+                <span>
+                  Review Note
+                </span>
+
+                <span className="admin-required-note">
+                  Required when rejecting
+                </span>
+
+              </label>
+
+
+              <textarea
+                id="handover-review-note"
+                value={
+                  handoverReviewNote
+                }
+                onChange={(event) => {
+
+                  setHandoverReviewNote(
+                    event.target.value
+                  );
+
+                  if (
+                    event.target.value.trim()
+                  ) {
+                    setHandoverReviewNoteError("");
+                  }
+
+                }}
+                placeholder="Add a note about your decision..."
+                rows={4}
+                disabled={reviewingHandover}
+                aria-describedby="handover-review-note-help"
+                aria-invalid={Boolean(
+                  handoverReviewNoteError
+                )}
+              />
+
+
+              <p
+                id="handover-review-note-help"
+                className="admin-review-note-help"
+              >
+                A review note is required when
+                rejecting a handover.
+              </p>
+
+
+              {handoverReviewNoteError && (
+
+                <p
+                  className="admin-review-note-error"
+                  role="alert"
+                >
+                  {handoverReviewNoteError}
+                </p>
+
+              )}
+
+            </div>
+
+
+            {/* Modal Actions */}
+
+            <div className="admin-modal-actions">
+
+              <button
+                type="button"
+                className="admin-modal-cancel"
+                onClick={
+                  handleCloseHandoverReview
+                }
+                disabled={reviewingHandover}
+              >
+                Cancel
+              </button>
+
+
+              <button
+                type="button"
+                className="admin-modal-reject"
+                onClick={() =>
+                  handleReviewHandover(
+                    "rejected"
+                  )
+                }
+                disabled={reviewingHandover}
+              >
+                {reviewingHandover
+                  ? "Processing..."
+                  : "Reject Handover"}
+              </button>
+
+
+              <button
+                type="button"
+                className="admin-modal-approve"
+                onClick={() =>
+                  handleReviewHandover(
+                    "confirmed"
+                  )
+                }
+                disabled={reviewingHandover}
+              >
+                {reviewingHandover
+                  ? "Processing..."
+                  : "Confirm Handover"}
               </button>
 
             </div>
