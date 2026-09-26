@@ -2,6 +2,7 @@ const Claim = require("../models/Claim");
 const Item = require("../models/Item");
 const uploadToCloudinary = require("../utils/cloudinaryUpload");
 const createNotification = require("../utils/createNotification");
+const User = require("../models/User");
 
 const createClaim = async (req, res) => {
   try {
@@ -69,6 +70,7 @@ const createClaim = async (req, res) => {
     item.status = "claim-pending";
     await item.save();
 
+    const io = req.app.get("io");
     await createNotification({
       recipient: item.reportedBy,
       type: "claim-submitted",
@@ -76,7 +78,22 @@ const createClaim = async (req, res) => {
       message: "Someone has submitted a claim for your found item.",
       item: item._id,
       claim: claim._id,
+      io,
     });
+
+    const admin = await User.findOne({ role: "admin" });
+
+    if (admin) {
+      await createNotification({
+        recipient: admin._id,
+        type: "claim-submitted",
+        title: "New Claim Submitted",
+        message: "A student has submitted a claim that requires review.",
+        item: item._id,
+        claim: claim._id,
+        io,
+      });
+    }
 
     res.status(201).json({
       message:

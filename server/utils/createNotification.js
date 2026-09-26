@@ -8,6 +8,7 @@ const createNotification = async ({
   item = null,
   claim = null,
   conversation = null,
+  io = null,
 }) => {
   try {
     const notification = await Notification.create({
@@ -19,6 +20,15 @@ const createNotification = async ({
       claim,
       conversation,
     });
+
+    // Send the notification in real time
+    if (io) {
+      const userRoom = `user:${recipient}`;
+
+      io.to(userRoom).emit("new-notification", {
+        notification,
+      });
+    }
 
     return notification;
   } catch (error) {

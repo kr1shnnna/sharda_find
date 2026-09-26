@@ -33,8 +33,12 @@ const getAllClaims = async (req, res) => {
 };
 
 const reviewClaim = async (req, res) => {
+
   try {
+    const io=req.app.get("io");
+
     const { status, reviewNote } = req.body;
+
 
     if (!["approved", "rejected"].includes(status)) {
       return res.status(400).json({
@@ -101,6 +105,7 @@ const reviewClaim = async (req, res) => {
           : "Your claim could not be verified based on the information provided.",
       item: item._id,
       claim: claim._id,
+      io,
     });
 
     const responseMessage =

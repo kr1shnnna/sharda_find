@@ -56,6 +56,10 @@ const reportHandover = async (req, res) => {
       status: "pending",
     });
 
+
+
+    const io = req.app.get("io");
+
     // 7. Find the admin
     const admin = await User.findOne({ role: "admin" });
 
@@ -68,6 +72,7 @@ const reportHandover = async (req, res) => {
         message:
           "A finder has reported handing over an item to the Lost & Found Department.",
         item: item._id,
+        io,
       });
     }
 
@@ -87,6 +92,9 @@ const reportHandover = async (req, res) => {
 
 const reviewHandover = async (req, res) => {
   try {
+
+    const io = req.app.get("io");
+
     const { status, note } = req.body;
 
     // 1. Validate the status
@@ -138,6 +146,7 @@ const reviewHandover = async (req, res) => {
     await item.save();
     await handover.save();
 
+
     // 8. Notify the finder
     await createNotification({
       recipient: handover.submittedBy,
@@ -154,6 +163,7 @@ const reviewHandover = async (req, res) => {
           ? "The Lost & Found Department has confirmed receipt of the item."
           : "The Lost & Found Department could not confirm receipt of the item.",
       item: item._id,
+      io,
     });
 
     res.status(200).json({
