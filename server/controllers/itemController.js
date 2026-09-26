@@ -89,12 +89,7 @@ const createItem = async (req, res) => {
       location,
       itemDate: itemDateValue,
 
-      // A lost item is not physically held
-      // by the person who posted it.
-      //
-      // For a found item, the creator can
-      // specify where the item currently is.
-      itemLocation: type === "found" ? itemLocation : null,
+      itemLocation: type === "found" ? "with-finder" : null,
 
       images,
       reportedBy: req.user._id,
