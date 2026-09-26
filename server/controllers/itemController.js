@@ -146,11 +146,16 @@ const getItems = async (req, res) => {
   }
 };
 
+
 const getMyItems = async (req, res) => {
   try {
     const items = await Item.find({
-      reportedBy: req.user._id,
+      $or: [
+        { reportedBy: req.user._id },
+        { foundBy: req.user._id },
+      ],
     }).sort({ createdAt: -1 });
+
 
     const itemsWithHandover = await Promise.all(
       items.map(async (item) => {
@@ -457,7 +462,6 @@ const confirmOwnerReceivedItem = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   createItem,

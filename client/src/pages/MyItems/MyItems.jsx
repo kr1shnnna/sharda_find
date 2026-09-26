@@ -8,6 +8,7 @@ import {
   FiPackage,
   FiPlus,
   FiRefreshCw,
+  FiX,
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -112,7 +113,8 @@ const MyItems = () => {
   const [handoverLoading, setHandoverLoading] = useState(null);
 
   const [ownerHandoverLoading, setOwnerHandoverLoading] = useState(null);
-  
+
+  const [confirmationModal, setConfirmationModal] = useState(null);
 
   const fetchMyItems = async () => {
     try {
@@ -134,17 +136,43 @@ const MyItems = () => {
     }
   };
 
-  const handleHandover = async (itemId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to hand over this item to the Lost & Found Department?",
-    );
+  const openHandoverConfirmation = (item) => {
+    setConfirmationModal(item);
+  };
 
-    if (!confirmed) return;
+  const closeHandoverConfirmation = () => {
+    if (handoverLoading) return;
+
+    setConfirmationModal(null);
+  };
+
+  useEffect(() => {
+    if (!confirmationModal) return;
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        closeHandoverConfirmation();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [confirmationModal, handoverLoading]);
+
+  const handleHandover = async () => {
+    if (!confirmationModal) return;
+
+    const itemId = confirmationModal._id;
 
     try {
       setHandoverLoading(itemId);
 
       await api.post(`/handovers/${itemId}`);
+
+      setConfirmationModal(null);
 
       await fetchMyItems();
     } catch (error) {
@@ -205,6 +233,72 @@ const MyItems = () => {
   return (
     <main className="my-items-page">
       <div className="my-items-container">
+        {/* DEPARTMENT HANDOVER CONFIRMATION MODAL */}
+
+        {confirmationModal && (
+          <div
+            className="confirmation-modal-overlay"
+            onClick={closeHandoverConfirmation}
+          >
+            <div
+              className="confirmation-modal"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="confirmation-modal-close"
+                onClick={closeHandoverConfirmation}
+                disabled={handoverLoading}
+                aria-label="Close"
+              >
+                <FiX />
+              </button>
+
+              <div className="confirmation-modal-icon">
+                <FiPackage />
+              </div>
+
+              <h2>Hand over item?</h2>
+
+              <p className="confirmation-modal-message">
+                Are you sure you want to hand over{" "}
+                <strong>{confirmationModal.title}</strong> to the Lost & Found
+                Department?
+              </p>
+
+              <p className="confirmation-modal-note">
+                The department will review and confirm the handover. The item's
+                location will change to the Lost & Found Department only after
+                the department confirms receipt.
+              </p>
+
+              <div className="confirmation-modal-actions">
+                <button
+                  type="button"
+                  className="confirmation-modal-cancel"
+                  onClick={closeHandoverConfirmation}
+                  disabled={handoverLoading}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="confirmation-modal-confirm"
+                  onClick={handleHandover}
+                  disabled={handoverLoading}
+                >
+                  <FiCheckCircle />
+
+                  {handoverLoading
+                    ? "Submitting..."
+                    : "Hand over to Department"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* HEADER */}
 
         <div className="my-items-header">
@@ -475,8 +569,7 @@ const MyItems = () => {
                           </span>
                         )}
 
-
-                        {/* HANDOVER */}
+                        {/* DEPARTMENT HANDOVER */}
 
                         {item.type === "lost" &&
                           item.foundBy &&
@@ -484,27 +577,30 @@ const MyItems = () => {
                           item.status !== "returned" && (
                             <>
                               {/* No previous handover */}
+
                               {!item.handover ? (
                                 <button
                                   type="button"
                                   className="my-item-handover-button"
                                   disabled={handoverLoading === item._id}
-                                  onClick={() => handleHandover(item._id)}
+                                  onClick={() => openHandoverConfirmation(item)}
                                 >
                                   <FiCheckCircle />
 
                                   {handoverLoading === item._id
                                     ? "Submitting..."
-                                    : "Hand over"}
+                                    : "Hand over to L&F Department"}
                                 </button>
                               ) : item.handover.status === "pending" ? (
                                 /* Pending */
+
                                 <span className="my-item-handover-status pending">
                                   <FiAlertCircle />
                                   Waiting for Department
                                 </span>
                               ) : item.handover.status === "rejected" ? (
                                 /* Rejected */
+
                                 <div className="my-item-handover-rejected">
                                   <span className="my-item-handover-status rejected">
                                     <FiAlertCircle />
@@ -515,7 +611,9 @@ const MyItems = () => {
                                     type="button"
                                     className="my-item-handover-button"
                                     disabled={handoverLoading === item._id}
-                                    onClick={() => handleHandover(item._id)}
+                                    onClick={() =>
+                                      openHandoverConfirmation(item)
+                                    }
                                   >
                                     <FiCheckCircle />
 
