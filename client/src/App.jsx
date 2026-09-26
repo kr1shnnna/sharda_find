@@ -32,9 +32,7 @@ import Notifications from "./pages/Notifications/Notifications";
 import Messages from "./pages/Messages/Messages";
 import Chat from "./pages/Chat/Chat";
 
-import AdminRoute from "./components/routes/AdminRoute";
-import AdminLogin from "./pages/Admin/AdminLogin";
-import AdminDashboard from "./pages/Admin/AdminDashboard";
+
 
 const Home = () => {
   return (
@@ -95,11 +93,6 @@ const AppContent = () => {
 
         <Route path="/login" element={<Login />} />
 
-        <Route path="/admin/login" element={<AdminLogin />} />
-
-        <Route element={<AdminRoute />}>
-          <Route path="/admin" element={<AdminDashboard />} />
-        </Route>
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
