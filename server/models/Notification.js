@@ -10,6 +10,7 @@ const notificationSchema = new mongoose.Schema(
 
     type: {
       type: String,
+
       enum: [
         "claim-submitted",
         "claim-approved",
@@ -17,8 +18,10 @@ const notificationSchema = new mongoose.Schema(
         "handover-submitted",
         "handover-confirmed",
         "handover-rejected",
-        "new-message",
         "item-found",
+        "item-handover-confirmed",
+        "item-returned",
+        "new-message",
       ],
       required: true,
     },
@@ -58,7 +61,7 @@ const notificationSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Notification = mongoose.model("Notification", notificationSchema);

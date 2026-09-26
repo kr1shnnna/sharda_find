@@ -5,6 +5,8 @@ const {
   getMyItems,
   getItemById,
   reportFoundItem,
+  confirmFinderHandover,
+  confirmOwnerReceivedItem,
 } = require("../controllers/itemController");
 const { protect } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
@@ -23,6 +25,19 @@ router.post(
 );
 
 router.get("/:id", getItemById);
+
+router.patch(
+  "/:id/confirm-handover",
+  protect,
+  confirmFinderHandover
+);
+
+router.patch(
+  "/:id/confirm-received",
+  protect,
+  confirmOwnerReceivedItem
+);
+
 
 
 module.exports = router;

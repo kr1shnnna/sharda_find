@@ -88,6 +88,21 @@ const itemSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+
+    finderHandedOver: {
+      type: Boolean,
+      default: false,
+    },
+    returnConfirmedByOwner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    returnConfirmedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
