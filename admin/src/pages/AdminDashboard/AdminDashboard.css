@@ -2032,3 +2032,595 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ==================================================
+   Dashboard Polish Overrides
+   Visual-only refinements — functionality unchanged
+================================================== */
+
+.admin-dashboard-container {
+  padding: 34px 40px 56px;
+  max-width: 1600px;
+}
+
+/* Keep the content centered on very wide screens. */
+.admin-dashboard-shell {
+  align-items: flex-start;
+}
+
+.admin-sidebar {
+  flex: 0 0 240px;
+}
+
+/* --------------------------------------------------
+   Heading spacing
+-------------------------------------------------- */
+
+.admin-dashboard-heading {
+  margin-bottom: 26px;
+}
+
+.admin-heading-eyebrow {
+  margin-bottom: 6px;
+  font-size: 10px;
+}
+
+.admin-dashboard-heading h1 {
+  font-size: clamp(25px, 2vw, 30px);
+  letter-spacing: -0.02em;
+}
+
+.admin-dashboard-heading p {
+  max-width: 680px;
+  font-size: 13px;
+}
+
+.admin-refresh-button {
+  min-width: 104px;
+}
+
+/* --------------------------------------------------
+   Statistics cards
+-------------------------------------------------- */
+
+.admin-summary-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 26px;
+}
+
+.admin-summary-card {
+  min-height: 100px;
+  padding: 16px;
+  gap: 12px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.035);
+}
+
+.admin-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.055);
+}
+
+.admin-summary-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.admin-summary-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.admin-summary-label {
+  font-size: 10px;
+}
+
+.admin-summary-value {
+  font-size: 23px;
+}
+
+/* --------------------------------------------------
+   Tabs
+-------------------------------------------------- */
+
+.admin-dashboard-tabs {
+  margin-bottom: 18px;
+}
+
+.admin-dashboard-tab {
+  min-height: 36px;
+  padding: 0 16px;
+}
+
+/* --------------------------------------------------
+   Main section/card layout
+-------------------------------------------------- */
+
+.admin-dashboard-section {
+  margin-bottom: 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.025);
+}
+
+.admin-section-header {
+  min-height: 74px;
+  padding: 17px 22px;
+}
+
+.admin-section-header h2 {
+  font-size: 15px;
+}
+
+.admin-section-header p {
+  font-size: 11px;
+}
+
+/*
+  With one attention case, let the card use the available
+  content width instead of leaving a large empty third.
+  With multiple cases, the grid automatically creates columns.
+*/
+.admin-case-grid {
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 14px;
+  padding: 18px;
+}
+
+.admin-case-card {
+  padding: 17px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.admin-case-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Keep the case content compact even when a single card
+   expands across the section. */
+.admin-case-card-top {
+  margin-bottom: 13px;
+}
+
+.admin-case-card-details {
+  margin-bottom: 13px;
+}
+
+.admin-case-card-alerts {
+  margin-bottom: 13px;
+}
+
+/* --------------------------------------------------
+   Case list
+-------------------------------------------------- */
+
+.admin-case-search {
+  margin: 16px 18px;
+}
+
+.admin-case-list {
+  margin: 0 18px 18px;
+}
+
+.admin-case-row {
+  min-height: 70px;
+  grid-template-columns: minmax(230px, 1.3fr) minmax(160px, 0.9fr) 130px auto;
+  gap: 16px;
+  padding: 12px 14px;
+}
+
+/* --------------------------------------------------
+   Modal polish
+-------------------------------------------------- */
+
+.admin-modal-overlay {
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.48);
+}
+
+.admin-case-modal {
+  max-width: 820px;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+}
+
+.admin-modal-header {
+  padding: 20px 24px;
+}
+
+.admin-case-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-case-summary > div {
+  min-height: 72px;
+  padding: 13px 17px;
+}
+
+.admin-case-timeline-section {
+  padding: 20px 24px 22px;
+}
+
+/* --------------------------------------------------
+   Action panels
+-------------------------------------------------- */
+
+.admin-action-panel {
+  margin: 18px 24px 0;
+  padding: 16px;
+  border-radius: var(--radius-md);
+}
+
+.admin-action-panel-content > p {
+  max-width: 620px;
+}
+
+.admin-action-buttons {
+  margin-top: 11px;
+}
+
+.admin-modal-reject,
+.admin-modal-approve {
+  min-height: 37px;
+}
+
+/* --------------------------------------------------
+   Claim information
+-------------------------------------------------- */
+
+.admin-claim-review-grid {
+  gap: 9px;
+}
+
+.admin-claim-review-grid > div,
+.admin-claim-message {
+  padding: 11px;
+}
+
+/* --------------------------------------------------
+   Sidebar polish
+-------------------------------------------------- */
+
+.admin-sidebar-content {
+  padding: 26px 14px;
+}
+
+.admin-sidebar-section {
+  gap: 4px;
+}
+
+.admin-sidebar-link {
+  min-height: 40px;
+}
+
+.admin-sidebar-footer {
+  padding: 14px;
+}
+
+/* --------------------------------------------------
+   Medium desktop
+-------------------------------------------------- */
+
+@media (max-width: 1250px) {
+  .admin-dashboard-container {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .admin-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-case-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --------------------------------------------------
+   Tablet / smaller laptop
+-------------------------------------------------- */
+
+@media (max-width: 980px) {
+  .admin-sidebar {
+    flex-basis: 215px;
+    width: 215px;
+  }
+
+  .admin-dashboard-container {
+    padding: 28px 22px 48px;
+  }
+
+  .admin-dashboard-heading {
+    gap: 20px;
+  }
+
+  .admin-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-case-row {
+    grid-template-columns: minmax(200px, 1fr) 140px auto;
+  }
+
+  .admin-case-row-status {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------
+   Mobile navigation
+-------------------------------------------------- */
+
+@media (max-width: 760px) {
+  .admin-dashboard-shell {
+    display: block;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .admin-sidebar-content {
+    padding: 9px 14px;
+  }
+
+  .admin-sidebar-section {
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .admin-sidebar-section-title {
+    display: none;
+  }
+
+  .admin-sidebar-link {
+    flex: 1;
+    min-height: 40px;
+    justify-content: center;
+    padding: 0 10px;
+  }
+
+  .admin-sidebar-footer {
+    display: none;
+  }
+
+  .admin-dashboard-container {
+    padding: 24px 16px 42px;
+  }
+
+  .admin-case-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-case-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .admin-case-row-meta,
+  .admin-case-row-status {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------
+   Phone
+-------------------------------------------------- */
+
+@media (max-width: 600px) {
+  .admin-dashboard-heading {
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .admin-dashboard-heading h1 {
+    font-size: 24px;
+  }
+
+  .admin-dashboard-heading p {
+    font-size: 12px;
+  }
+
+  .admin-refresh-button {
+    width: 100%;
+  }
+
+  .admin-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    margin-bottom: 22px;
+  }
+
+  .admin-summary-card {
+    min-height: 84px;
+  }
+
+  .admin-dashboard-tabs {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 14px;
+  }
+
+  .admin-dashboard-tab {
+    flex: 1 0 auto;
+    white-space: nowrap;
+  }
+
+  .admin-dashboard-section {
+    border-radius: var(--radius-md);
+  }
+
+  .admin-section-header {
+    min-height: 68px;
+    padding: 15px 16px;
+  }
+
+  .admin-case-grid {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .admin-case-card {
+    padding: 15px;
+  }
+
+  .admin-case-search {
+    margin: 12px;
+  }
+
+  .admin-case-list {
+    margin: 0 12px 12px;
+  }
+
+  .admin-case-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 13px;
+  }
+
+  .admin-table-action {
+    width: 100%;
+  }
+
+  .admin-modal-overlay {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .admin-case-modal {
+    max-height: calc(100vh - 24px);
+    border-radius: 15px;
+  }
+
+  .admin-modal-header {
+    padding: 17px;
+  }
+
+  .admin-case-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-case-summary > div {
+    min-height: 68px;
+  }
+
+  .admin-case-summary > div:nth-child(2) {
+    border-right: none;
+  }
+
+  .admin-case-summary > div:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .admin-action-panel {
+    margin: 14px 16px 0;
+    padding: 14px;
+    gap: 11px;
+  }
+
+  .admin-action-buttons {
+    flex-direction: column-reverse;
+  }
+
+  .admin-action-buttons button {
+    width: 100%;
+  }
+
+  .admin-claim-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-case-timeline-section {
+    padding: 17px 16px 19px;
+  }
+
+  .admin-approved-owner {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .admin-case-final-action,
+  .admin-case-returned {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .admin-case-final-action {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-case-final-action .admin-modal-approve {
+    width: 100%;
+  }
+}
+
+/* --------------------------------------------------
+   Very small phones
+-------------------------------------------------- */
+
+@media (max-width: 440px) {
+  .admin-sidebar-link {
+    width: 42px;
+    flex: 0 0 42px;
+    padding: 0;
+  }
+
+  .admin-sidebar-link span:not(.admin-sidebar-badge) {
+    display: none;
+  }
+
+  .admin-sidebar-section {
+    justify-content: center;
+  }
+
+  .admin-dashboard-container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .admin-summary-card {
+    padding: 14px;
+  }
+
+  .admin-summary-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .admin-dashboard-heading h1 {
+    font-size: 22px;
+  }
+
+  .admin-case-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-case-summary > div {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .admin-case-summary > div:last-child {
+    border-bottom: none;
+  }
+
+  .admin-modal-header h2 {
+    font-size: 18px;
+  }
+
+  .admin-timeline-top {
+    flex-direction: column;
+    gap: 3px;
+  }
+}
+
