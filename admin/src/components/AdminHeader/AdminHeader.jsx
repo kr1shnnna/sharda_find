@@ -100,7 +100,22 @@ const AdminHeader = () => {
         ...previous,
       ]);
 
-      setUnreadCount((previous) => previous + 1);
+      setUnreadCount(
+        (previous) => previous + 1
+      );
+
+      /*
+       * Tell other admin pages that a new
+       * notification has arrived.
+       */
+      window.dispatchEvent(
+        new CustomEvent(
+          "admin-new-notification",
+          {
+            detail: notification,
+          }
+        )
+      );
 
       toast.success(
         notification.title ||
@@ -403,7 +418,7 @@ const AdminHeader = () => {
           </div>
 
           <div className="admin-header-divider" />
-          
+
           <button
             type="button"
             className="admin-header-logout"
