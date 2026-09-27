@@ -401,7 +401,12 @@ const returnItemFromDepartment = async (req, res) => {
 
 const getAllCases = async (req, res) => {
   try {
-    const items = await Item.find()
+    const items = await Item.find({
+      $or: [
+        { itemLocation: "lost-found-department" },
+        { departmentReturnedAt: { $ne: null } },
+      ],
+    })
       .populate("reportedBy", "name email")
       .populate("foundBy", "name email")
       .populate("departmentReturnedTo", "name email")
