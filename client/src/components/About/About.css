@@ -112,13 +112,15 @@
   line-height: 1.6;
 }
 
-/* Responsive */
+
+/* --------------------------------
+   RESPONSIVE
+-------------------------------- */
 
 @media (max-width: 900px) {
   .about-content {
     grid-template-columns: 1fr;
     gap: 40px;
-
     padding: 48px;
   }
 
@@ -127,16 +129,81 @@
   }
 }
 
+
 @media (max-width: 600px) {
   .about {
     padding: 60px 0;
   }
 
+  .about-container {
+    padding: 0 18px;
+  }
+
   .about-content {
-    padding: 36px 24px;
+    padding: 36px 20px;
+    gap: 36px;
+    text-align: center;
+  }
+
+  .about-text {
+    max-width: 100%;
+  }
+
+  .about-label {
+    margin-bottom: 10px;
+    font-size: 12px;
   }
 
   .about h2 {
+    margin-bottom: 18px;
     font-size: 30px;
+    line-height: 1.2;
+  }
+
+  .about-description {
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* Center feature section */
+  .about-features {
+    align-items: center;
+    gap: 28px;
+    text-align: center;
+  }
+
+  /* Center each feature */
+  .about-feature {
+    width: 100%;
+    max-width: 320px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 10px;
+    text-align: center;
+  }
+
+  .about-feature-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .about-feature-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .about-feature h3 {
+    margin-bottom: 5px;
+    font-size: 15px;
+  }
+
+  .about-feature p {
+    font-size: 13px;
+    line-height: 1.6;
   }
 }
+

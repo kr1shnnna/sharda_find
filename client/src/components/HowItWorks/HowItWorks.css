@@ -96,28 +96,92 @@
   line-height: 1.7;
 }
 
-/* Responsive */
+
+/* -------------------------------
+   RESPONSIVE
+-------------------------------- */
 
 @media (max-width: 900px) {
   .how-it-works-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 600px) {
-  .how-it-works {
-    padding: 60px 0;
-  }
-
-  .how-it-works-header h2 {
-    font-size: 28px;
-  }
-
-  .how-it-works-grid {
-    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .how-it-works-card {
     padding: 24px;
   }
 }
+
+
+@media (max-width: 600px) {
+  .how-it-works {
+    padding: 60px 0;
+  }
+
+  .how-it-works-container {
+    padding: 0 18px;
+  }
+
+  .how-it-works-header {
+    max-width: 100%;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .how-it-works-header h2 {
+    font-size: 28px;
+  }
+
+  .how-it-works-header .section-description {
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .how-it-works-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .how-it-works-card {
+    padding: 26px 20px;
+    text-align: center;
+  }
+
+  .step-top {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 20px;
+  }
+
+  .step-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .step-number {
+    position: absolute;
+    top: 50%;
+    right: 0;
+
+    transform: translateY(-50%);
+  }
+
+  .how-it-works-card h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+
+  .how-it-works-card p {
+    max-width: 500px;
+    margin: 0 auto;
+
+    font-size: 13px;
+    line-height: 1.65;
+  }
+}
+
+
