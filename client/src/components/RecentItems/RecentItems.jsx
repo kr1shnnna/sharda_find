@@ -1,21 +1,59 @@
-import { useState } from "react";
-import { FiArrowRight, FiSearch } from "react-icons/fi";
+import { useEffect, useState } from "react";
+
+import {
+  FiArrowRight,
+  FiSearch,
+} from "react-icons/fi";
+
 import { Link } from "react-router-dom";
 
 import ItemCard from "../ItemCard/ItemCard";
-import placeholderItems from "../../data/placeholderItems";
+
+import api from "../../api/axios";
 
 import "./RecentItems.css";
 
 const RecentItems = () => {
-  const [loading] = useState(false);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const items = placeholderItems;
+  useEffect(() => {
+    const fetchRecentItems = async () => {
+      try {
+        setLoading(true);
+
+        const response = await api.get("/items");
+
+        const fetchedItems =
+          response.data?.items || [];
+
+        /*
+         * The backend already returns items
+         * newest first.
+         *
+         * We only need the first 6 for
+         * the homepage.
+         */
+        setItems(fetchedItems.slice(0, 6));
+      } catch (error) {
+        console.error(
+          "Unable to fetch recent items:",
+          error
+        );
+
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecentItems();
+  }, []);
 
   return (
     <section className="recent-items">
       <div className="recent-items-container">
-
+        {/* Header */}
         <div className="recent-items-header">
           <div>
             <p className="section-label">
@@ -27,7 +65,8 @@ const RecentItems = () => {
             </h2>
 
             <p className="section-description">
-              Browse the latest items reported by Sharda University students.
+              Browse the latest items reported by
+              Sharda University students.
             </p>
           </div>
 
@@ -40,6 +79,7 @@ const RecentItems = () => {
           </Link>
         </div>
 
+        {/* Loading State */}
         {loading ? (
           <div className="recent-items-grid">
             {[1, 2, 3].map((item) => (
@@ -53,10 +93,12 @@ const RecentItems = () => {
                   <div className="skeleton-title"></div>
 
                   <div className="skeleton-info"></div>
+
                   <div className="skeleton-info short"></div>
 
                   <div className="skeleton-footer">
                     <div className="skeleton-category"></div>
+
                     <div className="skeleton-button"></div>
                   </div>
                 </div>
@@ -64,15 +106,17 @@ const RecentItems = () => {
             ))}
           </div>
         ) : items.length > 0 ? (
+          /* Items */
           <div className="recent-items-grid">
             {items.map((item) => (
               <ItemCard
-                key={item.id}
+                key={item._id}
                 item={item}
               />
             ))}
           </div>
         ) : (
+          /* Empty State */
           <div className="recent-items-empty">
             <div className="empty-icon">
               <FiSearch />
@@ -83,8 +127,9 @@ const RecentItems = () => {
             </h3>
 
             <p>
-              There are no recent lost or found items to display.
-              Check back later or report an item yourself.
+              There are no recent lost or found
+              items to display. Check back later
+              or report an item yourself.
             </p>
 
             <Link
@@ -96,7 +141,6 @@ const RecentItems = () => {
             </Link>
           </div>
         )}
-
       </div>
     </section>
   );
