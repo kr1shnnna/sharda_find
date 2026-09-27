@@ -2,16 +2,17 @@ import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 import { FaLeaf } from "react-icons/fa";
-
 import {
   FiBell,
   FiChevronDown,
   FiFileText,
   FiGrid,
   FiLogOut,
+  FiMenu,
   FiMessageSquare,
   FiPackage,
   FiUser,
+  FiX,
 } from "react-icons/fi";
 
 import {
@@ -38,7 +39,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
-
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
   /*
@@ -96,23 +97,16 @@ const Navbar = () => {
       );
     });
 
-    /*
-     * When the backend sends a new notification,
-     * increase the unread notification count.
-     */
-    socket.on(
-      "new-notification",
-      (notification) => {
-        console.log(
-          "New notification received:",
-          notification
-        );
+    socket.on("new-notification", (notification) => {
+      console.log(
+        "New notification received:",
+        notification
+      );
 
-        setUnreadCount(
-          (previousCount) => previousCount + 1
-        );
-      }
-    );
+      setUnreadCount(
+        (previousCount) => previousCount + 1
+      );
+    });
 
     socket.on("connect_error", (error) => {
       console.error(
@@ -131,6 +125,7 @@ const Navbar = () => {
    */
   const handleLogout = () => {
     setMenuOpen(false);
+    setMobileMenuOpen(false);
 
     logout();
 
@@ -144,6 +139,13 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
+  /*
+   * Close mobile menu after navigation
+   */
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className="navbar">
       <div className="navbar-container">
@@ -152,6 +154,7 @@ const Navbar = () => {
         <Link
           to="/"
           className="navbar-logo"
+          onClick={closeMobileMenu}
         >
           <span className="navbar-logo-icon">
             <FaLeaf />
@@ -162,14 +165,12 @@ const Navbar = () => {
           </span>
         </Link>
 
-        {/* Navigation */}
+        {/* Desktop Navigation */}
         <nav className="navbar-links">
           <Link
             to="/browse"
             className={`navbar-link ${
-              isActive("/browse")
-                ? "active"
-                : ""
+              isActive("/browse") ? "active" : ""
             }`}
           >
             Browse
@@ -190,8 +191,9 @@ const Navbar = () => {
           </Link>
         </nav>
 
-        {/* Right side */}
+        {/* Desktop Right Side */}
         <div className="navbar-actions">
+
           {isAuthenticated ? (
             <div className="navbar-user">
 
@@ -234,9 +236,7 @@ const Navbar = () => {
 
                   <FiChevronDown
                     className={
-                      menuOpen
-                        ? "rotate"
-                        : ""
+                      menuOpen ? "rotate" : ""
                     }
                   />
                 </button>
@@ -244,7 +244,6 @@ const Navbar = () => {
                 {menuOpen && (
                   <div className="navbar-user-dropdown">
 
-                    {/* Dashboard */}
                     <Link
                       to="/dashboard"
                       className="user-dropdown-item"
@@ -253,13 +252,9 @@ const Navbar = () => {
                       }
                     >
                       <FiGrid />
-
-                      <span>
-                        Dashboard
-                      </span>
+                      <span>Dashboard</span>
                     </Link>
 
-                    {/* My Items */}
                     <Link
                       to="/my-items"
                       className="user-dropdown-item"
@@ -268,13 +263,9 @@ const Navbar = () => {
                       }
                     >
                       <FiPackage />
-
-                      <span>
-                        My Items
-                      </span>
+                      <span>My Items</span>
                     </Link>
 
-                    {/* My Claims */}
                     <Link
                       to="/my-claims"
                       className="user-dropdown-item"
@@ -283,13 +274,9 @@ const Navbar = () => {
                       }
                     >
                       <FiFileText />
-
-                      <span>
-                        My Claims
-                      </span>
+                      <span>My Claims</span>
                     </Link>
 
-                    {/* Messages */}
                     <Link
                       to="/messages"
                       className="user-dropdown-item"
@@ -298,34 +285,27 @@ const Navbar = () => {
                       }
                     >
                       <FiMessageSquare />
-
-                      <span>
-                        Messages
-                      </span>
+                      <span>Messages</span>
                     </Link>
 
                     <div className="user-dropdown-divider" />
 
-                    {/* Logout */}
                     <button
                       type="button"
                       className="user-dropdown-item logout-item"
                       onClick={handleLogout}
                     >
                       <FiLogOut />
-
-                      <span>
-                        Logout
-                      </span>
+                      <span>Logout</span>
                     </button>
 
                   </div>
                 )}
               </div>
+
             </div>
           ) : (
             <>
-              {/* Login */}
               <Link
                 to="/login"
                 className="navbar-login-button"
@@ -333,7 +313,6 @@ const Navbar = () => {
                 Login
               </Link>
 
-              {/* Register */}
               <Link
                 to="/register"
                 className="navbar-register-button"
@@ -342,9 +321,172 @@ const Navbar = () => {
               </Link>
             </>
           )}
+
         </div>
 
+        {/* Mobile Menu Button */}
+        <button
+          type="button"
+          className="navbar-mobile-button"
+          onClick={() =>
+            setMobileMenuOpen(
+              (previous) => !previous
+            )
+          }
+          aria-label={
+            mobileMenuOpen
+              ? "Close navigation menu"
+              : "Open navigation menu"
+          }
+          aria-expanded={mobileMenuOpen}
+        >
+          {mobileMenuOpen ? <FiX /> : <FiMenu />}
+        </button>
+
       </div>
+
+      {/* Mobile Navigation */}
+      {mobileMenuOpen && (
+        <div className="navbar-mobile-menu">
+
+          <nav className="navbar-mobile-links">
+
+            <Link
+              to="/browse"
+              className={`navbar-mobile-link ${
+                isActive("/browse") ? "active" : ""
+              }`}
+              onClick={closeMobileMenu}
+            >
+              Browse
+            </Link>
+
+            <Link
+              to="/#how-it-works"
+              className="navbar-mobile-link"
+              onClick={closeMobileMenu}
+            >
+              How It Works
+            </Link>
+
+            <Link
+              to="/#about"
+              className="navbar-mobile-link"
+              onClick={closeMobileMenu}
+            >
+              About
+            </Link>
+
+            {isAuthenticated && (
+              <>
+                <div className="navbar-mobile-divider" />
+
+                <Link
+                  to="/notifications"
+                  className="navbar-mobile-link navbar-mobile-link-with-icon"
+                  onClick={closeMobileMenu}
+                >
+                  <span>
+                    <FiBell />
+                    Notifications
+                  </span>
+
+                  {unreadCount > 0 && (
+                    <span className="mobile-notification-badge">
+                      {unreadCount > 99
+                        ? "99+"
+                        : unreadCount}
+                    </span>
+                  )}
+                </Link>
+
+                <Link
+                  to="/dashboard"
+                  className="navbar-mobile-link navbar-mobile-link-with-icon"
+                  onClick={closeMobileMenu}
+                >
+                  <span>
+                    <FiGrid />
+                    Dashboard
+                  </span>
+                </Link>
+
+                <Link
+                  to="/my-items"
+                  className="navbar-mobile-link navbar-mobile-link-with-icon"
+                  onClick={closeMobileMenu}
+                >
+                  <span>
+                    <FiPackage />
+                    My Items
+                  </span>
+                </Link>
+
+                <Link
+                  to="/my-claims"
+                  className="navbar-mobile-link navbar-mobile-link-with-icon"
+                  onClick={closeMobileMenu}
+                >
+                  <span>
+                    <FiFileText />
+                    My Claims
+                  </span>
+                </Link>
+
+                <Link
+                  to="/messages"
+                  className="navbar-mobile-link navbar-mobile-link-with-icon"
+                  onClick={closeMobileMenu}
+                >
+                  <span>
+                    <FiMessageSquare />
+                    Messages
+                  </span>
+                </Link>
+
+                <div className="navbar-mobile-divider" />
+
+                <button
+                  type="button"
+                  className="navbar-mobile-link navbar-mobile-logout"
+                  onClick={handleLogout}
+                >
+                  <span>
+                    <FiLogOut />
+                    Logout
+                  </span>
+                </button>
+              </>
+            )}
+
+            {!isAuthenticated && (
+              <>
+                <div className="navbar-mobile-divider" />
+
+                <div className="navbar-mobile-auth">
+                  <Link
+                    to="/login"
+                    className="navbar-login-button"
+                    onClick={closeMobileMenu}
+                  >
+                    Login
+                  </Link>
+
+                  <Link
+                    to="/register"
+                    className="navbar-register-button"
+                    onClick={closeMobileMenu}
+                  >
+                    Register
+                  </Link>
+                </div>
+              </>
+            )}
+
+          </nav>
+
+        </div>
+      )}
     </header>
   );
 };

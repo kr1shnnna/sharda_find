@@ -409,3 +409,209 @@
 .logout-item:hover svg {
   color: var(--danger);
 }
+
+/* =========================
+   Mobile Navigation
+========================= */
+
+.navbar-mobile-button {
+  display: none;
+}
+
+
+/* =========================
+   Mobile Menu
+========================= */
+
+.navbar-mobile-menu {
+  display: none;
+}
+
+
+/* =========================
+   Mobile Breakpoint
+========================= */
+
+@media (max-width: 768px) {
+
+  .navbar-container {
+    height: 64px;
+    padding: 0 16px;
+  }
+
+  /* Hide desktop navigation */
+  .navbar-links,
+  .navbar-actions {
+    display: none;
+  }
+
+  /* Mobile menu button */
+  .navbar-mobile-button {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--text-primary);
+    background-color: var(--white);
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    font-size: 21px;
+
+    cursor: pointer;
+
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .navbar-mobile-button:hover {
+    color: var(--primary);
+    background-color: var(--primary-light);
+    border-color: #bbf7d0;
+  }
+
+  .navbar-mobile-button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* Mobile menu container */
+  .navbar-mobile-menu {
+    display: block;
+
+    background-color: var(--white);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+
+    box-shadow:
+      0 8px 20px rgba(15, 23, 42, 0.08);
+  }
+
+  .navbar-mobile-links {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 16px 14px;
+  }
+
+  /* Mobile links */
+  .navbar-mobile-link {
+    width: 100%;
+    min-height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 12px;
+
+    color: var(--text-primary);
+    background: transparent;
+
+    border: none;
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  .navbar-mobile-link:hover {
+    color: var(--primary);
+    background-color: var(--primary-light);
+  }
+
+  .navbar-mobile-link.active {
+    color: var(--primary);
+    background-color: var(--primary-light);
+    font-weight: 600;
+  }
+
+  /* Links containing icons */
+  .navbar-mobile-link-with-icon > span {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .navbar-mobile-link-with-icon svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+  }
+
+  /* Divider */
+  .navbar-mobile-divider {
+    height: 1px;
+    margin: 8px 0;
+
+    background-color: var(--border);
+  }
+
+  /* Notification badge */
+  .mobile-notification-badge {
+    min-width: 20px;
+    height: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 5px;
+
+    color: var(--white);
+    background-color: var(--danger);
+
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  /* Logout */
+  .navbar-mobile-logout {
+    color: var(--danger);
+  }
+
+  .navbar-mobile-logout:hover {
+    color: var(--danger);
+    background-color: #fef2f2;
+  }
+
+  /* Login / Register */
+  .navbar-mobile-auth {
+    display: flex;
+    gap: 10px;
+
+    padding: 8px 0 2px;
+  }
+
+  .navbar-mobile-auth .navbar-login-button,
+  .navbar-mobile-auth .navbar-register-button {
+    flex: 1;
+  }
+
+  /* Smaller logo */
+  .navbar-logo {
+    font-size: 18px;
+  }
+
+  .navbar-logo-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+}
