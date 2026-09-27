@@ -72,7 +72,6 @@
 
 .item-details-gallery {
   min-width: 0;
-
   background-color: #f1f5f9;
 }
 
@@ -169,7 +168,6 @@
 
 .gallery-arrow:hover:not(:disabled) {
   color: var(--white);
-
   background-color: var(--primary);
   border-color: var(--primary);
 }
@@ -204,6 +202,8 @@
   background-color: var(--white);
 
   border-top: 1px solid var(--border);
+
+  scrollbar-width: thin;
 }
 
 .item-image-thumbnail {
@@ -285,6 +285,8 @@
   font-weight: 700;
 
   letter-spacing: -0.8px;
+
+  overflow-wrap: anywhere;
 }
 
 .details-status {
@@ -316,6 +318,8 @@
 
   font-size: 15px;
   line-height: 1.7;
+
+  overflow-wrap: anywhere;
 }
 
 
@@ -338,6 +342,8 @@
   display: flex;
   align-items: center;
   gap: 13px;
+
+  min-width: 0;
 }
 
 .details-info-icon {
@@ -363,6 +369,8 @@
 }
 
 .details-info-item > div:last-child {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -379,6 +387,8 @@
 
   font-size: 13px;
   font-weight: 600;
+
+  overflow-wrap: anywhere;
 }
 
 
@@ -410,6 +420,8 @@
 }
 
 .pickup-box div {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -425,13 +437,14 @@
   color: var(--primary-dark);
 
   font-size: 13px;
+
+  overflow-wrap: anywhere;
 }
 
 
 /* =========================================
    ITEM ACTIONS
 ========================================= */
-
 
 .details-actions {
   display: flex;
@@ -443,8 +456,9 @@
 }
 
 
-
-/* Primary action */
+/* =========================================
+   CLAIM BUTTON
+========================================= */
 
 .claim-button {
   flex: 1 1 160px;
@@ -475,7 +489,8 @@
     background-color 0.2s ease,
     opacity 0.2s ease,
     transform 0.2s ease;
-    white-space: nowrap;
+
+  white-space: nowrap;
 }
 
 .claim-button:hover:not(:disabled) {
@@ -504,7 +519,9 @@
 }
 
 
-/* Message action */
+/* =========================================
+   MESSAGE BUTTON
+========================================= */
 
 .message-button {
   height: 48px;
@@ -542,7 +559,6 @@
 
 .message-button:hover {
   color: var(--white);
-
   background-color: var(--primary);
   border-color: var(--primary);
 }
@@ -554,6 +570,186 @@
 .message-button:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+
+/* =========================================
+   DEPARTMENT HANDOVER
+========================================= */
+
+.department-handover-button {
+  min-height: 44px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 18px;
+
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+
+  background: var(--primary);
+  color: var(--white);
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+.department-handover-button:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+
+  box-shadow: 0 4px 10px rgba(22, 101, 52, 0.15);
+}
+
+.department-handover-button:active {
+  transform: translateY(1px);
+}
+
+.department-handover-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.department-handover-button svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+
+/* =========================================
+   DEPARTMENT HANDOVER STATUS
+========================================= */
+
+.department-handover-status {
+  min-height: 44px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 16px;
+
+  border-radius: var(--radius-sm);
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.department-handover-status svg {
+  width: 17px;
+  height: 17px;
+}
+
+.department-handover-status.pending {
+  border: 1px solid #fde68a;
+
+  background: #fffbeb;
+  color: #92400e;
+}
+
+
+/* =========================================
+   SHARE ACTIONS
+========================================= */
+
+.share-whatsapp-button,
+.copy-link-button {
+  height: 48px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 16px;
+
+  border-radius: var(--radius-md);
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.share-whatsapp-button svg,
+.copy-link-button svg {
+  width: 17px;
+  height: 17px;
+
+  flex-shrink: 0;
+}
+
+.share-whatsapp-button {
+  flex: 1 1 190px;
+
+  min-width: 190px;
+
+  color: var(--primary);
+  background-color: var(--primary-light);
+
+  border: 1px solid #bbf7d0;
+}
+
+.share-whatsapp-button:hover {
+  background-color: #bbf7d0;
+  border-color: #86efac;
+
+  transform: translateY(-1px);
+}
+
+.copy-link-button {
+  flex: 0 0 auto;
+
+  min-width: 120px;
+
+  color: var(--text-primary);
+  background-color: var(--white);
+
+  border: 1px solid var(--border);
+}
+
+.copy-link-button:hover {
+  background-color: var(--background);
+  border-color: #cbd5e1;
+
+  transform: translateY(-1px);
+}
+
+.share-whatsapp-button:focus-visible,
+.copy-link-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.share-whatsapp-button:disabled,
+.copy-link-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 
@@ -820,9 +1016,6 @@
     color 0.2s ease;
 }
 
-
-/* Cancel */
-
 .report-found-cancel {
   color: var(--text-primary);
   background-color: var(--white);
@@ -834,9 +1027,6 @@
   background-color: var(--background);
   border-color: #cbd5e1;
 }
-
-
-/* Confirm */
 
 .report-found-confirm {
   color: var(--white);
@@ -857,87 +1047,8 @@
 
 
 /* =========================================
-   RESPONSIVE
+   MY ITEM HELPERS
 ========================================= */
-
-@media (max-width: 900px) {
-  .item-details-card {
-    grid-template-columns: 1fr;
-  }
-
-  .item-details-image {
-    height: 420px;
-  }
-}
-
-@media (max-width: 600px) {
-  .item-details-page {
-    padding: 36px 0 60px;
-  }
-
-  .item-details-image {
-    height: 320px;
-  }
-
-  .item-details-content {
-    padding: 28px 24px;
-  }
-
-  .details-heading {
-    flex-direction: column;
-  }
-
-  .details-heading h1 {
-    font-size: 28px;
-  }
-
-  .item-image-thumbnail {
-    width: 64px;
-    height: 52px;
-  }
-
-  .gallery-arrow {
-    width: 36px;
-    height: 36px;
-  }
-
-  .gallery-arrow-left {
-    left: 10px;
-  }
-
-  .gallery-arrow-right {
-    right: 10px;
-  }
-
-  .details-actions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
-  .details-actions .claim-button,
-  .details-actions .message-button {
-    width: 100%;
-  }
-
-  .report-found-overlay {
-    padding: 16px;
-  }
-
-  .report-found-modal {
-    padding: 28px 22px;
-  }
-
-  .report-found-actions {
-    flex-direction: column-reverse;
-  }
-
-  .report-found-cancel,
-  .report-found-confirm {
-    width: 100%;
-  }
-}
-
 
 .my-item-footer {
   display: flex;
@@ -963,223 +1074,617 @@
 }
 
 
-/* =========================================================
-   DEPARTMENT HANDOVER
-   ========================================================= */
+/* =========================================
+   LARGE TABLET
+   1024px - 1199px
+========================================= */
 
-.department-handover-button {
-  min-height: 44px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  padding: 0 18px;
-
-  border: 1px solid var(--primary);
-  border-radius: var(--radius-sm);
-
-  background: var(--primary);
-  color: var(--white);
-
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.15s ease;
-}
-
-.department-handover-button:hover {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
-
-  box-shadow: 0 4px 10px rgba(22, 101, 52, 0.15);
-}
-
-.department-handover-button:active {
-  transform: translateY(1px);
-}
-
-.department-handover-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.department-handover-button svg {
-  width: 17px;
-  height: 17px;
-  flex-shrink: 0;
-}
-
-
-/* =========================================================
-   DEPARTMENT HANDOVER STATUS
-   ========================================================= */
-
-.department-handover-status {
-  min-height: 44px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  padding: 0 16px;
-
-  border-radius: var(--radius-sm);
-
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.department-handover-status svg {
-  width: 17px;
-  height: 17px;
-}
-
-.department-handover-status.pending {
-  border: 1px solid #fde68a;
-
-  background: #fffbeb;
-  color: #92400e;
-}
-
-
-/* =========================================================
-   DETAILS ACTIONS
-   ========================================================= */
-
-
-
-
-@media (max-width: 600px) {
-  .details-actions {
-    flex-direction: column;
-    align-items: stretch;
+@media (max-width: 1199px) {
+  .item-details-container {
+    padding: 0 22px;
   }
 
-  .details-actions .claim-button,
-  .details-actions .message-button,
-  .share-whatsapp-button,
+  .item-details-card {
+    grid-template-columns: 47% 53%;
+  }
+
+  .item-details-image {
+    height: 460px;
+  }
+
+  .item-details-content {
+    padding: 40px;
+  }
+
+  .details-heading h1 {
+    font-size: 32px;
+  }
+}
+
+
+/* =========================================
+   TABLET
+   768px - 1023px
+========================================= */
+
+@media (max-width: 1023px) {
+  .item-details-page {
+    padding: 40px 0 64px;
+  }
+
+  .item-details-container {
+    padding: 0 20px;
+  }
+
+  .item-details-card {
+    grid-template-columns: 46% 54%;
+  }
+
+  .item-details-image {
+    height: 430px;
+  }
+
+  .item-details-content {
+    padding: 34px;
+  }
+
+  .details-heading {
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .details-heading h1 {
+    font-size: 29px;
+  }
+
+  .details-description {
+    margin-bottom: 26px;
+    font-size: 14px;
+  }
+
+  .details-info {
+    gap: 16px;
+    padding: 20px 0;
+  }
+
+  .details-info-item {
+    gap: 11px;
+  }
+
+  .details-info-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .details-info-icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .details-info-item strong {
+    font-size: 12px;
+  }
+
+  .pickup-box {
+    margin-top: 18px;
+    padding: 13px;
+  }
+
+  /*
+    Keep actions flexible on tablet,
+    but prevent them from becoming too narrow.
+  */
+
+  .details-actions {
+    align-items: stretch;
+    gap: 9px;
+  }
+
+  .claim-button {
+    flex: 1 1 180px;
+    min-width: 150px;
+
+    height: 46px;
+
+    padding: 0 14px;
+
+    font-size: 13px;
+  }
+
+  .message-button {
+    height: 46px;
+    padding: 0 14px;
+  }
+
+  .department-handover-button {
+    min-height: 46px;
+
+    padding: 0 14px;
+
+    font-size: 13px;
+  }
+
+  .share-whatsapp-button {
+    flex: 1 1 170px;
+    min-width: 160px;
+
+    height: 46px;
+  }
+
   .copy-link-button {
-    width: 100%;
+    min-width: 110px;
+    height: 46px;
+  }
+}
+
+
+/* =========================================
+   SMALL TABLET
+   601px - 767px
+
+   Switch the card to a vertical layout
+   before reaching the phone breakpoint.
+========================================= */
+
+@media (max-width: 767px) {
+  .item-details-page {
+    padding: 34px 0 56px;
+  }
+
+  .item-details-container {
+    padding: 0 18px;
+  }
+
+  .item-details-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .item-details-image {
+    height: 380px;
+  }
+
+  .item-details-content {
+    padding: 32px;
+  }
+
+  .details-heading {
+    gap: 12px;
+  }
+
+  .details-heading h1 {
+    font-size: 28px;
+  }
+
+  .details-description {
+    font-size: 14px;
+  }
+
+  .details-actions {
+    flex-wrap: wrap;
+  }
+
+  .claim-button {
+    flex: 1 1 200px;
+  }
+
+  .message-button {
+    flex: 1 1 140px;
   }
 
   .department-handover-button,
   .department-handover-status {
-    width: 100%;
+    flex: 1 1 220px;
+  }
+
+  .share-whatsapp-button {
+    flex: 1 1 200px;
+  }
+
+  .copy-link-button {
+    flex: 1 1 120px;
   }
 }
 
-/* =====================================================
-   SHARE ACTIONS
-   ===================================================== */
 
-.share-whatsapp-button,
-.copy-link-button {
-  height: 48px;
+/* =========================================
+   MOBILE
+   <= 600px
+========================================= */
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+@media (max-width: 600px) {
+  .item-details-page {
+    padding: 28px 0 50px;
+  }
 
-  padding: 0 16px;
+  .item-details-container {
+    padding: 0 16px;
+  }
 
-  border-radius: var(--radius-md);
 
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
+  /* Back link */
 
-  white-space: nowrap;
+  .details-back-link {
+    margin-bottom: 18px;
+    font-size: 13px;
+  }
 
-  cursor: pointer;
 
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+  /* Main card */
+
+  .item-details-card {
+    display: flex;
+    flex-direction: column;
+
+    border-radius: var(--radius-lg);
+  }
+
+
+  /* Image */
+
+  .item-details-gallery {
+    width: 100%;
+  }
+
+  .item-details-image {
+    width: 100%;
+    height: 300px;
+  }
+
+  .details-type-badge {
+    top: 14px;
+    left: 14px;
+
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+
+
+  /* Gallery arrows */
+
+  .gallery-arrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  .gallery-arrow-left {
+    left: 10px;
+  }
+
+  .gallery-arrow-right {
+    right: 10px;
+  }
+
+  .gallery-arrow svg {
+    width: 18px;
+    height: 18px;
+  }
+
+
+  /* Thumbnails */
+
+  .item-image-thumbnails {
+    gap: 8px;
+    padding: 10px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+  }
+
+  .item-image-thumbnails::-webkit-scrollbar {
+    display: none;
+  }
+
+  .item-image-thumbnail {
+    width: 64px;
+    height: 52px;
+  }
+
+
+  /* Content */
+
+  .item-details-content {
+    padding: 24px 20px 26px;
+  }
+
+
+  /* Heading */
+
+  .details-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .details-category {
+    margin-bottom: 6px;
+    font-size: 11px;
+  }
+
+  .details-heading h1 {
+    font-size: 27px;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+  }
+
+  .details-status {
+    padding: 6px 9px;
+    font-size: 10px;
+  }
+
+
+  /* Description */
+
+  .details-description {
+    margin-bottom: 24px;
+
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+
+  /* Item information */
+
+  .details-info {
+    gap: 16px;
+    padding: 20px 0;
+  }
+
+  .details-info-item {
+    gap: 11px;
+  }
+
+  .details-info-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .details-info-icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .details-info-item span {
+    font-size: 10px;
+  }
+
+  .details-info-item strong {
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+
+  /* Current location */
+
+  .pickup-box {
+    margin-top: 18px;
+    padding: 13px;
+
+    gap: 10px;
+  }
+
+  .pickup-box > svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .pickup-box span {
+    font-size: 10px;
+  }
+
+  .pickup-box strong {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+
+  /* Actions */
+
+  .details-actions {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .details-actions .claim-button,
+  .details-actions .message-button,
+  .details-actions .department-handover-button,
+  .details-actions .department-handover-status,
+  .details-actions .share-whatsapp-button,
+  .details-actions .copy-link-button {
+    width: 100%;
+    min-width: 0;
+
+    flex: none;
+  }
+
+
+  /* Claim */
+
+  .claim-button {
+    height: 46px;
+    min-height: 46px;
+
+    padding: 0 14px;
+
+    font-size: 13px;
+  }
+
+  .claim-button svg {
+    width: 17px;
+    height: 17px;
+  }
+
+
+  /* Message */
+
+  .message-button {
+    height: 46px;
+    padding: 0 14px;
+
+    font-size: 13px;
+  }
+
+
+  /* Department handover */
+
+  .department-handover-button {
+    min-height: 46px;
+    height: auto;
+
+    padding: 11px 14px;
+
+    font-size: 13px;
+    line-height: 1.3;
+
+    white-space: normal;
+    text-align: center;
+  }
+
+  .department-handover-status {
+    min-height: 46px;
+
+    padding: 11px 14px;
+
+    font-size: 13px;
+    line-height: 1.3;
+
+    text-align: center;
+  }
+
+
+  /* Share */
+
+  .share-whatsapp-button,
+  .copy-link-button {
+    width: 100%;
+    min-width: 0;
+
+    height: 46px;
+
+    flex: none;
+
+    padding: 0 14px;
+
+    font-size: 13px;
+  }
+
+
+  /* Loading */
+
+  .item-details-loading {
+    min-height: 400px;
+    padding: 30px 20px;
+
+    text-align: center;
+  }
+
+
+  /* Error */
+
+  .item-details-error {
+    min-height: 400px;
+    padding: 32px 20px;
+  }
+
+  .item-details-error h2 {
+    font-size: 19px;
+  }
+
+  .item-details-error p {
+    max-width: 300px;
+    font-size: 13px;
+  }
+
+
+  /* Report found modal */
+
+  .report-found-overlay {
+    padding: 16px;
+  }
+
+  .report-found-modal {
+    max-width: 100%;
+    padding: 28px 20px;
+  }
+
+  .report-found-modal h2 {
+    padding: 0 12px;
+
+    font-size: 19px;
+    line-height: 1.35;
+  }
+
+  .report-found-modal p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .report-found-actions {
+    flex-direction: column-reverse;
+    gap: 9px;
+
+    margin-top: 24px;
+  }
+
+  .report-found-cancel,
+  .report-found-confirm {
+    width: 100%;
+    height: 44px;
+  }
 }
 
-.share-whatsapp-button svg,
-.copy-link-button svg {
-  width: 17px;
-  height: 17px;
 
-  flex-shrink: 0;
+/* =========================================
+   VERY SMALL PHONES
+   <= 380px
+========================================= */
+
+@media (max-width: 380px) {
+  .item-details-page {
+    padding-top: 22px;
+  }
+
+  .item-details-container {
+    padding: 0 12px;
+  }
+
+  .item-details-image {
+    height: 270px;
+  }
+
+  .item-details-content {
+    padding: 22px 16px 24px;
+  }
+
+  .details-heading h1 {
+    font-size: 24px;
+  }
+
+  .details-description {
+    font-size: 13px;
+  }
+
+  .item-image-thumbnail {
+    width: 58px;
+    height: 48px;
+  }
+
+  .details-info-item strong {
+    font-size: 12px;
+  }
+
+  .details-actions {
+    gap: 9px;
+  }
 }
-
-
-/* WhatsApp */
-
-.share-whatsapp-button {
-  flex: 1 1 190px;
-
-  min-width: 190px;
-
-  color: var(--primary);
-  background-color: var(--primary-light);
-
-  border: 1px solid #bbf7d0;
-}
-
-.share-whatsapp-button:hover {
-  background-color: #bbf7d0;
-  border-color: #86efac;
-
-  transform: translateY(-1px);
-}
-
-
-/* Copy Link */
-
-.copy-link-button {
-  flex: 0 0 auto;
-
-  min-width: 120px;
-
-  color: var(--text-primary);
-  background-color: var(--white);
-
-  border: 1px solid var(--border);
-}
-
-.copy-link-button:hover {
-  background-color: var(--background);
-  border-color: #cbd5e1;
-
-  transform: translateY(-1px);
-}
-
-
-/* Focus */
-
-.share-whatsapp-button:focus-visible,
-.copy-link-button:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-
-/* Disabled */
-
-.share-whatsapp-button:disabled,
-.copy-link-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-
-
-  

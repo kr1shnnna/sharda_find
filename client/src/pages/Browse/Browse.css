@@ -371,12 +371,17 @@
   line-height: 1.6;
 }
 
-/* Responsive */
+
+
+/* --------------------------------
+   RESPONSIVE
+-------------------------------- */
 
 @media (max-width: 1000px) {
   .browse-toolbar {
     align-items: flex-start;
     flex-direction: column;
+    gap: 16px;
   }
 
   .browse-filter-controls {
@@ -387,42 +392,245 @@
     flex: 1;
   }
 }
+
+
+/* --------------------------------
+   TABLET
+-------------------------------- */
 
 @media (max-width: 900px) {
   .browse-grid,
   .browse-loading {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
   }
 }
 
+
+/* --------------------------------
+   MOBILE
+-------------------------------- */
+
 @media (max-width: 600px) {
   .browse-page {
-    padding: 48px 0 60px;
+    padding: 44px 0 60px;
+  }
+
+  .browse-container {
+    padding: 0 16px;
+  }
+
+  /* Header */
+
+  .browse-header {
+    margin-bottom: 24px;
+    text-align: center;
   }
 
   .browse-header h1 {
+    margin-bottom: 8px;
     font-size: 30px;
+    line-height: 1.2;
+    letter-spacing: -0.6px;
   }
+
+  .browse-description {
+    max-width: 340px;
+    margin: 0 auto;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+
+  /* Search */
+
+  .browse-search {
+    height: 52px;
+    gap: 9px;
+    margin-bottom: 18px;
+    padding: 0 14px;
+  }
+
+  .browse-search svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .browse-search input {
+    font-size: 13px;
+  }
+
+
+  /* Toolbar */
+
+  .browse-toolbar {
+    width: 100%;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+
+  /* All / Lost / Found tabs */
 
   .browse-tabs {
     width: 100%;
+    padding: 4px;
   }
 
   .browse-tab {
     flex: 1;
+    height: 38px;
+    padding: 0 8px;
+    font-size: 13px;
   }
 
+
+  /* Filter controls */
+
   .browse-filter-controls {
+    width: 100%;
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 
   .filter-select {
     width: 100%;
+    min-width: 0;
+    height: 42px;
   }
+
+  /*
+    Hide the sliders icon on mobile.
+    This gives Category and Location
+    equal visual spacing.
+  */
+
+  .filter-select > svg:first-child {
+    display: none;
+  }
+
+  .filter-select select {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0 28px 0 10px;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .filter-select .select-arrow {
+    right: 8px;
+    width: 13px;
+    height: 13px;
+  }
+
+
+  /* Sort */
+
+  .filter-select:last-child {
+    grid-column: 1 / -1;
+  }
+
+
+  /* Results count */
+
+  .browse-results-header {
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  .browse-results-header p {
+    font-size: 13px;
+  }
+
+
+  /* Item grid */
 
   .browse-grid,
   .browse-loading {
     grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+
+  /* Loading cards */
+
+  .browse-loading-card {
+    height: 360px;
+  }
+
+  .browse-loading-image {
+    height: 200px;
+  }
+
+
+  /* Empty state */
+
+  .browse-empty {
+    min-height: 280px;
+    padding: 36px 20px;
+  }
+
+  .browse-empty-icon {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 14px;
+  }
+
+  .browse-empty h3 {
+    font-size: 17px;
+  }
+
+  .browse-empty p {
+    max-width: 300px;
+    font-size: 13px;
+  }
+}
+
+
+/* --------------------------------
+   SMALL PHONES
+-------------------------------- */
+
+@media (max-width: 380px) {
+  .browse-container {
+    padding: 0 14px;
+  }
+
+  /*
+    On very narrow screens,
+    stack filters to prevent
+    cramped dropdowns.
+  */
+
+  .browse-filter-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-select:last-child {
+    grid-column: auto;
+  }
+
+  .filter-select {
+    height: 42px;
+  }
+
+  .filter-select select {
+    font-size: 13px;
+  }
+
+  .browse-header h1 {
+    font-size: 28px;
+  }
+
+  .browse-search {
+    padding: 0 12px;
+  }
+
+  .browse-tab {
+    padding: 0 6px;
+    font-size: 12px;
   }
 }
