@@ -6,6 +6,7 @@ import {
   FiChevronRight,
   FiClock,
   FiEye,
+  FiGrid,
   FiPackage,
   FiRefreshCw,
   FiSearch,
@@ -124,6 +125,14 @@ const AdminDashboard = () => {
   const [caseLoading, setCaseLoading] = useState(false);
 
   const [returningItem, setReturningItem] = useState(false);
+
+  const [reviewingClaim, setReviewingClaim] = useState(false);
+  const [claimReviewNote, setClaimReviewNote] = useState("");
+  const [claimReviewNoteError, setClaimReviewNoteError] = useState("");
+
+  const [reviewingHandover, setReviewingHandover] = useState(false);
+  const [handoverReviewNote, setHandoverReviewNote] = useState("");
+  const [handoverReviewNoteError, setHandoverReviewNoteError] = useState("");
 
   /* ==================================================
      Fetch Cases
@@ -276,7 +285,7 @@ const AdminDashboard = () => {
   };
 
   const handleCloseCase = () => {
-    if (returningItem) {
+    if (returningItem || reviewingClaim || reviewingHandover) {
       return;
     }
 
@@ -310,6 +319,114 @@ const AdminDashboard = () => {
       toast.error(error.response?.data?.message || "Unable to return item.");
     } finally {
       setReturningItem(false);
+    }
+  };
+
+  /* ==================================================
+     Review Claim
+  ================================================== */
+
+  const handleReviewClaim = async (decision) => {
+    const pendingClaim = selectedCase?.claims?.find(
+      (claim) => claim.status === "pending",
+    );
+
+    if (!pendingClaim) {
+      return;
+    }
+
+    if (decision === "rejected" && !claimReviewNote.trim()) {
+      setClaimReviewNoteError(
+        "Please provide a reason for rejecting this claim.",
+      );
+      return;
+    }
+
+    try {
+      setReviewingClaim(true);
+      setClaimReviewNoteError("");
+
+      await api.patch(`/admin/claims/${pendingClaim._id}`, {
+        decision,
+        reviewNote: claimReviewNote.trim(),
+      });
+
+      toast.success(
+        decision === "approved"
+          ? "Claim approved successfully."
+          : "Claim rejected successfully.",
+      );
+
+      setClaimReviewNote("");
+
+      const response = await api.get(
+        `/admin/cases/${selectedCase.item._id}`,
+      );
+
+      setSelectedCase(response.data?.case || null);
+      await fetchCases();
+    } catch (error) {
+      console.error("Unable to review claim:", error);
+
+      toast.error(
+        error.response?.data?.message || "Unable to review the claim.",
+      );
+    } finally {
+      setReviewingClaim(false);
+    }
+  };
+
+  /* ==================================================
+     Review Department Handover
+  ================================================== */
+
+  const handleReviewHandover = async (status) => {
+    const pendingHandover = selectedCase?.handovers?.find(
+      (handover) => handover.status === "pending",
+    );
+
+    if (!pendingHandover) {
+      return;
+    }
+
+    if (status === "rejected" && !handoverReviewNote.trim()) {
+      setHandoverReviewNoteError(
+        "Please provide a reason for rejecting this handover.",
+      );
+      return;
+    }
+
+    try {
+      setReviewingHandover(true);
+      setHandoverReviewNoteError("");
+
+      await api.patch(`/admin/handovers/${pendingHandover._id}`, {
+        status,
+        note: handoverReviewNote.trim(),
+      });
+
+      toast.success(
+        status === "confirmed"
+          ? "Handover confirmed successfully."
+          : "Handover rejected successfully.",
+      );
+
+      setHandoverReviewNote("");
+
+      const response = await api.get(
+        `/admin/cases/${selectedCase.item._id}`,
+      );
+
+      setSelectedCase(response.data?.case || null);
+      await fetchCases();
+    } catch (error) {
+      console.error("Unable to review handover:", error);
+
+      toast.error(
+        error.response?.data?.message || "Unable to review the handover.",
+      );
+    } finally {
+      setReviewingHandover(false);
     }
   };
 
@@ -404,13 +521,40 @@ const AdminDashboard = () => {
       <div className="admin-dashboard-page">
         <AdminHeader />
 
-        <main className="admin-dashboard-container">
-          <div className="admin-dashboard-loading">
-            <FiRefreshCw className="admin-loading-icon" />
+        <div className="admin-dashboard-shell">
+          <aside className="admin-sidebar">
+            <div className="admin-sidebar-content">
+              <div className="admin-sidebar-section">
+                <span className="admin-sidebar-section-title">
+                  Workspace
+                </span>
 
-            <p>Loading admin dashboard...</p>
-          </div>
-        </main>
+                <div className="admin-sidebar-link active">
+                  <FiGrid />
+                  <span>Dashboard</span>
+                </div>
+
+                <div className="admin-sidebar-link">
+                  <FiPackage />
+                  <span>All Cases</span>
+                </div>
+
+                <div className="admin-sidebar-link">
+                  <FiClock />
+                  <span>Needs Attention</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <main className="admin-dashboard-container">
+            <div className="admin-dashboard-loading">
+              <FiRefreshCw className="admin-loading-icon" />
+
+              <p>Loading admin dashboard...</p>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
@@ -423,14 +567,87 @@ const AdminDashboard = () => {
     <div className="admin-dashboard-page">
       <AdminHeader />
 
-      <main className="admin-dashboard-container">
+      <div className="admin-dashboard-shell">
+        <aside className="admin-sidebar">
+          <div className="admin-sidebar-content">
+            <div className="admin-sidebar-section">
+              <span className="admin-sidebar-section-title">
+                Workspace
+              </span>
+
+              <button
+                type="button"
+                className={
+                  activeTab === "overview"
+                    ? "admin-sidebar-link active"
+                    : "admin-sidebar-link"
+                }
+                onClick={() => setActiveTab("overview")}
+              >
+                <FiGrid />
+                <span>Dashboard</span>
+              </button>
+
+              <button
+                type="button"
+                className={
+                  activeTab === "cases"
+                    ? "admin-sidebar-link active"
+                    : "admin-sidebar-link"
+                }
+                onClick={() => setActiveTab("cases")}
+              >
+                <FiPackage />
+                <span>All Cases</span>
+              </button>
+
+              <button
+                type="button"
+                className={
+                  activeTab === "attention"
+                    ? "admin-sidebar-link active"
+                    : "admin-sidebar-link"
+                }
+                onClick={() => setActiveTab("attention")}
+              >
+                <FiClock />
+                <span>Needs Attention</span>
+
+                {attentionCases.length > 0 && (
+                  <span className="admin-sidebar-badge">
+                    {attentionCases.length}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="admin-sidebar-footer">
+            <div className="admin-sidebar-user">
+              <div className="admin-sidebar-avatar">A</div>
+
+              <div>
+                <strong>Administrator</strong>
+                <span>ShardaFind Admin Portal</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <main className="admin-dashboard-container">
         {/* Header */}
 
         <div className="admin-dashboard-heading">
-          <div>
-            <h1>Lost &amp; Found Administration</h1>
+          <div className="admin-heading-content">
+            <span className="admin-heading-eyebrow">
+              Administration
+            </span>
 
-            <p>Manage cases, verify claims, and track item movement.</p>
+            <h1>Lost &amp; Found Dashboard</h1>
+
+            <p>
+              Manage claims, handovers, and department cases from one place.
+            </p>
           </div>
 
           <button
@@ -698,6 +915,7 @@ const AdminDashboard = () => {
           </section>
         )}
       </main>
+      </div>
 
       {/* ==================================================
           CASE MODAL
@@ -782,6 +1000,195 @@ const AdminDashboard = () => {
                     {selectedCase.approvedClaim.claimant?.email ||
                       "Email unavailable"}
                   </small>
+                </div>
+              </div>
+            )}
+
+            {/* Pending Handover Action */}
+
+            {selectedCase.handovers?.some(
+              (handover) => handover.status === "pending",
+            ) && (
+              <div className="admin-action-panel admin-action-panel-warning">
+                <div className="admin-action-panel-icon">
+                  <FaHandHolding />
+                </div>
+
+                <div className="admin-action-panel-content">
+                  <span className="admin-action-label">
+                    Department Handover Request
+                  </span>
+
+                  <h3>Confirm that the department received this item</h3>
+
+                  <p>
+                    The student has reported handing over this item to the
+                    Lost &amp; Found Department. Confirm only after the item has
+                    actually been received.
+                  </p>
+
+                  <label
+                    htmlFor="handover-review-note"
+                    className="admin-review-note-label"
+                  >
+                    <span>Admin Note</span>
+                    <span className="admin-required-note">
+                      Required when rejecting
+                    </span>
+                  </label>
+
+                  <textarea
+                    id="handover-review-note"
+                    value={handoverReviewNote}
+                    onChange={(event) => {
+                      setHandoverReviewNote(event.target.value);
+                      if (event.target.value.trim()) {
+                        setHandoverReviewNoteError("");
+                      }
+                    }}
+                    placeholder="Add a note about this handover..."
+                    rows={3}
+                    disabled={reviewingHandover}
+                    aria-invalid={Boolean(handoverReviewNoteError)}
+                  />
+
+                  {handoverReviewNoteError && (
+                    <p className="admin-review-note-error" role="alert">
+                      {handoverReviewNoteError}
+                    </p>
+                  )}
+
+                  <div className="admin-action-buttons">
+                    <button
+                      type="button"
+                      className="admin-modal-reject"
+                      onClick={() => handleReviewHandover("rejected")}
+                      disabled={reviewingHandover}
+                    >
+                      {reviewingHandover ? "Processing..." : "Reject Handover"}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="admin-modal-approve"
+                      onClick={() => handleReviewHandover("confirmed")}
+                      disabled={reviewingHandover}
+                    >
+                      <FiCheckCircle />
+                      {reviewingHandover
+                        ? "Processing..."
+                        : "Confirm Handover"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Pending Claim Action */}
+
+            {selectedCase.claims?.some(
+              (claim) => claim.status === "pending",
+            ) && (
+              <div className="admin-action-panel admin-action-panel-claim">
+                <div className="admin-action-panel-icon">
+                  <FiUser />
+                </div>
+
+                <div className="admin-action-panel-content">
+                  <span className="admin-action-label">
+                    Ownership Claim
+                  </span>
+
+                  <h3>Review this student's claim</h3>
+
+                  {(() => {
+                    const claim = selectedCase.claims.find(
+                      (currentClaim) => currentClaim.status === "pending",
+                    );
+
+                    return (
+                      <>
+                        <div className="admin-claim-review-grid">
+                          <div>
+                            <span>Claimant</span>
+                            <strong>
+                              {claim?.claimant?.name || "Student"}
+                            </strong>
+                            <small>
+                              {claim?.claimant?.email || "Email unavailable"}
+                            </small>
+                          </div>
+
+                          <div>
+                            <span>Ownership Proof</span>
+                            <p>
+                              {claim?.ownershipProof ||
+                                "No ownership proof provided."}
+                            </p>
+                          </div>
+                        </div>
+
+                        {claim?.message && (
+                          <div className="admin-claim-message">
+                            <span>Claimant Message</span>
+                            <p>{claim.message}</p>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+
+                  <label
+                    htmlFor="claim-review-note"
+                    className="admin-review-note-label"
+                  >
+                    <span>Admin Review Note</span>
+                    <span className="admin-required-note">
+                      Required when rejecting
+                    </span>
+                  </label>
+
+                  <textarea
+                    id="claim-review-note"
+                    value={claimReviewNote}
+                    onChange={(event) => {
+                      setClaimReviewNote(event.target.value);
+                      if (event.target.value.trim()) {
+                        setClaimReviewNoteError("");
+                      }
+                    }}
+                    placeholder="Explain your decision..."
+                    rows={3}
+                    disabled={reviewingClaim}
+                    aria-invalid={Boolean(claimReviewNoteError)}
+                  />
+
+                  {claimReviewNoteError && (
+                    <p className="admin-review-note-error" role="alert">
+                      {claimReviewNoteError}
+                    </p>
+                  )}
+
+                  <div className="admin-action-buttons">
+                    <button
+                      type="button"
+                      className="admin-modal-reject"
+                      onClick={() => handleReviewClaim("rejected")}
+                      disabled={reviewingClaim}
+                    >
+                      {reviewingClaim ? "Processing..." : "Reject Claim"}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="admin-modal-approve"
+                      onClick={() => handleReviewClaim("approved")}
+                      disabled={reviewingClaim}
+                    >
+                      <FiCheckCircle />
+                      {reviewingClaim ? "Processing..." : "Approve Claim"}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
