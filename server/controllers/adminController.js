@@ -399,10 +399,114 @@ const returnItemFromDepartment = async (req, res) => {
   }
 };
 
+const getAllCases = async (req, res) => {
+  try {
+    const items = await Item.find()
+      .populate("reportedBy", "name email")
+      .populate("foundBy", "name email")
+      .populate("departmentReturnedTo", "name email")
+      .populate("departmentReturnedBy", "name email")
+      .sort({ createdAt: -1 });
+
+    const cases = await Promise.all(
+      items.map(async (item) => {
+        const [handovers, claims] = await Promise.all([
+          Handover.find({ item: item._id })
+            .populate("submittedBy", "name email")
+            .populate("reviewedBy", "name email")
+            .sort({ createdAt: -1 }),
+
+          Claim.find({ item: item._id })
+            .populate("claimant", "name email")
+            .populate("reviewedBy", "name email")
+            .sort({ createdAt: -1 }),
+        ]);
+
+        const approvedClaim =
+          claims.find((claim) => claim.status === "approved") || null;
+
+        return {
+          item,
+          handovers,
+          claims,
+          approvedClaim,
+        };
+      }),
+    );
+
+    return res.status(200).json({
+      count: cases.length,
+      cases,
+    });
+  } catch (error) {
+    console.error("Get all cases error:", error);
+
+    return res.status(500).json({
+      message: "Unable to fetch cases",
+    });
+  }
+};
+
+const getCaseByItemId = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+
+    const item = await Item.findById(itemId)
+      .populate("reportedBy", "name email")
+      .populate("foundBy", "name email")
+      .populate("departmentReturnedTo", "name email")
+      .populate("departmentReturnedBy", "name email");
+
+    if (!item) {
+      return res.status(404).json({
+        message: "Item not found",
+      });
+    }
+
+    const [handovers, claims] = await Promise.all([
+      Handover.find({ item: item._id })
+        .populate("submittedBy", "name email")
+        .populate("reviewedBy", "name email")
+        .sort({ createdAt: -1 }),
+
+      Claim.find({ item: item._id })
+        .populate("claimant", "name email")
+        .populate("reviewedBy", "name email")
+        .sort({ createdAt: -1 }),
+    ]);
+
+    const approvedClaim =
+      claims.find((claim) => claim.status === "approved") || null;
+
+    return res.status(200).json({
+      case: {
+        item,
+        handovers,
+        claims,
+        approvedClaim,
+      },
+    });
+  } catch (error) {
+    console.error("Get case by item ID error:", error);
+
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        message: "Invalid item identifier",
+      });
+    }
+
+    return res.status(500).json({
+      message: "Unable to fetch case",
+    });
+  }
+};
+
 module.exports = {
   getAllClaims,
   reviewClaim,
   reviewHandover,
   getAllHandovers,
   returnItemFromDepartment,
+  getAllCases,
+  getCaseByItemId,
 };

@@ -7,6 +7,8 @@ const {
   getAllHandovers,
   reviewHandover,
   returnItemFromDepartment,
+  getAllCases,
+  getCaseByItemId,
 
 } = require("../controllers/adminController");
 
@@ -55,6 +57,23 @@ router.patch(
   adminOnly,
   returnItemFromDepartment
 );
+
+// Case management
+
+router.get(
+  "/cases",
+  protect,
+  adminOnly,
+  getAllCases
+);
+
+router.get(
+  "/cases/:itemId",
+  protect,
+  adminOnly,
+  getCaseByItemId
+);
+
 
 module.exports = router;
 
