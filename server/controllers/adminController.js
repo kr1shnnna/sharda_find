@@ -35,10 +35,9 @@ const getAllClaims = async (req, res) => {
 const reviewClaim = async (req, res) => {
   try {
     const io = req.app.get("io");
+    const { decision, reviewNote } = req.body;
 
-    const { status, reviewNote } = req.body;
-
-    if (!["approved", "rejected"].includes(status)) {
+    if (!["approved", "rejected"].includes(decision)) {
       return res.status(400).json({
         message: "Status must be approved or rejected",
       });
@@ -80,13 +79,17 @@ const reviewClaim = async (req, res) => {
         .toLowerCase();
     }
 
-    claim.status = status;
+    claim.status = decision;
     claim.reviewedBy = req.user._id;
     claim.reviewNote = reviewNote || "";
 
-    if (status === "approved") {
-      item.status = "returned";
+    if (decision === "approved") {
+      // Claim approval only verifies the owner.
+      // The item is not returned yet.
+      item.status = "active";
+      item.itemLocation = "lost-found-department";
     } else {
+      // Rejected claim makes the item available again.
       item.status = "active";
     }
 
@@ -95,10 +98,10 @@ const reviewClaim = async (req, res) => {
 
     await createNotification({
       recipient: claim.claimant,
-      type: status === "approved" ? "claim-approved" : "claim-rejected",
-      title: status === "approved" ? "Claim Approved" : "Claim Rejected",
+      type: decision === "approved" ? "claim-approved" : "claim-rejected",
+      title: decision === "approved" ? "Claim Approved" : "Claim Rejected",
       message:
-        status === "approved"
+        decision === "approved"
           ? "Your claim has been approved. Please visit the Lost & Found Department with your valid Sharda University ID to collect your item."
           : "Your claim could not be verified based on the information provided.",
       item: item._id,
@@ -107,7 +110,7 @@ const reviewClaim = async (req, res) => {
     });
 
     const responseMessage =
-      status === "approved"
+      decision === "approved"
         ? "Your claim has been approved. Please visit the Lost & Found Department with your valid Sharda University ID to collect your item."
         : "Your claim could not be verified based on the information provided.";
 
