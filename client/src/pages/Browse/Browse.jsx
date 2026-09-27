@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import axios from "axios";
+
+import api from "../../api/axios";
+
 import {
   FiSearch,
   FiSliders,
@@ -31,9 +33,8 @@ const Browse = () => {
         setLoading(true);
         setError("");
 
-        const response = await axios.get(
-          "http://localhost:5000/api/items"
-        );
+        
+        const response = await api.get("/items");
 
         setItems(response.data.items || []);
       } catch (error) {
