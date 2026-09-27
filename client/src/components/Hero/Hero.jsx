@@ -1,12 +1,38 @@
-import { FiSearch, FiPlusCircle, FiPackage } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import {
+  FiSearch,
+  FiPlusCircle,
+  FiPackage,
+} from "react-icons/fi";
+
+import { Link, useNavigate } from "react-router-dom";
+
 import shardaUniversity from "../../assets/images/sharda-university.jpg";
+
 import "./Hero.css";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+
+    const trimmedSearch = searchTerm.trim();
+
+    if (!trimmedSearch) {
+      navigate("/browse");
+      return;
+    }
+
+    navigate(`/browse?search=${encodeURIComponent(trimmedSearch)}`);
+  };
+
   return (
     <section className="hero">
       {/* University image */}
+
       <div className="hero-image">
         <img
           src={shardaUniversity}
@@ -15,11 +41,11 @@ const Hero = () => {
       </div>
 
       {/* White fade over the image */}
+
       <div className="hero-image-fade"></div>
 
       <div className="hero-container">
         <div className="hero-content">
-
           <p className="hero-tagline">
             Sharda University Lost & Found
           </p>
@@ -35,22 +61,33 @@ const Hero = () => {
           </p>
 
           {/* Search */}
-          <div className="hero-search">
-            <FiSearch className="search-icon" />
 
+          <form
+            className="hero-search"
+            onSubmit={handleSearch}
+          >
             <input
               type="text"
               placeholder="Search items, locations, categories..."
+              value={searchTerm}
+              onChange={(event) =>
+                setSearchTerm(event.target.value)
+              }
+              aria-label="Search lost and found items"
             />
 
-            <button className="search-button">
+            <button
+              type="submit"
+              className="search-button"
+              aria-label="Search"
+            >
               <FiSearch />
             </button>
-          </div>
+          </form>
 
           {/* Action buttons */}
-          <div className="hero-actions">
 
+          <div className="hero-actions">
             <Link
               to="/report-lost"
               className="hero-button primary"
@@ -66,9 +103,7 @@ const Hero = () => {
               <FiPackage />
               Report Found Item
             </Link>
-
           </div>
-
         </div>
       </div>
     </section>

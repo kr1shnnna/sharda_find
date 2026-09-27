@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import {
   FiSearch,
@@ -11,15 +12,18 @@ import ItemCard from "../../components/ItemCard/ItemCard";
 import "./Browse.css";
 
 const Browse = () => {
+  const [searchParams] = useSearchParams();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [search, setSearch] = useState("");
+ 
   const [type, setType] = useState("all");
   const [category, setCategory] = useState("all");
   const [location, setLocation] = useState("all");
   const [sort, setSort] = useState("latest");
+
+  const [search,setSearch] = useState(searchParams.get("search") || "");
 
   useEffect(() => {
     const fetchItems = async () => {
