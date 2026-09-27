@@ -340,6 +340,14 @@ const ItemDetails = () => {
 
   const foundById = item.foundBy?._id || item.foundBy;
 
+  const approvedClaim = eligibleClaim?.status === "approved";
+
+  const isApprovedClaimOwner =
+    approvedClaim &&
+    currentUserId &&
+    eligibleClaim?.claimant?._id &&
+    currentUserId.toString() === eligibleClaim.claimant._id.toString();
+
   /*
    * Is the currently logged-in user the person
    * who originally reported this item?
@@ -597,9 +605,14 @@ const ItemDetails = () => {
                   disabled={
                     item.status !== "active" ||
                     reportingFound ||
-                    Boolean(item.foundBy)
+                    Boolean(item.foundBy) ||
+                    approvedClaim
                   }
                   onClick={() => {
+                    if (approvedClaim) {
+                      return;
+                    }
+
                     if (isLost && !item.foundBy) {
                       setShowReportFoundModal(true);
                       return;
@@ -612,15 +625,19 @@ const ItemDetails = () => {
                 >
                   <FiCheckCircle />
 
-                  {item.foundBy
-                    ? "Already Reported"
-                    : item.status !== "active"
-                      ? "Item Unavailable"
-                      : isLost
-                        ? reportingFound
-                          ? "Reporting..."
-                          : "Report Found"
-                        : "Claim This Item"}
+                  {approvedClaim
+                    ? isApprovedClaimOwner
+                      ? "Claim Approved"
+                      : "Item Already Claimed"
+                    : item.foundBy
+                      ? "Already Reported"
+                      : item.status !== "active"
+                        ? "Item Unavailable"
+                        : isLost
+                          ? reportingFound
+                            ? "Reporting..."
+                            : "Report Found"
+                          : "Claim This Item"}
                 </button>
               )}
 
@@ -813,7 +830,7 @@ const ItemDetails = () => {
           </div>
         </div>
       )}
-      
+
       {showClaimForm && (
         <ClaimForm
           itemId={item._id}

@@ -37,12 +37,26 @@ const createClaim = async (req, res) => {
     const existingClaim = await Claim.findOne({
       item: itemId,
       claimant: req.user._id,
-      status: "pending",
+      status: { $in: ["pending", "approved"] },
     });
 
     if (existingClaim) {
       return res.status(409).json({
-        message: "You already have a pending claim for this item",
+        message:
+          existingClaim.status === "approved"
+            ? "Your claim for this item has already been approved"
+            : "You already have a pending claim for this item",
+      });
+    }
+
+    const approvedClaim = await Claim.findOne({
+      item: itemId,
+      status: "approved",
+    });
+
+    if (approvedClaim) {
+      return res.status(409).json({
+        message: "This item has already been claimed",
       });
     }
 
