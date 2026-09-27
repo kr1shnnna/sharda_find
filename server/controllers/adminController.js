@@ -310,9 +310,99 @@ const reviewHandover = async (req, res) => {
   }
 };
 
+const returnItemFromDepartment = async (req, res) => {
+  try {
+    const io = req.app.get("io");
+    const { itemId } = req.params;
+
+    // 1. Find the item
+    const item = await Item.findById(itemId);
+
+    if (!item) {
+      return res.status(404).json({
+        message: "Item not found",
+      });
+    }
+
+    // 2. Item must currently be at the Lost & Found Department
+    if (item.itemLocation !== "lost-found-department") {
+      return res.status(400).json({
+        message: "This item is not currently at the Lost & Found Department",
+      });
+    }
+
+    // 3. Item must still be active
+    if (item.status !== "active") {
+      return res.status(400).json({
+        message: "This item cannot be returned",
+      });
+    }
+
+    // 4. Find the approved claim for this item
+    const approvedClaim = await Claim.findOne({
+      item: item._id,
+      status: "approved",
+    });
+
+    if (!approvedClaim) {
+      return res.status(400).json({
+        message: "No approved claim exists for this item",
+      });
+    }
+
+    // 5. Prevent returning an item twice
+    if (item.departmentReturnedAt) {
+      return res.status(400).json({
+        message: "This item has already been returned",
+      });
+    }
+
+    // 6. Record the department return
+    item.departmentReturnedTo = approvedClaim.claimant;
+    item.departmentReturnedBy = req.user._id;
+    item.departmentReturnedAt = new Date();
+
+    // 7. Mark the item as returned
+    item.status = "returned";
+
+    await item.save();
+
+    // 8. Notify the approved claimant
+    await createNotification({
+      recipient: approvedClaim.claimant,
+      type: "item-returned",
+      title: "Item Returned",
+      message:
+        "Your item has been handed over to you by the Lost & Found Department.",
+      item: item._id,
+      claim: approvedClaim._id,
+      io,
+    });
+
+    return res.status(200).json({
+      message: "Item returned to the owner successfully",
+      item,
+      claim: approvedClaim,
+    });
+  } catch (error) {
+    console.error("Return item from department error:", error);
+
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        message: "Invalid item identifier",
+      });
+    }
+
+    return res.status(500).json({
+      message: "Unable to return item from department",
+    });
+  }
+};
+
 module.exports = {
   getAllClaims,
   reviewClaim,
   reviewHandover,
   getAllHandovers,
+  returnItemFromDepartment,
 };

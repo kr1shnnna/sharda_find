@@ -103,6 +103,23 @@ const itemSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+
+    departmentReturnedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    departmentReturnedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    departmentReturnedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

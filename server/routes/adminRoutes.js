@@ -6,6 +6,8 @@ const {
   reviewClaim,
   getAllHandovers,
   reviewHandover,
+  returnItemFromDepartment,
+
 } = require("../controllers/adminController");
 
 const {
@@ -43,6 +45,15 @@ router.patch(
   protect,
   adminOnly,
   reviewHandover
+);
+
+// Department item return
+
+router.patch(
+  "/items/:itemId/return",
+  protect,
+  adminOnly,
+  returnItemFromDepartment
 );
 
 module.exports = router;
