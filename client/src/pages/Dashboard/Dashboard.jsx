@@ -152,7 +152,7 @@ const Dashboard = () => {
 
       setItems(itemsResponse.data?.items || []);
 
-      setClaims(itemsResponse.data?.claims || []);
+      setClaims(claimsResponse.data?.claims || []);
 
       setNotifications(notificationsResponse.data?.notifications || []);
 

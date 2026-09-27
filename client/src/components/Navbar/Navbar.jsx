@@ -5,12 +5,10 @@ import { FaLeaf } from "react-icons/fa";
 import {
   FiBell,
   FiChevronDown,
-  FiFileText,
   FiGrid,
   FiLogOut,
   FiMenu,
   FiMessageSquare,
-  FiPackage,
   FiUser,
   FiX,
 } from "react-icons/fi";
@@ -262,7 +260,6 @@ const Navbar = () => {
                         setMenuOpen(false)
                       }
                     >
-                      <FiPackage />
                       <span>My Items</span>
                     </Link>
 
@@ -273,7 +270,6 @@ const Navbar = () => {
                         setMenuOpen(false)
                       }
                     >
-                      <FiFileText />
                       <span>My Claims</span>
                     </Link>
 
@@ -351,6 +347,32 @@ const Navbar = () => {
 
           <nav className="navbar-mobile-links">
 
+            {/* Logged-in account section */}
+            {isAuthenticated && (
+              <>
+                <div className="navbar-mobile-user">
+
+                  <div className="navbar-mobile-user-icon">
+                    <FiUser />
+                  </div>
+
+                  <div className="navbar-mobile-user-info">
+                    <span className="navbar-mobile-user-name">
+                      {user?.name || "Account"}
+                    </span>
+
+                    <span className="navbar-mobile-user-role">
+                      Student
+                    </span>
+                  </div>
+
+                </div>
+
+                <div className="navbar-mobile-divider" />
+              </>
+            )}
+
+            {/* Common navigation */}
             <Link
               to="/browse"
               className={`navbar-mobile-link ${
@@ -377,10 +399,24 @@ const Navbar = () => {
               About
             </Link>
 
+            {/* Authenticated navigation */}
             {isAuthenticated && (
               <>
                 <div className="navbar-mobile-divider" />
 
+                {/* Dashboard */}
+                <Link
+                  to="/dashboard"
+                  className="navbar-mobile-link navbar-mobile-link-with-icon"
+                  onClick={closeMobileMenu}
+                >
+                  <span>
+                    <FiGrid />
+                    Dashboard
+                  </span>
+                </Link>
+
+                {/* Notifications */}
                 <Link
                   to="/notifications"
                   className="navbar-mobile-link navbar-mobile-link-with-icon"
@@ -400,39 +436,7 @@ const Navbar = () => {
                   )}
                 </Link>
 
-                <Link
-                  to="/dashboard"
-                  className="navbar-mobile-link navbar-mobile-link-with-icon"
-                  onClick={closeMobileMenu}
-                >
-                  <span>
-                    <FiGrid />
-                    Dashboard
-                  </span>
-                </Link>
-
-                <Link
-                  to="/my-items"
-                  className="navbar-mobile-link navbar-mobile-link-with-icon"
-                  onClick={closeMobileMenu}
-                >
-                  <span>
-                    <FiPackage />
-                    My Items
-                  </span>
-                </Link>
-
-                <Link
-                  to="/my-claims"
-                  className="navbar-mobile-link navbar-mobile-link-with-icon"
-                  onClick={closeMobileMenu}
-                >
-                  <span>
-                    <FiFileText />
-                    My Claims
-                  </span>
-                </Link>
-
+                {/* Messages */}
                 <Link
                   to="/messages"
                   className="navbar-mobile-link navbar-mobile-link-with-icon"
@@ -446,6 +450,7 @@ const Navbar = () => {
 
                 <div className="navbar-mobile-divider" />
 
+                {/* Logout */}
                 <button
                   type="button"
                   className="navbar-mobile-link navbar-mobile-logout"
@@ -459,11 +464,13 @@ const Navbar = () => {
               </>
             )}
 
+            {/* Logged-out navigation */}
             {!isAuthenticated && (
               <>
                 <div className="navbar-mobile-divider" />
 
                 <div className="navbar-mobile-auth">
+
                   <Link
                     to="/login"
                     className="navbar-login-button"
@@ -479,6 +486,7 @@ const Navbar = () => {
                   >
                     Register
                   </Link>
+
                 </div>
               </>
             )}
