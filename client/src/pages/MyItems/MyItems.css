@@ -868,44 +868,60 @@
   flex-wrap: wrap;
 }
 
+
 .my-item-handover-button {
-  min-height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+
+  min-height: 38px;
   padding: 0 12px;
 
-  color: var(--white);
-  background-color: var(--primary);
   border: 1px solid var(--primary);
   border-radius: var(--radius-sm);
 
+  background: var(--white);
+  color: var(--primary);
+
   font-family: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
+
+  white-space: nowrap;
 
   cursor: pointer;
 
   transition:
     background-color 0.2s ease,
-    border-color 0.2s ease,
-    opacity 0.2s ease;
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
+
+
 .my-item-handover-button:hover {
-  background-color: var(--primary-dark);
+  background: var(--primary-light);
   border-color: var(--primary-dark);
+  color: var(--primary-dark);
 }
+
+
+.my-item-handover-button:active {
+  transform: translateY(1px);
+}
+
 
 .my-item-handover-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
+
 .my-item-handover-button svg {
   width: 15px;
   height: 15px;
+  flex-shrink: 0;
 }
 
 
@@ -1289,9 +1305,6 @@
   box-shadow: 0 3px 8px rgba(22, 101, 52, 0.15);
 }
 
-.my-item-handover-button:active {
-  transform: translateY(1px);
-}
 
 .my-item-handover-button:disabled {
   opacity: 0.6;
