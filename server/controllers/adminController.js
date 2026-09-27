@@ -401,10 +401,40 @@ const returnItemFromDepartment = async (req, res) => {
 
 const getAllCases = async (req, res) => {
   try {
+    const pendingHandovers = await Handover.find({
+      status: "pending",
+    }).select("item");
+
+    const pendingClaims = await Claim.find({
+      status: "pending",
+    }).select("item");
+
+    const pendingHandoverItemIds = pendingHandovers.map(
+      (handover) => handover.item,
+    );
+
+    const pendingClaimItemIds = pendingClaims.map((claim) => claim.item);
+
     const items = await Item.find({
       $or: [
-        { itemLocation: "lost-found-department" },
-        { departmentReturnedAt: { $ne: null } },
+        {
+          itemLocation: "lost-found-department",
+        },
+        {
+          departmentReturnedAt: {
+            $ne: null,
+          },
+        },
+        {
+          _id: {
+            $in: pendingHandoverItemIds,
+          },
+        },
+        {
+          _id: {
+            $in: pendingClaimItemIds,
+          },
+        },
       ],
     })
       .populate("reportedBy", "name email")
