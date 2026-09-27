@@ -1,24 +1,24 @@
-/* =========================
+/* ==================================================
    Admin Header
-========================= */
+================================================== */
 
 .admin-header {
   width: 100%;
 
-  background-color: var(--white);
-
-  border-bottom: 1px solid var(--border);
-
   position: sticky;
   top: 0;
   z-index: 100;
+
+  background: var(--white);
+
+  border-bottom: 1px solid var(--border);
 }
 
 .admin-header-container {
   width: 100%;
-  max-width: 1440px;
+  max-width: 1600px;
 
-  min-height: 72px;
+  min-height: 68px;
 
   margin: 0 auto;
   padding: 0 32px;
@@ -30,17 +30,17 @@
   gap: 24px;
 }
 
-/* =========================
+/* ==================================================
    Branding
-========================= */
+================================================== */
 
 .admin-header-logo {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+
+  gap: 11px;
 
   color: var(--text-primary);
-
   text-decoration: none;
 
   flex-shrink: 0;
@@ -55,19 +55,31 @@
   justify-content: center;
 
   color: var(--primary);
-  background-color: var(--primary-light);
+  background: var(--primary-light);
 
+  border: 1px solid #bbf7d0;
   border-radius: 10px;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.admin-header-logo:hover .admin-header-logo-icon {
+  background: #bbf7d0;
+
+  transform: translateY(-1px);
 }
 
 .admin-header-logo-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 19px;
+  height: 19px;
 }
 
 .admin-header-logo-text {
   display: flex;
   flex-direction: column;
+
   gap: 2px;
 }
 
@@ -77,252 +89,35 @@
   font-size: 17px;
   line-height: 1.2;
   font-weight: 700;
+
+  letter-spacing: -0.01em;
 }
 
 .admin-header-label {
   color: var(--text-secondary);
 
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1.2;
-  font-weight: 500;
+  font-weight: 600;
 
-  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
 
-/* =========================
+/* ==================================================
    Right Side
-========================= */
+================================================== */
 
 .admin-header-actions {
   display: flex;
   align-items: center;
-  gap: 20px;
+
+  gap: 14px;
 }
 
-/* =========================
-   Admin Identity
-========================= */
-
-.admin-header-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.admin-header-avatar {
-  width: 36px;
-  height: 36px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: var(--primary);
-  background-color: var(--primary-light);
-
-  border-radius: 50%;
-
-  font-size: 13px;
-  font-weight: 700;
-
-  flex-shrink: 0;
-}
-
-.admin-header-user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.admin-header-user-name {
-  max-width: 150px;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  color: var(--text-primary);
-
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.admin-header-user-role {
-  color: var(--text-secondary);
-
-  font-size: 11px;
-  font-weight: 500;
-}
-
-/* =========================
-   Divider
-========================= */
-
-.admin-header-divider {
-  width: 1px;
-  height: 28px;
-
-  background-color: var(--border);
-}
-
-/* =========================
-   Dashboard Link
-========================= */
-
-.admin-header-dashboard-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-
-  padding: 8px 10px;
-
-  color: var(--text-secondary);
-
-  border-radius: var(--radius-sm);
-
-  text-decoration: none;
-
-  font-size: 13px;
-  font-weight: 500;
-
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.admin-header-dashboard-link svg {
-  width: 16px;
-  height: 16px;
-}
-
-.admin-header-dashboard-link:hover {
-  color: var(--primary);
-  background-color: var(--primary-light);
-}
-
-.admin-header-dashboard-link:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-/* =========================
-   Logout
-========================= */
-
-.admin-header-logout {
-  min-height: 36px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-
-  padding: 0 13px;
-
-  color: var(--text-secondary);
-  background-color: var(--white);
-
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease,
-    border-color 0.2s ease;
-}
-
-.admin-header-logout svg {
-  width: 16px;
-  height: 16px;
-}
-
-.admin-header-logout:hover {
-  color: var(--danger);
-
-  background-color: #fef2f2;
-
-  border-color: #fecaca;
-}
-
-.admin-header-logout:focus-visible {
-  outline: 2px solid var(--danger);
-  outline-offset: 2px;
-}
-
-/* =========================
-   Responsive
-========================= */
-
-@media (max-width: 760px) {
-  .admin-header-container {
-    min-height: 68px;
-
-    padding: 0 20px;
-  }
-
-  .admin-header-actions {
-    gap: 12px;
-  }
-
-  .admin-header-user-info {
-    display: none;
-  }
-
-  .admin-header-divider {
-    display: none;
-  }
-
-  .admin-header-dashboard-link span {
-    display: none;
-  }
-
-  .admin-header-dashboard-link {
-    width: 36px;
-    height: 36px;
-
-    padding: 0;
-
-    justify-content: center;
-  }
-
-  .admin-header-logout span {
-    display: none;
-  }
-
-  .admin-header-logout {
-    width: 36px;
-
-    padding: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .admin-header-container {
-    padding: 0 16px;
-  }
-
-  .admin-header-logo-text {
-    display: none;
-  }
-
-  .admin-header-logo-icon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .admin-header-actions {
-    gap: 8px;
-  }
-}
-
-
-/* =========================
-   Admin Notifications
-========================= */
+/* ==================================================
+   Notifications
+================================================== */
 
 .admin-notification-wrapper {
   position: relative;
@@ -331,30 +126,34 @@
 .admin-notification-button {
   position: relative;
 
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
   color: var(--text-secondary);
-  background-color: transparent;
+  background: transparent;
 
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: 9px;
 
   font-size: 18px;
 
+  cursor: pointer;
+
   transition:
-    color 0.2s ease,
-    background-color 0.2s ease,
-    border-color 0.2s ease;
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .admin-notification-button:hover {
   color: var(--primary);
-  background-color: var(--primary-light);
+
+  background: var(--primary-light);
+
   border-color: #bbf7d0;
 }
 
@@ -368,11 +167,16 @@
   box-shadow: 0 0 0 3px #dcfce7;
 }
 
+.admin-notification-button svg {
+  width: 18px;
+  height: 18px;
+}
+
 .admin-notification-count {
   position: absolute;
 
-  top: 2px;
-  right: 1px;
+  top: 0;
+  right: -2px;
 
   min-width: 17px;
   height: 17px;
@@ -384,7 +188,7 @@
   padding: 0 4px;
 
   color: var(--white);
-  background-color: var(--danger);
+  background: var(--danger);
 
   border: 2px solid var(--white);
   border-radius: 999px;
@@ -394,40 +198,48 @@
   line-height: 1;
 }
 
+/* ==================================================
+   Notification Dropdown
+================================================== */
+
 .admin-notification-dropdown {
   position: absolute;
 
   top: calc(100% + 10px);
   right: 0;
 
-  width: 380px;
+  width: 390px;
   max-height: 520px;
 
   display: flex;
   flex-direction: column;
 
-  background-color: var(--white);
+  background: var(--white);
 
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: 14px;
 
   box-shadow:
-    0 12px 30px rgba(15, 23, 42, 0.12),
-    0 3px 8px rgba(15, 23, 42, 0.06);
+    0 18px 45px rgba(15, 23, 42, 0.13),
+    0 4px 12px rgba(15, 23, 42, 0.05);
 
   overflow: hidden;
 
-  z-index: 100;
+  z-index: 200;
 }
 
 .admin-notification-header {
+  min-height: 66px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
 
   gap: 16px;
 
-  padding: 16px;
+  padding: 14px 16px;
+
+  background: var(--white);
 
   border-bottom: 1px solid var(--border);
 }
@@ -451,7 +263,7 @@
 .admin-notification-header span {
   color: var(--text-secondary);
 
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .admin-mark-all-read {
@@ -463,24 +275,28 @@
   padding: 6px 8px;
 
   color: var(--primary);
-  background-color: transparent;
+  background: transparent;
 
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 7px;
 
-  font-size: 11px;
+  font-family: inherit;
+  font-size: 10px;
   font-weight: 600;
 
   white-space: nowrap;
 
+  cursor: pointer;
+
   transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
+    color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .admin-mark-all-read:hover {
   color: var(--primary-dark);
-  background-color: var(--primary-light);
+
+  background: var(--primary-light);
 }
 
 .admin-mark-all-read:focus-visible {
@@ -489,10 +305,21 @@
   box-shadow: 0 0 0 3px #dcfce7;
 }
 
+.admin-mark-all-read svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* ==================================================
+   Notification List
+================================================== */
+
 .admin-notification-list {
   max-height: 440px;
 
   overflow-y: auto;
+
+  scrollbar-width: thin;
 }
 
 .admin-notification-item {
@@ -503,29 +330,37 @@
 
   gap: 10px;
 
-  padding: 14px 16px;
+  padding: 13px 16px;
 
   text-align: left;
 
   color: inherit;
-  background-color: var(--white);
+  background: var(--white);
 
   border: none;
   border-bottom: 1px solid #f1f5f9;
 
-  transition: background-color 0.2s ease;
+  font-family: inherit;
+
+  cursor: pointer;
+
+  transition: background-color 0.15s ease;
+}
+
+.admin-notification-item:last-child {
+  border-bottom: none;
 }
 
 .admin-notification-item:hover {
-  background-color: #f8fafc;
+  background: #f8fafc;
 }
 
 .admin-notification-item.unread {
-  background-color: #f0fdf4;
+  background: #f0fdf4;
 }
 
 .admin-notification-item.unread:hover {
-  background-color: #ecfdf5;
+  background: #ecfdf5;
 }
 
 .admin-notification-dot {
@@ -536,14 +371,13 @@
 
   margin-top: 5px;
 
-  background-color: transparent;
+  background: transparent;
 
   border-radius: 50%;
 }
 
-.admin-notification-item.unread
-  .admin-notification-dot {
-  background-color: var(--primary);
+.admin-notification-item.unread .admin-notification-dot {
+  background: var(--primary);
 }
 
 .admin-notification-content {
@@ -559,9 +393,8 @@
   color: var(--text-primary);
 
   font-size: 12px;
-  font-weight: 600;
-
   line-height: 1.4;
+  font-weight: 600;
 }
 
 .admin-notification-content p {
@@ -576,11 +409,21 @@
 .admin-notification-content span {
   color: #94a3b8;
 
-  font-size: 10px;
+  font-size: 9px;
 }
 
+/* ==================================================
+   Empty Notification State
+================================================== */
+
 .admin-notification-empty {
-  padding: 40px 20px;
+  min-height: 180px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px 20px;
 
   color: var(--text-secondary);
 
@@ -589,25 +432,286 @@
   font-size: 12px;
 }
 
-/* =========================
-   Notification Responsive
-========================= */
+/* ==================================================
+   Admin Identity
+================================================== */
 
-@media (max-width: 700px) {
-  .admin-notification-dropdown {
-    position: fixed;
+.admin-header-user {
+  display: flex;
+  align-items: center;
 
-    top: 70px;
-    left: 16px;
-    right: 16px;
+  gap: 9px;
 
-    width: auto;
+  padding: 5px 8px 5px 5px;
 
-    max-height: calc(100vh - 90px);
+  border-radius: 10px;
+
+  transition: background-color 0.15s ease;
+}
+
+.admin-header-user:hover {
+  background: #f8fafc;
+}
+
+.admin-header-avatar {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  color: var(--primary);
+  background: var(--primary-light);
+
+  border: 1px solid #bbf7d0;
+  border-radius: 50%;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-header-user-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.admin-header-user-name {
+  max-width: 145px;
+
+  overflow: hidden;
+
+  color: var(--text-primary);
+
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-header-user-role {
+  color: var(--text-secondary);
+
+  font-size: 10px;
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+/* ==================================================
+   Divider
+================================================== */
+
+.admin-header-divider {
+  width: 1px;
+  height: 27px;
+
+  flex-shrink: 0;
+
+  background: var(--border);
+}
+
+/* ==================================================
+   Dashboard Link
+================================================== */
+
+.admin-header-dashboard-link {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 8px 10px;
+
+  color: var(--text-secondary);
+  background: transparent;
+
+  border-radius: var(--radius-sm);
+
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.admin-header-dashboard-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+.admin-header-dashboard-link:hover {
+  color: var(--primary);
+
+  background: var(--primary-light);
+}
+
+.admin-header-dashboard-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ==================================================
+   Logout
+================================================== */
+
+.admin-header-logout {
+  min-height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 0 12px;
+
+  color: var(--text-secondary);
+  background: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.admin-header-logout svg {
+  width: 15px;
+  height: 15px;
+}
+
+.admin-header-logout:hover {
+  color: var(--danger);
+
+  background: #fef2f2;
+
+  border-color: #fecaca;
+}
+
+.admin-header-logout:focus-visible {
+  outline: 2px solid var(--danger);
+  outline-offset: 2px;
+}
+
+/* ==================================================
+   Responsive
+================================================== */
+
+@media (max-width: 900px) {
+  .admin-header-container {
+    padding: 0 22px;
   }
 
-  .admin-notification-list {
-    max-height: calc(100vh - 180px);
+  .admin-header-actions {
+    gap: 10px;
+  }
+
+  .admin-header-user-info {
+    display: none;
+  }
+
+  .admin-header-user {
+    padding: 0;
+  }
+
+  .admin-header-divider {
+    display: none;
   }
 }
 
+@media (max-width: 700px) {
+  .admin-header-container {
+    min-height: 64px;
+
+    padding: 0 18px;
+
+    gap: 14px;
+  }
+
+  .admin-header-logo-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .admin-header-logo-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .admin-header-actions {
+    gap: 7px;
+  }
+
+  .admin-notification-dropdown {
+    position: fixed;
+
+    top: 74px;
+    left: 14px;
+    right: 14px;
+
+    width: auto;
+
+    max-height: calc(100vh - 88px);
+
+    border-radius: 13px;
+  }
+
+  .admin-notification-list {
+    max-height: calc(100vh - 170px);
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-header-container {
+    padding: 0 14px;
+  }
+
+  .admin-header-logo-text {
+    display: none;
+  }
+
+  .admin-header-logo-icon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .admin-notification-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .admin-header-avatar {
+    width: 33px;
+    height: 33px;
+  }
+
+  .admin-header-logout span {
+    display: none;
+  }
+
+  .admin-header-logout {
+    width: 36px;
+    min-height: 36px;
+
+    padding: 0;
+  }
+}
