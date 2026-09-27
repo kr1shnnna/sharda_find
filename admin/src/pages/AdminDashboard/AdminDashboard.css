@@ -15,7 +15,6 @@
   padding: 36px 32px 60px;
 }
 
-
 /* =========================
    Dashboard Heading
 ========================= */
@@ -45,7 +44,6 @@
   font-size: 14px;
   line-height: 1.6;
 }
-
 
 /* =========================
    Refresh Button
@@ -93,7 +91,6 @@
   outline-offset: 2px;
 }
 
-
 /* =========================
    Error State
 ========================= */
@@ -125,7 +122,6 @@
   flex-shrink: 0;
 }
 
-
 /* =========================
    Summary Cards
 ========================= */
@@ -133,8 +129,7 @@
 .admin-summary-grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 
   gap: 18px;
 
@@ -155,8 +150,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
 
-  box-shadow:
-    0 4px 12px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
 }
 
 .admin-summary-icon {
@@ -210,7 +204,6 @@
   line-height: 1.2;
   font-weight: 700;
 }
-
 
 /* =========================
    Dashboard Sections
@@ -277,7 +270,6 @@
   font-weight: 600;
 }
 
-
 /* =========================
    Tables
 ========================= */
@@ -342,7 +334,6 @@
   background-color: #f8fafc;
 }
 
-
 /* =========================
    Item Information
 ========================= */
@@ -372,7 +363,6 @@
   text-transform: capitalize;
 }
 
-
 /* =========================
    User Information
 ========================= */
@@ -397,7 +387,6 @@
 
   font-size: 11px;
 }
-
 
 /* =========================
    Status Badges
@@ -435,7 +424,6 @@
   color: var(--danger);
   background-color: #fef2f2;
 }
-
 
 /* =========================
    Review Button
@@ -480,7 +468,6 @@
   outline-offset: 2px;
 }
 
-
 /* =========================
    Empty State
 ========================= */
@@ -513,7 +500,6 @@
   font-size: 13px;
   font-weight: 500;
 }
-
 
 /* =========================
    Loading State
@@ -556,7 +542,6 @@
   }
 }
 
-
 /* =========================
    Dashboard Responsive
 ========================= */
@@ -567,15 +552,13 @@
   }
 
   .admin-summary-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .admin-summary-card:last-child {
     grid-column: 1 / -1;
   }
 }
-
 
 @media (max-width: 650px) {
   .admin-dashboard-container {
@@ -632,7 +615,6 @@
   }
 }
 
-
 @media (max-width: 420px) {
   .admin-dashboard-heading {
     flex-direction: column;
@@ -660,7 +642,6 @@
     font-size: 11px;
   }
 }
-
 
 /* ==================================================
    Claim Review Modal
@@ -696,12 +677,11 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
 
-  box-shadow:
-    0 20px 50px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
 
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
-
 
 /* =========================
    Modal Header
@@ -773,7 +753,6 @@
   opacity: 0.5;
 }
 
-
 /* =========================
    Claim Details
 ========================= */
@@ -781,8 +760,7 @@
 .admin-claim-details {
   display: grid;
 
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
   gap: 1px;
 
@@ -828,7 +806,6 @@
   font-size: 11px;
 }
 
-
 /* =========================
    Review Sections
 ========================= */
@@ -873,7 +850,6 @@
   font-weight: 600;
 }
 
-
 /* =========================
    Ownership Proof
 ========================= */
@@ -895,7 +871,6 @@
   white-space: pre-wrap;
 }
 
-
 /* =========================
    Evidence Images
 ========================= */
@@ -903,8 +878,7 @@
 .admin-evidence-grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 
   gap: 10px;
 }
@@ -974,7 +948,6 @@
   font-size: 12px;
 }
 
-
 /* =========================
    Review Note
 ========================= */
@@ -1036,8 +1009,7 @@
 .admin-review-section textarea:focus-visible {
   border-color: var(--primary);
 
-  box-shadow:
-    0 0 0 3px var(--primary-light);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .admin-review-section textarea:disabled {
@@ -1053,8 +1025,7 @@
 .admin-review-section textarea[aria-invalid="true"]:focus-visible {
   border-color: var(--danger);
 
-  box-shadow:
-    0 0 0 3px #fee2e2;
+  box-shadow: 0 0 0 3px #fee2e2;
 }
 
 .admin-review-note-help {
@@ -1075,7 +1046,6 @@
   line-height: 1.5;
   font-weight: 500;
 }
-
 
 /* =========================
    Modal Actions
@@ -1160,7 +1130,6 @@
   border-color: var(--primary-dark);
 }
 
-
 /* =========================
    Modal Responsive
 ========================= */
@@ -1189,8 +1158,7 @@
   }
 
   .admin-evidence-grid {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .admin-modal-actions {
@@ -1204,7 +1172,6 @@
   }
 }
 
-
 @media (max-width: 440px) {
   .admin-modal-actions {
     flex-direction: column-reverse;
@@ -1215,11 +1182,9 @@
   }
 
   .admin-evidence-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
 
 /* =========================
    Handover Review
@@ -1272,8 +1237,7 @@
 .admin-handover-info {
   display: grid;
 
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
   gap: 12px;
 }
@@ -1304,4 +1268,3 @@
     grid-template-columns: 1fr;
   }
 }
-
