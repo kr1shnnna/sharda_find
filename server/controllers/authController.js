@@ -3,10 +3,17 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 
-const createToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
+const createToken = (userId, role) => {
+  return jwt.sign(
+    {
+      userId,
+      role,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "7d",
+    },
+  );
 };
 
 const registerUser = async (req, res) => {
@@ -281,8 +288,6 @@ const resendOtp = async (req, res) => {
 
     await user.save();
 
-    
-
     // Send the new OTP email
     await sendEmail({
       to: email,
@@ -428,7 +433,9 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const token = createToken(user._id);
+    
+    const token = createToken(user._id, user.role);
+    
 
     res.status(200).json({
       message: "Login successful",

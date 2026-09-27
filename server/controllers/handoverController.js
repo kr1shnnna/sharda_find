@@ -30,10 +30,7 @@ const reportHandover = async (req, res) => {
      * For a LOST item:
      * foundBy = person currently holding the item
      */
-    const finderId =
-      item.type === "found"
-        ? item.reportedBy
-        : item.foundBy;
+    const finderId = item.type === "found" ? item.reportedBy : item.foundBy;
 
     if (!finderId) {
       return res.status(400).json({
@@ -45,8 +42,7 @@ const reportHandover = async (req, res) => {
     // report the department handover.
     if (finderId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
-        message:
-          "Only the person who has the item can report this handover",
+        message: "Only the person who has the item can report this handover",
       });
     }
 
@@ -85,6 +81,12 @@ const reportHandover = async (req, res) => {
 
     const io = req.app.get("io");
 
+    io.to("admins").emit("admin-case-updated", {
+      type: "handover-submitted",
+      itemId: item._id,
+      handoverId: handover._id,
+    });
+
     // 8. Find the admin
     const admin = await User.findOne({
       role: "admin",
@@ -112,30 +114,21 @@ const reportHandover = async (req, res) => {
     console.error("Report handover error:", error);
 
     // Duplicate-key error from the unique pending-handover index.
-    if (
-      error.code === 11000 &&
-      error.keyPattern?.item
-    ) {
+    if (error.code === 11000 && error.keyPattern?.item) {
       return res.status(409).json({
-        message:
-          "A pending handover already exists for this item.",
+        message: "A pending handover already exists for this item.",
       });
     }
 
     // Mongoose validation errors
     if (error.name === "ValidationError") {
-      const messages = Object.values(
-        error.errors || {}
-      ).map(
-        (validationError) =>
-          validationError.message
+      const messages = Object.values(error.errors || {}).map(
+        (validationError) => validationError.message,
       );
 
       return res.status(400).json({
         message:
-          messages.length > 0
-            ? messages.join(", ")
-            : "Invalid handover data.",
+          messages.length > 0 ? messages.join(", ") : "Invalid handover data.",
       });
     }
 

@@ -85,6 +85,13 @@ const createClaim = async (req, res) => {
     await item.save();
 
     const io = req.app.get("io");
+    
+    io.to("admins").emit("admin-case-updated", {
+      type: "claim-submitted",
+      itemId: item._id,
+      claimId: claim._id,
+    });
+
     await createNotification({
       recipient: item.reportedBy,
       type: "claim-submitted",

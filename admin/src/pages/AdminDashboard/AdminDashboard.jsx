@@ -1,8 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   FiAlertCircle,
@@ -26,7 +22,6 @@ import AdminHeader from "../../components/AdminHeader/AdminHeader";
 
 import "./AdminDashboard.css";
 
-
 /* ==================================================
    Helpers
 ================================================== */
@@ -49,7 +44,6 @@ const formatDate = (dateString) => {
   });
 };
 
-
 const formatDateTime = (dateString) => {
   if (!dateString) {
     return "Date unavailable";
@@ -70,7 +64,6 @@ const formatDateTime = (dateString) => {
   });
 };
 
-
 const formatCategory = (category) => {
   if (!category) {
     return "Other";
@@ -78,26 +71,17 @@ const formatCategory = (category) => {
 
   return category
     .split("-")
-    .map(
-      (word) =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1)
-    )
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 };
-
 
 const formatType = (type) => {
   if (!type) {
     return "Unknown";
   }
 
-  return (
-    type.charAt(0).toUpperCase() +
-    type.slice(1)
-  );
+  return type.charAt(0).toUpperCase() + type.slice(1);
 };
-
 
 const formatLocation = (location) => {
   if (location === "with-finder") {
@@ -111,7 +95,6 @@ const formatLocation = (location) => {
   return "Not specified";
 };
 
-
 const formatStatus = (status) => {
   if (!status) {
     return "Unknown";
@@ -119,14 +102,9 @@ const formatStatus = (status) => {
 
   return status
     .split("-")
-    .map(
-      (word) =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1)
-    )
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 };
-
 
 /* ==================================================
    Component
@@ -147,7 +125,6 @@ const AdminDashboard = () => {
 
   const [returningItem, setReturningItem] = useState(false);
 
-
   /* ==================================================
      Fetch Cases
   ================================================== */
@@ -159,29 +136,31 @@ const AdminDashboard = () => {
 
       const response = await api.get("/admin/cases");
 
-      setCases(
-        response.data?.cases || []
-      );
+      setCases(response.data?.cases || []);
     } catch (error) {
-      console.error(
-        "Unable to load admin cases:",
-        error
-      );
+      console.error("Unable to load admin cases:", error);
 
-      setError(
-        error.response?.data?.message ||
-          "Unable to load admin cases."
-      );
+      setError(error.response?.data?.message || "Unable to load admin cases.");
     } finally {
       setLoading(false);
     }
   };
 
-
   useEffect(() => {
     fetchCases();
   }, []);
 
+  useEffect(() => {
+    const handleCaseUpdate = () => {
+      fetchCases();
+    };
+
+    window.addEventListener("admin-case-updated", handleCaseUpdate);
+
+    return () => {
+      window.removeEventListener("admin-case-updated", handleCaseUpdate);
+    };
+  }, []);
 
   /* ==================================================
      Statistics
@@ -193,33 +172,27 @@ const AdminDashboard = () => {
     const pendingClaims = cases.reduce(
       (count, currentCase) =>
         count +
-        currentCase.claims.filter(
-          (claim) =>
-            claim.status === "pending"
-        ).length,
-      0
+        currentCase.claims.filter((claim) => claim.status === "pending").length,
+      0,
     );
 
     const pendingHandovers = cases.reduce(
       (count, currentCase) =>
         count +
         currentCase.handovers.filter(
-          (handover) =>
-            handover.status === "pending"
+          (handover) => handover.status === "pending",
         ).length,
-      0
+      0,
     );
 
     const atDepartment = cases.filter(
       (currentCase) =>
-        currentCase.item?.itemLocation ===
-          "lost-found-department" &&
-        currentCase.item?.status !== "returned"
+        currentCase.item?.itemLocation === "lost-found-department" &&
+        currentCase.item?.status !== "returned",
     ).length;
 
     const returned = cases.filter(
-      (currentCase) =>
-        currentCase.item?.status === "returned"
+      (currentCase) => currentCase.item?.status === "returned",
     ).length;
 
     return {
@@ -231,61 +204,45 @@ const AdminDashboard = () => {
     };
   }, [cases]);
 
-
   /* ==================================================
      Needs Attention
   ================================================== */
 
   const attentionCases = useMemo(() => {
     return cases.filter((currentCase) => {
-      const hasPendingClaim =
-        currentCase.claims.some(
-          (claim) =>
-            claim.status === "pending"
-        );
-
-      const hasPendingHandover =
-        currentCase.handovers.some(
-          (handover) =>
-            handover.status === "pending"
-        );
-
-      return (
-        hasPendingClaim ||
-        hasPendingHandover
+      const hasPendingClaim = currentCase.claims.some(
+        (claim) => claim.status === "pending",
       );
+
+      const hasPendingHandover = currentCase.handovers.some(
+        (handover) => handover.status === "pending",
+      );
+
+      return hasPendingClaim || hasPendingHandover;
     });
   }, [cases]);
-
 
   /* ==================================================
      Search
   ================================================== */
 
   const filteredCases = useMemo(() => {
-    const search = searchTerm
-      .trim()
-      .toLowerCase();
+    const search = searchTerm.trim().toLowerCase();
 
     if (!search) {
       return cases;
     }
 
     return cases.filter((currentCase) => {
-      const item =
-        currentCase.item;
+      const item = currentCase.item;
 
-      const title =
-        item?.title?.toLowerCase() || "";
+      const title = item?.title?.toLowerCase() || "";
 
-      const location =
-        item?.location?.toLowerCase() || "";
+      const location = item?.location?.toLowerCase() || "";
 
-      const category =
-        item?.category?.toLowerCase() || "";
+      const category = item?.category?.toLowerCase() || "";
 
-      const reporter =
-        item?.reportedBy?.name?.toLowerCase() || "";
+      const reporter = item?.reportedBy?.name?.toLowerCase() || "";
 
       return (
         title.includes(search) ||
@@ -296,7 +253,6 @@ const AdminDashboard = () => {
     });
   }, [cases, searchTerm]);
 
-
   /* ==================================================
      Open Case
   ================================================== */
@@ -305,28 +261,19 @@ const AdminDashboard = () => {
     try {
       setCaseLoading(true);
 
-      const response = await api.get(
-        `/admin/cases/${itemId}`
-      );
+      const response = await api.get(`/admin/cases/${itemId}`);
 
-      setSelectedCase(
-        response.data?.case || null
-      );
+      setSelectedCase(response.data?.case || null);
     } catch (error) {
-      console.error(
-        "Unable to load case:",
-        error
-      );
+      console.error("Unable to load case:", error);
 
       toast.error(
-        error.response?.data?.message ||
-          "Unable to load case details."
+        error.response?.data?.message || "Unable to load case details.",
       );
     } finally {
       setCaseLoading(false);
     }
   };
-
 
   const handleCloseCase = () => {
     if (returningItem) {
@@ -335,7 +282,6 @@ const AdminDashboard = () => {
 
     setSelectedCase(null);
   };
-
 
   /* ==================================================
      Give Item To Owner
@@ -349,38 +295,23 @@ const AdminDashboard = () => {
     try {
       setReturningItem(true);
 
-      await api.patch(
-        `/admin/items/${selectedCase.item._id}/return`
-      );
+      await api.patch(`/admin/items/${selectedCase.item._id}/return`);
 
-      toast.success(
-        "Item returned to the owner successfully."
-      );
+      toast.success("Item returned to the owner successfully.");
 
-      const response = await api.get(
-        `/admin/cases/${selectedCase.item._id}`
-      );
+      const response = await api.get(`/admin/cases/${selectedCase.item._id}`);
 
-      setSelectedCase(
-        response.data?.case || null
-      );
+      setSelectedCase(response.data?.case || null);
 
       await fetchCases();
     } catch (error) {
-      console.error(
-        "Unable to return item:",
-        error
-      );
+      console.error("Unable to return item:", error);
 
-      toast.error(
-        error.response?.data?.message ||
-          "Unable to return item."
-      );
+      toast.error(error.response?.data?.message || "Unable to return item.");
     } finally {
       setReturningItem(false);
     }
   };
-
 
   /* ==================================================
      Build Timeline
@@ -399,101 +330,70 @@ const AdminDashboard = () => {
       timeline.push({
         date: item.createdAt,
         title: "Item Posted",
-        description:
-          `${item.reportedBy?.name || "Student"} posted this item.`,
+        description: `${item.reportedBy?.name || "Student"} posted this item.`,
         icon: "item",
       });
     }
 
-    currentCase.handovers?.forEach(
-      (handover) => {
+    currentCase.handovers?.forEach((handover) => {
+      timeline.push({
+        date: handover.createdAt,
+        title: "Handover Requested",
+        description: `${handover.submittedBy?.name || "Student"} requested department handover.`,
+        icon: "handover",
+      });
+
+      if (handover.status !== "pending") {
         timeline.push({
-          date: handover.createdAt,
-          title: "Handover Requested",
+          date: handover.reviewedAt || handover.updatedAt,
+          title:
+            handover.status === "confirmed"
+              ? "Department Handover Confirmed"
+              : "Department Handover Rejected",
           description:
-            `${handover.submittedBy?.name || "Student"} requested department handover.`,
-          icon: "handover",
+            handover.status === "confirmed"
+              ? "The Lost & Found Department confirmed receipt of the item."
+              : handover.note || "The department could not confirm receipt.",
+          icon: handover.status === "confirmed" ? "success" : "rejected",
         });
-
-        if (handover.status !== "pending") {
-          timeline.push({
-            date:
-              handover.reviewedAt ||
-              handover.updatedAt,
-            title:
-              handover.status === "confirmed"
-                ? "Department Handover Confirmed"
-                : "Department Handover Rejected",
-            description:
-              handover.status === "confirmed"
-                ? "The Lost & Found Department confirmed receipt of the item."
-                : handover.note ||
-                  "The department could not confirm receipt.",
-            icon:
-              handover.status === "confirmed"
-                ? "success"
-                : "rejected",
-          });
-        }
       }
-    );
+    });
 
-    currentCase.claims?.forEach(
-      (claim) => {
+    currentCase.claims?.forEach((claim) => {
+      timeline.push({
+        date: claim.createdAt,
+        title: "Claim Submitted",
+        description: `${claim.claimant?.name || "Student"} submitted an ownership claim.`,
+        icon: "claim",
+      });
+
+      if (claim.status !== "pending") {
         timeline.push({
-          date: claim.createdAt,
-          title: "Claim Submitted",
+          date: claim.updatedAt || claim.createdAt,
+          title:
+            claim.status === "approved" ? "Claim Approved" : "Claim Rejected",
           description:
-            `${claim.claimant?.name || "Student"} submitted an ownership claim.`,
-          icon: "claim",
+            claim.status === "approved"
+              ? "The ownership claim was approved."
+              : claim.reviewNote || "The ownership claim was rejected.",
+          icon: claim.status === "approved" ? "success" : "rejected",
         });
-
-        if (claim.status !== "pending") {
-          timeline.push({
-            date:
-              claim.updatedAt ||
-              claim.createdAt,
-            title:
-              claim.status === "approved"
-                ? "Claim Approved"
-                : "Claim Rejected",
-            description:
-              claim.status === "approved"
-                ? "The ownership claim was approved."
-                : claim.reviewNote ||
-                  "The ownership claim was rejected.",
-            icon:
-              claim.status === "approved"
-                ? "success"
-                : "rejected",
-          });
-        }
       }
-    );
+    });
 
     if (item?.departmentReturnedAt) {
       timeline.push({
         date: item.departmentReturnedAt,
         title: "Item Returned",
-        description:
-          `Item given to ${
-            item.departmentReturnedTo?.name ||
-            "the approved claimant"
-          } by ${
-            item.departmentReturnedBy?.name ||
-            "an administrator"
-          }.`,
+        description: `Item given to ${
+          item.departmentReturnedTo?.name || "the approved claimant"
+        } by ${item.departmentReturnedBy?.name || "an administrator"}.`,
         icon: "returned",
       });
     }
 
-    return timeline.sort(
-      (a, b) =>
-        new Date(a.date) -
-        new Date(b.date)
-    );
+    return timeline.sort((a, b) => new Date(a.date) - new Date(b.date));
   };
-
 
   /* ==================================================
      Loading
@@ -506,19 +406,14 @@ const AdminDashboard = () => {
 
         <main className="admin-dashboard-container">
           <div className="admin-dashboard-loading">
-            <FiRefreshCw
-              className="admin-loading-icon"
-            />
+            <FiRefreshCw className="admin-loading-icon" />
 
-            <p>
-              Loading admin dashboard...
-            </p>
+            <p>Loading admin dashboard...</p>
           </div>
         </main>
       </div>
     );
   }
-
 
   /* ==================================================
      Render
@@ -529,19 +424,13 @@ const AdminDashboard = () => {
       <AdminHeader />
 
       <main className="admin-dashboard-container">
-
         {/* Header */}
 
         <div className="admin-dashboard-heading">
           <div>
-            <h1>
-              Lost &amp; Found Administration
-            </h1>
+            <h1>Lost &amp; Found Administration</h1>
 
-            <p>
-              Manage cases, verify claims,
-              and track item movement.
-            </p>
+            <p>Manage cases, verify claims, and track item movement.</p>
           </div>
 
           <button
@@ -551,42 +440,30 @@ const AdminDashboard = () => {
           >
             <FiRefreshCw />
 
-            <span>
-              Refresh
-            </span>
+            <span>Refresh</span>
           </button>
         </div>
-
 
         {/* Error */}
 
         {error && (
-          <div
-            className="admin-dashboard-error"
-            role="alert"
-          >
+          <div className="admin-dashboard-error" role="alert">
             <FiAlertCircle />
 
-            <span>
-              {error}
-            </span>
+            <span>{error}</span>
           </div>
         )}
-
 
         {/* Statistics */}
 
         <div className="admin-summary-grid">
-
           <div className="admin-summary-card">
             <div className="admin-summary-icon">
               <FiPackage />
             </div>
 
             <div className="admin-summary-content">
-              <span className="admin-summary-label">
-                Total Cases
-              </span>
+              <span className="admin-summary-label">Total Cases</span>
 
               <strong className="admin-summary-value">
                 {statistics.totalCases}
@@ -594,16 +471,13 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-
           <div className="admin-summary-card">
             <div className="admin-summary-icon admin-summary-icon-warning">
               <FiClock />
             </div>
 
             <div className="admin-summary-content">
-              <span className="admin-summary-label">
-                Pending Claims
-              </span>
+              <span className="admin-summary-label">Pending Claims</span>
 
               <strong className="admin-summary-value">
                 {statistics.pendingClaims}
@@ -611,16 +485,13 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-
           <div className="admin-summary-card">
             <div className="admin-summary-icon admin-summary-icon-warning">
               <FaHandHolding />
             </div>
 
             <div className="admin-summary-content">
-              <span className="admin-summary-label">
-                Pending Handovers
-              </span>
+              <span className="admin-summary-label">Pending Handovers</span>
 
               <strong className="admin-summary-value">
                 {statistics.pendingHandovers}
@@ -628,16 +499,13 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-
           <div className="admin-summary-card">
             <div className="admin-summary-icon admin-summary-icon-package">
               <FiPackage />
             </div>
 
             <div className="admin-summary-content">
-              <span className="admin-summary-label">
-                At Department
-              </span>
+              <span className="admin-summary-label">At Department</span>
 
               <strong className="admin-summary-value">
                 {statistics.atDepartment}
@@ -645,30 +513,24 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-
           <div className="admin-summary-card">
             <div className="admin-summary-icon">
               <FiCheckCircle />
             </div>
 
             <div className="admin-summary-content">
-              <span className="admin-summary-label">
-                Returned
-              </span>
+              <span className="admin-summary-label">Returned</span>
 
               <strong className="admin-summary-value">
                 {statistics.returned}
               </strong>
             </div>
           </div>
-
         </div>
-
 
         {/* Navigation */}
 
         <div className="admin-dashboard-tabs">
-
           <button
             type="button"
             className={
@@ -676,9 +538,7 @@ const AdminDashboard = () => {
                 ? "admin-dashboard-tab active"
                 : "admin-dashboard-tab"
             }
-            onClick={() =>
-              setActiveTab("overview")
-            }
+            onClick={() => setActiveTab("overview")}
           >
             Overview
           </button>
@@ -690,15 +550,11 @@ const AdminDashboard = () => {
                 ? "admin-dashboard-tab active"
                 : "admin-dashboard-tab"
             }
-            onClick={() =>
-              setActiveTab("attention")
-            }
+            onClick={() => setActiveTab("attention")}
           >
             Needs Attention
             {attentionCases.length > 0 && (
-              <span className="admin-tab-count">
-                {attentionCases.length}
-              </span>
+              <span className="admin-tab-count">{attentionCases.length}</span>
             )}
           </button>
 
@@ -709,15 +565,11 @@ const AdminDashboard = () => {
                 ? "admin-dashboard-tab active"
                 : "admin-dashboard-tab"
             }
-            onClick={() =>
-              setActiveTab("cases")
-            }
+            onClick={() => setActiveTab("cases")}
           >
             All Cases
           </button>
-
         </div>
-
 
         {/* ==================================================
             OVERVIEW
@@ -726,17 +578,11 @@ const AdminDashboard = () => {
         {activeTab === "overview" && (
           <>
             <section className="admin-dashboard-section">
-
               <div className="admin-section-header">
                 <div>
-                  <h2>
-                    Needs Attention
-                  </h2>
+                  <h2>Needs Attention</h2>
 
-                  <p>
-                    Cases that currently require
-                    an administrator action.
-                  </p>
+                  <p>Cases that currently require an administrator action.</p>
                 </div>
 
                 <span className="admin-section-count">
@@ -744,41 +590,26 @@ const AdminDashboard = () => {
                 </span>
               </div>
 
-
               {attentionCases.length === 0 ? (
                 <div className="admin-empty-state">
                   <FiCheckCircle />
 
-                  <p>
-                    Nothing requires your attention.
-                  </p>
+                  <p>Nothing requires your attention.</p>
                 </div>
               ) : (
                 <div className="admin-case-grid">
-
-                  {attentionCases
-                    .slice(0, 6)
-                    .map((currentCase) => (
-                      <CaseCard
-                        key={
-                          currentCase.item?._id
-                        }
-                        currentCase={currentCase}
-                        onOpen={() =>
-                          handleOpenCase(
-                            currentCase.item._id
-                          )
-                        }
-                      />
-                    ))}
-
+                  {attentionCases.slice(0, 6).map((currentCase) => (
+                    <CaseCard
+                      key={currentCase.item?._id}
+                      currentCase={currentCase}
+                      onOpen={() => handleOpenCase(currentCase.item._id)}
+                    />
+                  ))}
                 </div>
               )}
-
             </section>
           </>
         )}
-
 
         {/* ==================================================
             NEEDS ATTENTION
@@ -786,17 +617,11 @@ const AdminDashboard = () => {
 
         {activeTab === "attention" && (
           <section className="admin-dashboard-section">
-
             <div className="admin-section-header">
               <div>
-                <h2>
-                  Cases Requiring Action
-                </h2>
+                <h2>Cases Requiring Action</h2>
 
-                <p>
-                  Pending claims and department
-                  handover requests.
-                </p>
+                <p>Pending claims and department handover requests.</p>
               </div>
 
               <span className="admin-section-count">
@@ -804,40 +629,25 @@ const AdminDashboard = () => {
               </span>
             </div>
 
-
             {attentionCases.length === 0 ? (
               <div className="admin-empty-state">
                 <FiCheckCircle />
 
-                <p>
-                  No cases require attention.
-                </p>
+                <p>No cases require attention.</p>
               </div>
             ) : (
               <div className="admin-case-grid">
-
-                {attentionCases.map(
-                  (currentCase) => (
-                    <CaseCard
-                      key={
-                        currentCase.item?._id
-                      }
-                      currentCase={currentCase}
-                      onOpen={() =>
-                        handleOpenCase(
-                          currentCase.item._id
-                        )
-                      }
-                    />
-                  )
-                )}
-
+                {attentionCases.map((currentCase) => (
+                  <CaseCard
+                    key={currentCase.item?._id}
+                    currentCase={currentCase}
+                    onOpen={() => handleOpenCase(currentCase.item._id)}
+                  />
+                ))}
               </div>
             )}
-
           </section>
         )}
-
 
         {/* ==================================================
             ALL CASES
@@ -845,26 +655,17 @@ const AdminDashboard = () => {
 
         {activeTab === "cases" && (
           <section className="admin-dashboard-section">
-
             <div className="admin-section-header">
-
               <div>
-                <h2>
-                  All Cases
-                </h2>
+                <h2>All Cases</h2>
 
-                <p>
-                  Complete history of items
-                  handled by the department.
-                </p>
+                <p>Complete history of items handled by the department.</p>
               </div>
 
               <span className="admin-section-count">
                 {filteredCases.length}
               </span>
-
             </div>
-
 
             <div className="admin-case-search">
               <FiSearch />
@@ -873,50 +674,30 @@ const AdminDashboard = () => {
                 type="text"
                 placeholder="Search by item, category, location, or student..."
                 value={searchTerm}
-                onChange={(event) =>
-                  setSearchTerm(
-                    event.target.value
-                  )
-                }
+                onChange={(event) => setSearchTerm(event.target.value)}
               />
             </div>
-
 
             {filteredCases.length === 0 ? (
               <div className="admin-empty-state">
                 <FiPackage />
 
-                <p>
-                  No cases found.
-                </p>
+                <p>No cases found.</p>
               </div>
             ) : (
               <div className="admin-case-list">
-
-                {filteredCases.map(
-                  (currentCase) => (
-                    <CaseRow
-                      key={
-                        currentCase.item?._id
-                      }
-                      currentCase={currentCase}
-                      onOpen={() =>
-                        handleOpenCase(
-                          currentCase.item._id
-                        )
-                      }
-                    />
-                  )
-                )}
-
+                {filteredCases.map((currentCase) => (
+                  <CaseRow
+                    key={currentCase.item?._id}
+                    currentCase={currentCase}
+                    onOpen={() => handleOpenCase(currentCase.item._id)}
+                  />
+                ))}
               </div>
             )}
-
           </section>
         )}
-
       </main>
-
 
       {/* ==================================================
           CASE MODAL
@@ -926,37 +707,19 @@ const AdminDashboard = () => {
         <div
           className="admin-modal-overlay"
           onMouseDown={(event) => {
-            if (
-              event.target ===
-              event.currentTarget
-            ) {
+            if (event.target === event.currentTarget) {
               handleCloseCase();
             }
           }}
         >
-
-          <div
-            className="admin-case-modal"
-            role="dialog"
-            aria-modal="true"
-          >
-
+          <div className="admin-case-modal" role="dialog" aria-modal="true">
             <div className="admin-modal-header">
-
               <div>
-                <span className="admin-modal-eyebrow">
-                  Case Details
-                </span>
+                <span className="admin-modal-eyebrow">Case Details</span>
 
-                <h2>
-                  {selectedCase.item?.title ||
-                    "Item"}
-                </h2>
+                <h2>{selectedCase.item?.title || "Item"}</h2>
 
-                <p>
-                  Complete activity and
-                  ownership history.
-                </p>
+                <p>Complete activity and ownership history.</p>
               </div>
 
               <button
@@ -968,189 +731,114 @@ const AdminDashboard = () => {
               >
                 <FiX />
               </button>
-
             </div>
-
 
             {/* Case summary */}
 
             <div className="admin-case-summary">
-
               <div>
-                <span>
-                  Type
-                </span>
+                <span>Type</span>
 
-                <strong>
-                  {formatType(
-                    selectedCase.item?.type
-                  )}
-                </strong>
+                <strong>{formatType(selectedCase.item?.type)}</strong>
               </div>
 
               <div>
-                <span>
-                  Category
-                </span>
+                <span>Category</span>
 
-                <strong>
-                  {formatCategory(
-                    selectedCase.item?.category
-                  )}
-                </strong>
+                <strong>{formatCategory(selectedCase.item?.category)}</strong>
               </div>
 
               <div>
-                <span>
-                  Status
-                </span>
+                <span>Status</span>
 
-                <strong>
-                  {formatStatus(
-                    selectedCase.item?.status
-                  )}
-                </strong>
+                <strong>{formatStatus(selectedCase.item?.status)}</strong>
               </div>
 
               <div>
-                <span>
-                  Location
-                </span>
+                <span>Location</span>
 
                 <strong>
-                  {formatLocation(
-                    selectedCase.item?.itemLocation
-                  )}
+                  {formatLocation(selectedCase.item?.itemLocation)}
                 </strong>
               </div>
-
             </div>
-
 
             {/* Approved claim */}
 
             {selectedCase.approvedClaim && (
               <div className="admin-approved-owner">
-
                 <div className="admin-approved-owner-icon">
                   <FiCheckCircle />
                 </div>
 
                 <div>
-                  <span>
-                    Approved Claimant
-                  </span>
+                  <span>Approved Claimant</span>
 
                   <strong>
-                    {
-                      selectedCase
-                        .approvedClaim
-                        .claimant?.name ||
-                      "Student"
-                    }
+                    {selectedCase.approvedClaim.claimant?.name || "Student"}
                   </strong>
 
                   <small>
-                    {
-                      selectedCase
-                        .approvedClaim
-                        .claimant?.email ||
-                      "Email unavailable"
-                    }
+                    {selectedCase.approvedClaim.claimant?.email ||
+                      "Email unavailable"}
                   </small>
                 </div>
-
               </div>
             )}
-
 
             {/* Timeline */}
 
             <div className="admin-case-timeline-section">
-
               <div className="admin-review-section-heading">
-                <h3>
-                  Case Timeline
-                </h3>
+                <h3>Case Timeline</h3>
               </div>
-
 
               <div className="admin-case-timeline">
-
-                {buildTimeline(
-                  selectedCase
-                ).map(
-                  (event, index) => (
-                    <div
-                      className="admin-timeline-item"
-                      key={`${event.title}-${index}`}
-                    >
-
-                      <div className="admin-timeline-marker">
-                        {event.icon === "success" ||
-                        event.icon === "returned" ? (
-                          <FiCheckCircle />
-                        ) : event.icon === "rejected" ? (
-                          <FiX />
-                        ) : event.icon === "handover" ? (
-                          <FaHandHolding />
-                        ) : event.icon === "claim" ? (
-                          <FiUser />
-                        ) : (
-                          <FiPackage />
-                        )}
-                      </div>
-
-
-                      <div className="admin-timeline-content">
-
-                        <div className="admin-timeline-top">
-                          <strong>
-                            {event.title}
-                          </strong>
-
-                          <span>
-                            {formatDateTime(
-                              event.date
-                            )}
-                          </span>
-                        </div>
-
-                        <p>
-                          {event.description}
-                        </p>
-
-                      </div>
-
+                {buildTimeline(selectedCase).map((event, index) => (
+                  <div
+                    className="admin-timeline-item"
+                    key={`${event.title}-${index}`}
+                  >
+                    <div className="admin-timeline-marker">
+                      {event.icon === "success" || event.icon === "returned" ? (
+                        <FiCheckCircle />
+                      ) : event.icon === "rejected" ? (
+                        <FiX />
+                      ) : event.icon === "handover" ? (
+                        <FaHandHolding />
+                      ) : event.icon === "claim" ? (
+                        <FiUser />
+                      ) : (
+                        <FiPackage />
+                      )}
                     </div>
-                  )
-                )}
 
+                    <div className="admin-timeline-content">
+                      <div className="admin-timeline-top">
+                        <strong>{event.title}</strong>
+
+                        <span>{formatDateTime(event.date)}</span>
+                      </div>
+
+                      <p>{event.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-
             </div>
-
 
             {/* Return action */}
 
-            {selectedCase.item?.status ===
-              "active" &&
-              selectedCase.item
-                ?.itemLocation ===
-                "lost-found-department" &&
+            {selectedCase.item?.status === "active" &&
+              selectedCase.item?.itemLocation === "lost-found-department" &&
               selectedCase.approvedClaim && (
                 <div className="admin-case-final-action">
-
                   <div>
-                    <h3>
-                      Ready for Collection
-                    </h3>
+                    <h3>Ready for Collection</h3>
 
                     <p>
-                      Verify the claimant's
-                      Sharda University ID and
-                      ownership proof before
-                      handing over the item.
+                      Verify the claimant's Sharda University ID and ownership
+                      proof before handing over the item.
                     </p>
                   </div>
 
@@ -1162,50 +850,30 @@ const AdminDashboard = () => {
                   >
                     <FiCheckCircle />
 
-                    {returningItem
-                      ? "Returning..."
-                      : "Give Item to Owner"}
+                    {returningItem ? "Returning..." : "Give Item to Owner"}
                   </button>
-
                 </div>
               )}
 
+            {selectedCase.item?.status === "returned" && (
+              <div className="admin-case-returned">
+                <FiCheckCircle />
 
-            {selectedCase.item?.status ===
-              "returned" && (
-                <div className="admin-case-returned">
+                <div>
+                  <strong>Item Returned</strong>
 
-                  <FiCheckCircle />
-
-                  <div>
-                    <strong>
-                      Item Returned
-                    </strong>
-
-                    <span>
-                      Returned to{" "}
-                      {
-                        selectedCase.item
-                          .departmentReturnedTo
-                          ?.name ||
-                        "the approved claimant"
-                      }{" "}
-                      on{" "}
-                      {formatDateTime(
-                        selectedCase.item
-                          .departmentReturnedAt
-                      )}
-                    </span>
-                  </div>
-
+                  <span>
+                    Returned to{" "}
+                    {selectedCase.item.departmentReturnedTo?.name ||
+                      "the approved claimant"}{" "}
+                    on {formatDateTime(selectedCase.item.departmentReturnedAt)}
+                  </span>
                 </div>
-              )}
-
+              </div>
+            )}
           </div>
-
         </div>
       )}
-
 
       {/* Case loading overlay */}
 
@@ -1213,85 +881,53 @@ const AdminDashboard = () => {
         <div className="admin-case-loading-overlay">
           <FiRefreshCw />
 
-          <span>
-            Loading case...
-          </span>
+          <span>Loading case...</span>
         </div>
       )}
-
     </div>
   );
 };
-
 
 /* ==================================================
    Case Card
 ================================================== */
 
-const CaseCard = ({
-  currentCase,
-  onOpen,
-}) => {
+const CaseCard = ({ currentCase, onOpen }) => {
   const item = currentCase.item;
 
-  const pendingClaim =
-    currentCase.claims?.find(
-      (claim) =>
-        claim.status === "pending"
-    );
+  const pendingClaim = currentCase.claims?.find(
+    (claim) => claim.status === "pending",
+  );
 
-  const pendingHandover =
-    currentCase.handovers?.find(
-      (handover) =>
-        handover.status === "pending"
-    );
+  const pendingHandover = currentCase.handovers?.find(
+    (handover) => handover.status === "pending",
+  );
 
   return (
     <div className="admin-case-card">
-
       <div className="admin-case-card-top">
-
         <div>
-          <span className="admin-case-type">
-            {formatType(item?.type)}
-          </span>
+          <span className="admin-case-type">{formatType(item?.type)}</span>
 
-          <h3>
-            {item?.title ||
-              "Item unavailable"}
-          </h3>
+          <h3>{item?.title || "Item unavailable"}</h3>
         </div>
 
         <span className="admin-case-status">
           {item?.status === "returned"
             ? "Returned"
-            : item?.itemLocation ===
-              "lost-found-department"
-            ? "At Department"
-            : "Active"}
+            : item?.itemLocation === "lost-found-department"
+              ? "At Department"
+              : "Active"}
         </span>
-
       </div>
-
 
       <div className="admin-case-card-details">
+        <span>{formatCategory(item?.category)}</span>
 
-        <span>
-          {formatCategory(
-            item?.category
-          )}
-        </span>
-
-        <span>
-          {item?.location ||
-            "Location unavailable"}
-        </span>
-
+        <span>{item?.location || "Location unavailable"}</span>
       </div>
 
-
       <div className="admin-case-card-alerts">
-
         {pendingClaim && (
           <span>
             <FiClock />
@@ -1305,106 +941,58 @@ const CaseCard = ({
             Handover pending
           </span>
         )}
-
       </div>
 
-
-      <button
-        type="button"
-        className="admin-case-open-button"
-        onClick={onOpen}
-      >
-        <span>
-          View Case
-        </span>
+      <button type="button" className="admin-case-open-button" onClick={onOpen}>
+        <span>View Case</span>
 
         <FiChevronRight />
       </button>
-
     </div>
   );
 };
-
 
 /* ==================================================
    Case Row
 ================================================== */
 
-const CaseRow = ({
-  currentCase,
-  onOpen,
-}) => {
+const CaseRow = ({ currentCase, onOpen }) => {
   const item = currentCase.item;
 
   return (
     <div className="admin-case-row">
-
       <div className="admin-case-row-main">
-
         <div className="admin-case-row-icon">
           <FiPackage />
         </div>
 
         <div className="admin-case-row-info">
-
-          <strong>
-            {item?.title ||
-              "Item unavailable"}
-          </strong>
+          <strong>{item?.title || "Item unavailable"}</strong>
 
           <span>
             {formatType(item?.type)}
             {" · "}
-            {formatCategory(
-              item?.category
-            )}
+            {formatCategory(item?.category)}
           </span>
-
         </div>
-
       </div>
-
 
       <div className="admin-case-row-meta">
+        <span>{formatLocation(item?.itemLocation)}</span>
 
-        <span>
-          {formatLocation(
-            item?.itemLocation
-          )}
-        </span>
-
-        <span>
-          {formatDate(
-            item?.createdAt
-          )}
-        </span>
-
+        <span>{formatDate(item?.createdAt)}</span>
       </div>
-
 
       <div className="admin-case-row-status">
-
-        <span>
-          {formatStatus(
-            item?.status
-          )}
-        </span>
-
+        <span>{formatStatus(item?.status)}</span>
       </div>
 
-
-      <button
-        type="button"
-        className="admin-table-action"
-        onClick={onOpen}
-      >
+      <button type="button" className="admin-table-action" onClick={onOpen}>
         <FiEye />
         View
       </button>
-
     </div>
   );
 };
-
 
 export default AdminDashboard;

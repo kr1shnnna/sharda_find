@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FaLeaf } from "react-icons/fa";
 
-import {
-  FiArrowLeft,
-  FiBell,
-  FiCheck,
-  FiLogOut,
-} from "react-icons/fi";
+import { FiArrowLeft, FiBell, FiCheck, FiLogOut } from "react-icons/fi";
 
 import { Link, useNavigate } from "react-router-dom";
 
@@ -26,10 +21,8 @@ const AdminHeader = () => {
 
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [showNotifications, setShowNotifications] =
-    useState(false);
-  const [loadingNotifications, setLoadingNotifications] =
-    useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
 
   const notificationRef = useRef(null);
 
@@ -43,18 +36,11 @@ const AdminHeader = () => {
 
         const response = await api.get("/notifications");
 
-        setNotifications(
-          response.data?.notifications || []
-        );
+        setNotifications(response.data?.notifications || []);
 
-        setUnreadCount(
-          response.data?.unreadCount || 0
-        );
+        setUnreadCount(response.data?.unreadCount || 0);
       } catch (error) {
-        console.error(
-          "Unable to fetch notifications:",
-          error
-        );
+        console.error("Unable to fetch notifications:", error);
       } finally {
         setLoadingNotifications(false);
       }
@@ -67,8 +53,7 @@ const AdminHeader = () => {
    * Listen for real-time notifications.
    */
   useEffect(() => {
-    const token =
-      localStorage.getItem("adminToken");
+    const token = localStorage.getItem("adminToken");
 
     if (!token) {
       return;
@@ -81,53 +66,43 @@ const AdminHeader = () => {
     });
 
     socket.on("connect", () => {
-      console.log(
-        "Admin notification socket connected:",
-        socket.id
-      );
+      console.log("Admin notification socket connected:", socket.id);
     });
 
     socket.on("new-notification", (data) => {
-      const notification =
-        data?.notification;
+      const notification = data?.notification;
 
       if (!notification) {
         return;
       }
 
-      setNotifications((previous) => [
-        notification,
-        ...previous,
-      ]);
+      setNotifications((previous) => [notification, ...previous]);
 
-      setUnreadCount(
-        (previous) => previous + 1
-      );
+      setUnreadCount((previous) => previous + 1);
 
       /*
        * Tell other admin pages that a new
        * notification has arrived.
        */
       window.dispatchEvent(
-        new CustomEvent(
-          "admin-new-notification",
-          {
-            detail: notification,
-          }
-        )
+        new CustomEvent("admin-new-notification", {
+          detail: notification,
+        }),
       );
 
-      toast.success(
-        notification.title ||
-          "New notification"
+      toast.success(notification.title || "New notification");
+    });
+
+    socket.on("admin-case-updated", (data) => {
+      window.dispatchEvent(
+        new CustomEvent("admin-case-updated", {
+          detail: data,
+        }),
       );
     });
 
     socket.on("connect_error", (error) => {
-      console.error(
-        "Admin notification socket error:",
-        error.message
-      );
+      console.error("Admin notification socket error:", error.message);
     });
 
     return () => {
@@ -142,71 +117,48 @@ const AdminHeader = () => {
     const handleClickOutside = (event) => {
       if (
         notificationRef.current &&
-        !notificationRef.current.contains(
-          event.target
-        )
+        !notificationRef.current.contains(event.target)
       ) {
         setShowNotifications(false);
       }
     };
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const handleLogout = () => {
     logout();
 
-    toast.success(
-      "Logged out successfully"
-    );
+    toast.success("Logged out successfully");
 
     navigate("/admin/login", {
       replace: true,
     });
   };
 
-  const handleNotificationClick = async (
-    notification
-  ) => {
+  const handleNotificationClick = async (notification) => {
     if (notification.read) {
       return;
     }
 
     try {
-      await api.patch(
-        `/notifications/${notification._id}/read`
-      );
+      await api.patch(`/notifications/${notification._id}/read`);
 
       setNotifications((previous) =>
         previous.map((item) =>
-          item._id === notification._id
-            ? { ...item, read: true }
-            : item
-        )
+          item._id === notification._id ? { ...item, read: true } : item,
+        ),
       );
 
-      setUnreadCount((previous) =>
-        Math.max(previous - 1, 0)
-      );
+      setUnreadCount((previous) => Math.max(previous - 1, 0));
     } catch (error) {
-      console.error(
-        "Unable to mark notification as read:",
-        error
-      );
+      console.error("Unable to mark notification as read:", error);
 
-      toast.error(
-        "Unable to update notification."
-      );
+      toast.error("Unable to update notification.");
     }
   };
 
@@ -216,37 +168,26 @@ const AdminHeader = () => {
     }
 
     try {
-      await api.patch(
-        "/notifications/read-all"
-      );
+      await api.patch("/notifications/read-all");
 
       setNotifications((previous) =>
         previous.map((notification) => ({
           ...notification,
           read: true,
-        }))
+        })),
       );
 
       setUnreadCount(0);
 
-      toast.success(
-        "All notifications marked as read."
-      );
+      toast.success("All notifications marked as read.");
     } catch (error) {
-      console.error(
-        "Unable to mark all notifications as read:",
-        error
-      );
+      console.error("Unable to mark all notifications as read:", error);
 
-      toast.error(
-        "Unable to update notifications."
-      );
+      toast.error("Unable to update notifications.");
     }
   };
 
-  const formatNotificationTime = (
-    createdAt
-  ) => {
+  const formatNotificationTime = (createdAt) => {
     if (!createdAt) {
       return "";
     }
@@ -264,51 +205,33 @@ const AdminHeader = () => {
   return (
     <header className="admin-header">
       <div className="admin-header-container">
-        <Link
-          to="/admin"
-          className="admin-header-logo"
-        >
+        <Link to="/admin" className="admin-header-logo">
           <span className="admin-header-logo-icon">
             <FaLeaf />
           </span>
 
           <div className="admin-header-logo-text">
-            <span className="admin-header-brand">
-              ShardaFind
-            </span>
+            <span className="admin-header-brand">ShardaFind</span>
 
-            <span className="admin-header-label">
-              Admin Portal
-            </span>
+            <span className="admin-header-label">Admin Portal</span>
           </div>
         </Link>
 
         <div className="admin-header-actions">
           {/* Notifications */}
-          <div
-            className="admin-notification-wrapper"
-            ref={notificationRef}
-          >
+          <div className="admin-notification-wrapper" ref={notificationRef}>
             <button
               type="button"
               className="admin-notification-button"
-              onClick={() =>
-                setShowNotifications(
-                  (previous) => !previous
-                )
-              }
+              onClick={() => setShowNotifications((previous) => !previous)}
               aria-label="Notifications"
-              aria-expanded={
-                showNotifications
-              }
+              aria-expanded={showNotifications}
             >
               <FiBell />
 
               {unreadCount > 0 && (
                 <span className="admin-notification-count">
-                  {unreadCount > 99
-                    ? "99+"
-                    : unreadCount}
+                  {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
             </button>
@@ -330,9 +253,7 @@ const AdminHeader = () => {
                     <button
                       type="button"
                       className="admin-mark-all-read"
-                      onClick={
-                        handleMarkAllAsRead
-                      }
+                      onClick={handleMarkAllAsRead}
                     >
                       <FiCheck />
                       Mark all as read
@@ -345,54 +266,33 @@ const AdminHeader = () => {
                     <div className="admin-notification-empty">
                       Loading notifications...
                     </div>
-                  ) : notifications.length ===
-                    0 ? (
+                  ) : notifications.length === 0 ? (
                     <div className="admin-notification-empty">
                       No notifications yet.
                     </div>
                   ) : (
-                    notifications
-                      .slice(0, 10)
-                      .map((notification) => (
-                        <button
-                          type="button"
-                          key={
-                            notification._id
-                          }
-                          className={`admin-notification-item ${
-                            !notification.read
-                              ? "unread"
-                              : ""
-                          }`}
-                          onClick={() =>
-                            handleNotificationClick(
-                              notification
-                            )
-                          }
-                        >
-                          <span className="admin-notification-dot" />
+                    notifications.slice(0, 10).map((notification) => (
+                      <button
+                        type="button"
+                        key={notification._id}
+                        className={`admin-notification-item ${
+                          !notification.read ? "unread" : ""
+                        }`}
+                        onClick={() => handleNotificationClick(notification)}
+                      >
+                        <span className="admin-notification-dot" />
 
-                          <div className="admin-notification-content">
-                            <strong>
-                              {
-                                notification.title
-                              }
-                            </strong>
+                        <div className="admin-notification-content">
+                          <strong>{notification.title}</strong>
 
-                            <p>
-                              {
-                                notification.message
-                              }
-                            </p>
+                          <p>{notification.message}</p>
 
-                            <span>
-                              {formatNotificationTime(
-                                notification.createdAt
-                              )}
-                            </span>
-                          </div>
-                        </button>
-                      ))
+                          <span>
+                            {formatNotificationTime(notification.createdAt)}
+                          </span>
+                        </div>
+                      </button>
+                    ))
                   )}
                 </div>
               </div>
@@ -401,9 +301,7 @@ const AdminHeader = () => {
 
           <div className="admin-header-user">
             <div className="admin-header-avatar">
-              {user?.name
-                ?.charAt(0)
-                .toUpperCase() || "A"}
+              {user?.name?.charAt(0).toUpperCase() || "A"}
             </div>
 
             <div className="admin-header-user-info">
@@ -411,9 +309,7 @@ const AdminHeader = () => {
                 {user?.name || "Admin"}
               </span>
 
-              <span className="admin-header-user-role">
-                Administrator
-              </span>
+              <span className="admin-header-user-role">Administrator</span>
             </div>
           </div>
 
