@@ -33,12 +33,10 @@ const getAllClaims = async (req, res) => {
 };
 
 const reviewClaim = async (req, res) => {
-
   try {
-    const io=req.app.get("io");
+    const io = req.app.get("io");
 
     const { status, reviewNote } = req.body;
-
 
     if (!["approved", "rejected"].includes(status)) {
       return res.status(400).json({
@@ -158,6 +156,7 @@ const getAllHandovers = async (req, res) => {
 
 const reviewHandover = async (req, res) => {
   try {
+    const io = req.app.get("io");
     const { status, note } = req.body;
 
     // 1. Validate the requested status
@@ -192,24 +191,65 @@ const reviewHandover = async (req, res) => {
       });
     }
 
-    // 5. Record who reviewed the handover
+    // 5. Make sure this is a valid lost/found item
+    if (!["lost", "found"].includes(item.type)) {
+      return res.status(400).json({
+        message: "This item cannot be processed for department handover",
+      });
+    }
+
+    // 6. The item must still be with the finder
+    // when the admin confirms the handover.
+    if (status === "confirmed" && item.itemLocation !== "with-finder") {
+      return res.status(400).json({
+        message:
+          "This item is no longer with the finder, so the handover cannot be confirmed.",
+      });
+    }
+
+    // 7. Returned or closed items cannot be processed
+    if (["returned", "closed"].includes(item.status)) {
+      return res.status(400).json({
+        message:
+          "This item is no longer active and cannot be processed for department handover.",
+      });
+    }
+
+    // 8. Validate the admin note
+    const cleanedNote = note?.trim() || "";
+
+    if (cleanedNote.length > 500) {
+      return res.status(400).json({
+        message: "Handover note cannot exceed 500 characters",
+      });
+    }
+
+    // 9. Record the admin review
     handover.status = status;
     handover.reviewedBy = req.user._id;
     handover.reviewedAt = new Date();
-    handover.note = note || "";
+    handover.note = cleanedNote;
 
-    // 6. Update the actual physical location
+    // 10. Update the physical location
     if (status === "confirmed") {
       item.itemLocation = "lost-found-department";
     } else {
       item.itemLocation = "with-finder";
     }
 
-    // 7. Save the changes
+    /*
+     * Department handover does NOT mean the item
+     * has been returned to its owner.
+     *
+     * Therefore the item remains active.
+     */
+    item.status = "active";
+
+    // 11. Save both changes
     await item.save();
     await handover.save();
 
-    // 8. Notify the finder
+    // 12. Notify the student through Socket.IO + database
     await createNotification({
       recipient: handover.submittedBy,
       type: status === "confirmed" ? "handover-confirmed" : "handover-rejected",
@@ -220,9 +260,10 @@ const reviewHandover = async (req, res) => {
           ? "The Lost & Found Department has confirmed receipt of the item."
           : "The Lost & Found Department could not confirm receipt of the item.",
       item: item._id,
+      io,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message:
         status === "confirmed"
           ? "Handover confirmed successfully"
@@ -233,12 +274,38 @@ const reviewHandover = async (req, res) => {
   } catch (error) {
     console.error("Review handover error:", error);
 
-    res.status(500).json({
+    // Duplicate-key error
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "This handover conflicts with an existing handover record.",
+      });
+    }
+
+    // Mongoose validation error
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors || {}).map(
+        (validationError) => validationError.message,
+      );
+
+      return res.status(400).json({
+        message:
+          messages.length > 0 ? messages.join(", ") : "Invalid handover data.",
+      });
+    }
+
+    // Invalid MongoDB ObjectId
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        message: "Invalid handover or item identifier.",
+      });
+    }
+
+    // Unexpected server error
+    return res.status(500).json({
       message: "Unable to review handover",
     });
   }
 };
-
 
 module.exports = {
   getAllClaims,
