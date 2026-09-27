@@ -167,12 +167,29 @@ const AdminDashboard = () => {
     }
   };
 
-
   // initial fetch of dashboard data
   useEffect(() => {
     fetchDashboardData();
   }, []);
 
+  useEffect(() => {
+    const handleAdminNotification = (event) => {
+      const notification = event.detail;
+
+      if (notification?.type === "handover-submitted") {
+        fetchHandovers();
+      }
+    };
+
+    window.addEventListener("admin-new-notification", handleAdminNotification);
+
+    return () => {
+      window.removeEventListener(
+        "admin-new-notification",
+        handleAdminNotification,
+      );
+    };
+  }, []);
 
   // real time handover notifications
   useEffect(() => {
@@ -330,12 +347,12 @@ const AdminDashboard = () => {
     setHandoverReviewNoteError("");
   };
 
-  const handleReviewHandover = async (decision) => {
+  const handleReviewHandover = async (status) => {
     if (!selectedHandover) {
       return;
     }
 
-    if (decision === "rejected" && !handoverReviewNote.trim()) {
+    if (status === "rejected" && !handoverReviewNote.trim()) {
       setHandoverReviewNoteError(
         "Please provide a reason for rejecting this handover.",
       );
@@ -349,12 +366,12 @@ const AdminDashboard = () => {
       setReviewingHandover(true);
 
       await api.patch(`/admin/handovers/${selectedHandover._id}`, {
-        decision,
-        reviewNote: handoverReviewNote.trim(),
+        status,
+        note: handoverReviewNote.trim(),
       });
 
       toast.success(
-        decision === "confirmed"
+        status === "confirmed"
           ? "Handover confirmed successfully."
           : "Handover rejected successfully.",
       );
