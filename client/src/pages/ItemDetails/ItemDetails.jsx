@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import ClaimForm from "../../components/ClaimForm/ClaimForm";
 
 import {
   FiArrowLeft,
@@ -52,6 +53,21 @@ const ItemDetails = () => {
 
   const [item, setItem] = useState(null);
   const [eligibleClaim, setEligibleClaim] = useState(null);
+  const [showClaimForm, setShowClaimForm] = useState(false);
+
+  const handleClaimSuccess = async () => {
+    setShowClaimForm(false);
+
+    try {
+      const response = await api.get(`/items/${item._id}`);
+
+      setItem(response.data.item);
+
+      setEligibleClaim(response.data.eligibleClaim || null);
+    } catch (error) {
+      console.error("Refresh item after claim error:", error);
+    }
+  };
 
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -60,14 +76,11 @@ const ItemDetails = () => {
 
   const [reportingFound, setReportingFound] = useState(false);
 
-  const [showReportFoundModal, setShowReportFoundModal] =
-    useState(false);
+  const [showReportFoundModal, setShowReportFoundModal] = useState(false);
 
-  const [handoverLoading, setHandoverLoading] =
-    useState(false);
+  const [handoverLoading, setHandoverLoading] = useState(false);
 
-  const [showHandoverModal, setShowHandoverModal] =
-    useState(false);
+  const [showHandoverModal, setShowHandoverModal] = useState(false);
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -79,9 +92,7 @@ const ItemDetails = () => {
 
         setItem(response.data.item);
 
-        setEligibleClaim(
-          response.data.eligibleClaim || null
-        );
+        setEligibleClaim(response.data.eligibleClaim || null);
 
         setSelectedImage(0);
       } catch (error) {
@@ -89,7 +100,7 @@ const ItemDetails = () => {
 
         setError(
           error.response?.data?.message ||
-            "Unable to load this item. It may no longer exist."
+            "Unable to load this item. It may no longer exist.",
         );
       } finally {
         setLoading(false);
@@ -131,19 +142,14 @@ const ItemDetails = () => {
 
       setItem(response.data.item);
 
-      setEligibleClaim(
-        response.data.eligibleClaim || null
-      );
+      setEligibleClaim(response.data.eligibleClaim || null);
 
-      toast.success(
-        "Item reported successfully. The owner has been notified."
-      );
+      toast.success("Item reported successfully. The owner has been notified.");
     } catch (error) {
       console.error("Report found error:", error);
 
       const message =
-        error.response?.data?.message ||
-        "Unable to report this item as found.";
+        error.response?.data?.message || "Unable to report this item as found.";
 
       toast.error(message);
     } finally {
@@ -187,16 +193,10 @@ const ItemDetails = () => {
       }
     };
 
-    document.addEventListener(
-      "keydown",
-      handleEscape
-    );
+    document.addEventListener("keydown", handleEscape);
 
     return () => {
-      document.removeEventListener(
-        "keydown",
-        handleEscape
-      );
+      document.removeEventListener("keydown", handleEscape);
     };
   }, [showHandoverModal, handoverLoading]);
 
@@ -210,30 +210,22 @@ const ItemDetails = () => {
 
       await api.post(`/handovers/${item._id}`);
 
-      const response = await api.get(
-        `/items/${item._id}`
-      );
+      const response = await api.get(`/items/${item._id}`);
 
       setItem(response.data.item);
 
-      setEligibleClaim(
-        response.data.eligibleClaim || null
-      );
+      setEligibleClaim(response.data.eligibleClaim || null);
 
       setShowHandoverModal(false);
 
       toast.success(
-        "Handover request submitted. Waiting for department confirmation."
+        "Handover request submitted. Waiting for department confirmation.",
       );
     } catch (error) {
-      console.error(
-        "Department handover error:",
-        error
-      );
+      console.error("Department handover error:", error);
 
       toast.error(
-        error.response?.data?.message ||
-          "Unable to submit handover request."
+        error.response?.data?.message || "Unable to submit handover request.",
       );
     } finally {
       setHandoverLoading(false);
@@ -246,27 +238,18 @@ const ItemDetails = () => {
     }
 
     try {
-      const response = await api.get(
-        `/messages/conversation/${item._id}`
-      );
+      const response = await api.get(`/messages/conversation/${item._id}`);
 
-      const conversation =
-        response.data?.conversation;
+      const conversation = response.data?.conversation;
 
       if (conversation?._id) {
-        navigate(
-          `/messages/${conversation._id}`
-        );
+        navigate(`/messages/${conversation._id}`);
       }
     } catch (error) {
-      console.error(
-        "Open conversation error:",
-        error
-      );
+      console.error("Open conversation error:", error);
 
       toast.error(
-        error.response?.data?.message ||
-          "Unable to open this conversation."
+        error.response?.data?.message || "Unable to open this conversation.",
       );
     }
   };
@@ -296,15 +279,9 @@ const ItemDetails = () => {
 
             <h2>Item not found</h2>
 
-            <p>
-              {error ||
-                "This item could not be found."}
-            </p>
+            <p>{error || "This item could not be found."}</p>
 
-            <Link
-              to="/browse"
-              className="back-to-browse"
-            >
+            <Link to="/browse" className="back-to-browse">
               <FiArrowLeft />
               Back to Browse
             </Link>
@@ -329,30 +306,20 @@ const ItemDetails = () => {
    */
 
   const images =
-    Array.isArray(item.images) &&
-    item.images.length > 0
-      ? item.images
-          .map((image) => image?.url)
-          .filter(Boolean)
+    Array.isArray(item.images) && item.images.length > 0
+      ? item.images.map((image) => image?.url).filter(Boolean)
       : [FALLBACK_IMAGE];
 
-  const mainImage =
-    images[selectedImage] || FALLBACK_IMAGE;
+  const mainImage = images[selectedImage] || FALLBACK_IMAGE;
 
   const isLost = item.type === "lost";
 
-  const hasMultipleImages =
-    images.length > 1;
+  const hasMultipleImages = images.length > 1;
 
-  const statusLabel =
-    statusLabels[item.status] ||
-    item.status ||
-    "Active";
+  const statusLabel = statusLabels[item.status] || item.status || "Active";
 
   const categoryLabel =
-    categoryLabels[item.category] ||
-    item.category ||
-    "Other";
+    categoryLabels[item.category] || item.category || "Other";
 
   /*
    * Get IDs safely.
@@ -367,16 +334,11 @@ const ItemDetails = () => {
    * { _id: "userId", name: "..." }
    */
 
-  const currentUserId =
-    user?.id || user?._id;
+  const currentUserId = user?.id || user?._id;
 
-  const reportedById =
-    item.reportedBy?._id ||
-    item.reportedBy;
+  const reportedById = item.reportedBy?._id || item.reportedBy;
 
-  const foundById =
-    item.foundBy?._id ||
-    item.foundBy;
+  const foundById = item.foundBy?._id || item.foundBy;
 
   /*
    * Is the currently logged-in user the person
@@ -386,8 +348,7 @@ const ItemDetails = () => {
   const isOwnItem =
     currentUserId &&
     reportedById &&
-    currentUserId.toString() ===
-      reportedById.toString();
+    currentUserId.toString() === reportedById.toString();
 
   /*
    * FOUND POST
@@ -400,8 +361,7 @@ const ItemDetails = () => {
     !isLost &&
     currentUserId &&
     reportedById &&
-    currentUserId.toString() ===
-      reportedById.toString();
+    currentUserId.toString() === reportedById.toString();
 
   /*
    * LOST ITEM
@@ -414,8 +374,7 @@ const ItemDetails = () => {
     isLost &&
     currentUserId &&
     foundById &&
-    currentUserId.toString() ===
-      foundById.toString();
+    currentUserId.toString() === foundById.toString();
 
   /*
    * Department handover is available when:
@@ -426,8 +385,7 @@ const ItemDetails = () => {
    */
 
   const canHandOverToDepartment =
-    (isFoundItemOwner ||
-      isLostItemFinder) &&
+    (isFoundItemOwner || isLostItemFinder) &&
     item.itemLocation === "with-finder" &&
     item.status === "active";
 
@@ -448,14 +406,9 @@ const ItemDetails = () => {
    */
 
   const canMessage =
-    item.itemLocation !==
-      "lost-found-department" &&
-    ((isLost &&
-      Boolean(item.foundBy)) ||
-      (!isLost &&
-        Boolean(
-          eligibleClaim?.claimant
-        )));
+    item.itemLocation !== "lost-found-department" &&
+    ((isLost && Boolean(item.foundBy)) ||
+      (!isLost && Boolean(eligibleClaim?.claimant)));
 
   const goToPreviousImage = () => {
     if (!hasMultipleImages) {
@@ -463,9 +416,7 @@ const ItemDetails = () => {
     }
 
     setSelectedImage((currentIndex) =>
-      currentIndex === 0
-        ? images.length - 1
-        : currentIndex - 1
+      currentIndex === 0 ? images.length - 1 : currentIndex - 1,
     );
   };
 
@@ -475,49 +426,37 @@ const ItemDetails = () => {
     }
 
     setSelectedImage((currentIndex) =>
-      currentIndex === images.length - 1
-        ? 0
-        : currentIndex + 1
+      currentIndex === images.length - 1 ? 0 : currentIndex + 1,
     );
   };
 
   const handleImageError = (event) => {
-    event.currentTarget.src =
-      FALLBACK_IMAGE;
+    event.currentTarget.src = FALLBACK_IMAGE;
   };
 
   return (
     <main className="item-details-page">
       <div className="item-details-container">
-
         {/* BACK LINK */}
 
-        <Link
-          to="/browse"
-          className="details-back-link"
-        >
+        <Link to="/browse" className="details-back-link">
           <FiArrowLeft />
           Back to Browse
         </Link>
 
         <div className="item-details-card">
-
           {/* IMAGE GALLERY */}
 
           <div className="item-details-gallery">
             <div className="item-details-image">
               <img
                 src={mainImage}
-                alt={`${item.title} ${
-                  selectedImage + 1
-                }`}
+                alt={`${item.title} ${selectedImage + 1}`}
                 onError={handleImageError}
               />
 
               <span
-                className={`details-type-badge ${
-                  isLost ? "lost" : "found"
-                }`}
+                className={`details-type-badge ${isLost ? "lost" : "found"}`}
               >
                 {isLost ? "Lost" : "Found"}
               </span>
@@ -525,9 +464,7 @@ const ItemDetails = () => {
               <button
                 type="button"
                 className="gallery-arrow gallery-arrow-left"
-                onClick={
-                  goToPreviousImage
-                }
+                onClick={goToPreviousImage}
                 disabled={!hasMultipleImages}
                 aria-label="Previous image"
               >
@@ -549,35 +486,22 @@ const ItemDetails = () => {
 
             {hasMultipleImages && (
               <div className="item-image-thumbnails">
-                {images.map(
-                  (image, index) => (
-                    <button
-                      type="button"
-                      key={`${image}-${index}`}
-                      className={`item-image-thumbnail ${
-                        selectedImage ===
-                        index
-                          ? "active"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        setSelectedImage(
-                          index
-                        )
-                      }
-                    >
-                      <img
-                        src={image}
-                        alt={`${item.title} thumbnail ${
-                          index + 1
-                        }`}
-                        onError={
-                          handleImageError
-                        }
-                      />
-                    </button>
-                  )
-                )}
+                {images.map((image, index) => (
+                  <button
+                    type="button"
+                    key={`${image}-${index}`}
+                    className={`item-image-thumbnail ${
+                      selectedImage === index ? "active" : ""
+                    }`}
+                    onClick={() => setSelectedImage(index)}
+                  >
+                    <img
+                      src={image}
+                      alt={`${item.title} thumbnail ${index + 1}`}
+                      onError={handleImageError}
+                    />
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -585,47 +509,32 @@ const ItemDetails = () => {
           {/* ITEM CONTENT */}
 
           <div className="item-details-content">
-
             <div className="details-heading">
               <div>
-                <span className="details-category">
-                  {categoryLabel}
-                </span>
+                <span className="details-category">{categoryLabel}</span>
 
                 <h1>{item.title}</h1>
               </div>
 
-              <span
-                className={`details-status ${item.status}`}
-              >
+              <span className={`details-status ${item.status}`}>
                 {statusLabel}
               </span>
             </div>
 
-            <p className="details-description">
-              {item.description}
-            </p>
+            <p className="details-description">{item.description}</p>
 
             {/* ITEM INFORMATION */}
 
             <div className="details-info">
-
               <div className="details-info-item">
                 <div className="details-info-icon">
                   <FiMapPin />
                 </div>
 
                 <div>
-                  <span>
-                    {isLost
-                      ? "Lost at"
-                      : "Found at"}
-                  </span>
+                  <span>{isLost ? "Lost at" : "Found at"}</span>
 
-                  <strong>
-                    {item.location ||
-                      "Location unavailable"}
-                  </strong>
+                  <strong>{item.location || "Location unavailable"}</strong>
                 </div>
               </div>
 
@@ -637,11 +546,7 @@ const ItemDetails = () => {
                 <div>
                   <span>Date</span>
 
-                  <strong>
-                    {formatDate(
-                      item.itemDate
-                    )}
-                  </strong>
+                  <strong>{formatDate(item.itemDate)}</strong>
                 </div>
               </div>
 
@@ -651,50 +556,38 @@ const ItemDetails = () => {
                 </div>
 
                 <div>
-                  <span>
-                    {isLost
-                      ? "Reported by"
-                      : "Found by"}
-                  </span>
+                  <span>{isLost ? "Reported by" : "Found by"}</span>
 
                   <strong>
                     {isOwnItem
                       ? "Me"
-                      : item.reportedBy
-                            ?.name ||
-                        "Sharda Student"}
+                      : item.reportedBy?.name || "Sharda Student"}
                   </strong>
                 </div>
               </div>
-
             </div>
 
             {/* CURRENT ITEM LOCATION */}
 
-            {!isLost &&
-              item.itemLocation && (
-                <div className="pickup-box">
-                  <FiCheckCircle />
+            {!isLost && item.itemLocation && (
+              <div className="pickup-box">
+                <FiCheckCircle />
 
-                  <div>
-                    <span>
-                      Current location
-                    </span>
+                <div>
+                  <span>Current location</span>
 
-                    <strong>
-                      {item.itemLocation ===
-                      "lost-found-department"
-                        ? "Lost & Found Department"
-                        : "With finder"}
-                    </strong>
-                  </div>
+                  <strong>
+                    {item.itemLocation === "lost-found-department"
+                      ? "Lost & Found Department"
+                      : "With finder"}
+                  </strong>
                 </div>
-              )}
+              </div>
+            )}
 
             {/* ACTIONS */}
 
             <div className="details-actions">
-
               {/* REPORT FOUND / CLAIM */}
 
               {!isOwnItem && (
@@ -702,19 +595,18 @@ const ItemDetails = () => {
                   type="button"
                   className="claim-button"
                   disabled={
-                    item.status !==
-                      "active" ||
+                    item.status !== "active" ||
                     reportingFound ||
                     Boolean(item.foundBy)
                   }
                   onClick={() => {
-                    if (
-                      isLost &&
-                      !item.foundBy
-                    ) {
-                      setShowReportFoundModal(
-                        true
-                      );
+                    if (isLost && !item.foundBy) {
+                      setShowReportFoundModal(true);
+                      return;
+                    }
+
+                    if (!isLost) {
+                      setShowClaimForm(true);
                     }
                   }}
                 >
@@ -722,8 +614,7 @@ const ItemDetails = () => {
 
                   {item.foundBy
                     ? "Already Reported"
-                    : item.status !==
-                        "active"
+                    : item.status !== "active"
                       ? "Item Unavailable"
                       : isLost
                         ? reportingFound
@@ -741,12 +632,8 @@ const ItemDetails = () => {
                     <button
                       type="button"
                       className="department-handover-button"
-                      disabled={
-                        handoverLoading
-                      }
-                      onClick={
-                        openHandoverModal
-                      }
+                      disabled={handoverLoading}
+                      onClick={openHandoverModal}
                     >
                       <FiCheckCircle />
 
@@ -754,31 +641,21 @@ const ItemDetails = () => {
                         ? "Submitting..."
                         : "Hand over to L&F Department"}
                     </button>
-                  ) : item.handover
-                      .status ===
-                    "pending" ? (
+                  ) : item.handover.status === "pending" ? (
                     <div className="department-handover-status pending">
                       <FiCheckCircle />
                       Waiting for Department
                     </div>
-                  ) : item.handover
-                      .status ===
-                    "rejected" ? (
+                  ) : item.handover.status === "rejected" ? (
                     <button
                       type="button"
                       className="department-handover-button"
-                      disabled={
-                        handoverLoading
-                      }
-                      onClick={
-                        openHandoverModal
-                      }
+                      disabled={handoverLoading}
+                      onClick={openHandoverModal}
                     >
                       <FiCheckCircle />
 
-                      {handoverLoading
-                        ? "Submitting..."
-                        : "Try Again"}
+                      {handoverLoading ? "Submitting..." : "Try Again"}
                     </button>
                   ) : null}
                 </>
@@ -790,15 +667,12 @@ const ItemDetails = () => {
                 <button
                   type="button"
                   className="message-button"
-                  onClick={
-                    handleMessage
-                  }
+                  onClick={handleMessage}
                 >
                   <FiMessageSquare />
                   Message
                 </button>
               )}
-
             </div>
           </div>
         </div>
@@ -812,10 +686,7 @@ const ItemDetails = () => {
         <div
           className="confirmation-modal-overlay"
           onClick={(event) => {
-            if (
-              event.target ===
-              event.currentTarget
-            ) {
+            if (event.target === event.currentTarget) {
               closeHandoverModal();
             }
           }}
@@ -826,16 +697,11 @@ const ItemDetails = () => {
             aria-modal="true"
             aria-labelledby="handover-title"
           >
-
             <button
               type="button"
               className="confirmation-modal-close"
-              onClick={
-                closeHandoverModal
-              }
-              disabled={
-                handoverLoading
-              }
+              onClick={closeHandoverModal}
+              disabled={handoverLoading}
               aria-label="Close"
             >
               <FiX />
@@ -845,40 +711,25 @@ const ItemDetails = () => {
               <FiPackage />
             </div>
 
-            <h2 id="handover-title">
-              Hand over item?
-            </h2>
+            <h2 id="handover-title">Hand over item?</h2>
 
             <p className="confirmation-modal-message">
-              Are you sure you want to
-              hand over{" "}
-              <strong>
-                {item.title}
-              </strong>{" "}
-              to the Lost & Found
-              Department?
+              Are you sure you want to hand over <strong>{item.title}</strong>{" "}
+              to the Lost & Found Department?
             </p>
 
             <p className="confirmation-modal-note">
-              The department will review
-              and confirm the handover.
-              The item's location will
-              change to the Lost & Found
-              Department only after the
+              The department will review and confirm the handover. The item's
+              location will change to the Lost & Found Department only after the
               department confirms receipt.
             </p>
 
             <div className="confirmation-modal-actions">
-
               <button
                 type="button"
                 className="confirmation-modal-cancel"
-                onClick={
-                  closeHandoverModal
-                }
-                disabled={
-                  handoverLoading
-                }
+                onClick={closeHandoverModal}
+                disabled={handoverLoading}
               >
                 Cancel
               </button>
@@ -886,20 +737,13 @@ const ItemDetails = () => {
               <button
                 type="button"
                 className="confirmation-modal-confirm"
-                onClick={
-                  handleDepartmentHandover
-                }
-                disabled={
-                  handoverLoading
-                }
+                onClick={handleDepartmentHandover}
+                disabled={handoverLoading}
               >
                 <FiCheckCircle />
 
-                {handoverLoading
-                  ? "Submitting..."
-                  : "Hand over to Department"}
+                {handoverLoading ? "Submitting..." : "Hand over to Department"}
               </button>
-
             </div>
           </div>
         </div>
@@ -913,13 +757,8 @@ const ItemDetails = () => {
         <div
           className="report-found-overlay"
           onClick={(event) => {
-            if (
-              event.target ===
-              event.currentTarget
-            ) {
-              setShowReportFoundModal(
-                false
-              );
+            if (event.target === event.currentTarget) {
+              setShowReportFoundModal(false);
             }
           }}
         >
@@ -929,15 +768,10 @@ const ItemDetails = () => {
             aria-modal="true"
             aria-labelledby="report-found-title"
           >
-
             <button
               type="button"
               className="report-found-close"
-              onClick={() =>
-                setShowReportFoundModal(
-                  false
-                )
-              }
+              onClick={() => setShowReportFoundModal(false)}
               aria-label="Close"
             >
               <FiX />
@@ -947,29 +781,18 @@ const ItemDetails = () => {
               <FiCheckCircle />
             </div>
 
-            <h2 id="report-found-title">
-              Report this item as found?
-            </h2>
+            <h2 id="report-found-title">Report this item as found?</h2>
 
             <p>
-              If you have found this
-              item, the person who
-              reported it will be
-              notified and you will be
-              able to message each
-              other.
+              If you have found this item, the person who reported it will be
+              notified and you will be able to message each other.
             </p>
 
             <div className="report-found-actions">
-
               <button
                 type="button"
                 className="report-found-cancel"
-                onClick={() =>
-                  setShowReportFoundModal(
-                    false
-                  )
-                }
+                onClick={() => setShowReportFoundModal(false)}
               >
                 Cancel
               </button>
@@ -978,26 +801,27 @@ const ItemDetails = () => {
                 type="button"
                 className="report-found-confirm"
                 onClick={() => {
-                  setShowReportFoundModal(
-                    false
-                  );
+                  setShowReportFoundModal(false);
 
                   handleReportFound();
                 }}
-                disabled={
-                  reportingFound
-                }
+                disabled={reportingFound}
               >
-                {reportingFound
-                  ? "Reporting..."
-                  : "Yes, I Found It"}
+                {reportingFound ? "Reporting..." : "Yes, I Found It"}
               </button>
-
             </div>
           </div>
         </div>
       )}
-
+      
+      {showClaimForm && (
+        <ClaimForm
+          itemId={item._id}
+          itemTitle={item.title}
+          onClose={() => setShowClaimForm(false)}
+          onSuccess={handleClaimSuccess}
+        />
+      )}
     </main>
   );
 };
