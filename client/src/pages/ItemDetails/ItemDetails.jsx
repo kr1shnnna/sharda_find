@@ -49,7 +49,25 @@ const ItemDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+
+  /*
+   * Redirect logged-out users to login
+   * before performing protected actions.
+   */
+  const requireLogin = () => {
+    if (!isAuthenticated) {
+      navigate("/login", {
+        state: {
+          from: `/items/${id}`,
+        },
+      });
+
+      return false;
+    }
+
+    return true;
+  };
 
   const [item, setItem] = useState(null);
   const [eligibleClaim, setEligibleClaim] = useState(null);
@@ -100,7 +118,7 @@ const ItemDetails = () => {
 
         setError(
           error.response?.data?.message ||
-            "Unable to load this item. It may no longer exist.",
+            "Unable to load this item. It may no longer exist."
         );
       } finally {
         setLoading(false);
@@ -144,12 +162,15 @@ const ItemDetails = () => {
 
       setEligibleClaim(response.data.eligibleClaim || null);
 
-      toast.success("Item reported successfully. The owner has been notified.");
+      toast.success(
+        "Item reported successfully. The owner has been notified."
+      );
     } catch (error) {
       console.error("Report found error:", error);
 
       const message =
-        error.response?.data?.message || "Unable to report this item as found.";
+        error.response?.data?.message ||
+        "Unable to report this item as found.";
 
       toast.error(message);
     } finally {
@@ -219,13 +240,14 @@ const ItemDetails = () => {
       setShowHandoverModal(false);
 
       toast.success(
-        "Handover request submitted. Waiting for department confirmation.",
+        "Handover request submitted. Waiting for department confirmation."
       );
     } catch (error) {
       console.error("Department handover error:", error);
 
       toast.error(
-        error.response?.data?.message || "Unable to submit handover request.",
+        error.response?.data?.message ||
+          "Unable to submit handover request."
       );
     } finally {
       setHandoverLoading(false);
@@ -238,7 +260,9 @@ const ItemDetails = () => {
     }
 
     try {
-      const response = await api.get(`/messages/conversation/${item._id}`);
+      const response = await api.get(
+        `/messages/conversation/${item._id}`
+      );
 
       const conversation = response.data?.conversation;
 
@@ -249,7 +273,8 @@ const ItemDetails = () => {
       console.error("Open conversation error:", error);
 
       toast.error(
-        error.response?.data?.message || "Unable to open this conversation.",
+        error.response?.data?.message ||
+          "Unable to open this conversation."
       );
     }
   };
@@ -346,7 +371,8 @@ const ItemDetails = () => {
     approvedClaim &&
     currentUserId &&
     eligibleClaim?.claimant?._id &&
-    currentUserId.toString() === eligibleClaim.claimant._id.toString();
+    currentUserId.toString() ===
+      eligibleClaim.claimant._id.toString();
 
   /*
    * Is the currently logged-in user the person
@@ -424,7 +450,7 @@ const ItemDetails = () => {
     }
 
     setSelectedImage((currentIndex) =>
-      currentIndex === 0 ? images.length - 1 : currentIndex - 1,
+      currentIndex === 0 ? images.length - 1 : currentIndex - 1
     );
   };
 
@@ -434,7 +460,7 @@ const ItemDetails = () => {
     }
 
     setSelectedImage((currentIndex) =>
-      currentIndex === images.length - 1 ? 0 : currentIndex + 1,
+      currentIndex === images.length - 1 ? 0 : currentIndex + 1
     );
   };
 
@@ -464,7 +490,9 @@ const ItemDetails = () => {
               />
 
               <span
-                className={`details-type-badge ${isLost ? "lost" : "found"}`}
+                className={`details-type-badge ${
+                  isLost ? "lost" : "found"
+                }`}
               >
                 {isLost ? "Lost" : "Found"}
               </span>
@@ -519,7 +547,9 @@ const ItemDetails = () => {
           <div className="item-details-content">
             <div className="details-heading">
               <div>
-                <span className="details-category">{categoryLabel}</span>
+                <span className="details-category">
+                  {categoryLabel}
+                </span>
 
                 <h1>{item.title}</h1>
               </div>
@@ -529,7 +559,9 @@ const ItemDetails = () => {
               </span>
             </div>
 
-            <p className="details-description">{item.description}</p>
+            <p className="details-description">
+              {item.description}
+            </p>
 
             {/* ITEM INFORMATION */}
 
@@ -542,7 +574,9 @@ const ItemDetails = () => {
                 <div>
                   <span>{isLost ? "Lost at" : "Found at"}</span>
 
-                  <strong>{item.location || "Location unavailable"}</strong>
+                  <strong>
+                    {item.location || "Location unavailable"}
+                  </strong>
                 </div>
               </div>
 
@@ -554,7 +588,9 @@ const ItemDetails = () => {
                 <div>
                   <span>Date</span>
 
-                  <strong>{formatDate(item.itemDate)}</strong>
+                  <strong>
+                    {formatDate(item.itemDate)}
+                  </strong>
                 </div>
               </div>
 
@@ -564,7 +600,9 @@ const ItemDetails = () => {
                 </div>
 
                 <div>
-                  <span>{isLost ? "Reported by" : "Found by"}</span>
+                  <span>
+                    {isLost ? "Reported by" : "Found by"}
+                  </span>
 
                   <strong>
                     {isOwnItem
@@ -585,7 +623,8 @@ const ItemDetails = () => {
                   <span>Current location</span>
 
                   <strong>
-                    {item.itemLocation === "lost-found-department"
+                    {item.itemLocation ===
+                    "lost-found-department"
                       ? "Lost & Found Department"
                       : "With finder"}
                   </strong>
@@ -609,6 +648,13 @@ const ItemDetails = () => {
                     approvedClaim
                   }
                   onClick={() => {
+                    /*
+                     * Claim and Report Found require login.
+                     */
+                    if (!requireLogin()) {
+                      return;
+                    }
+
                     if (approvedClaim) {
                       return;
                     }
@@ -672,7 +718,9 @@ const ItemDetails = () => {
                     >
                       <FiCheckCircle />
 
-                      {handoverLoading ? "Submitting..." : "Try Again"}
+                      {handoverLoading
+                        ? "Submitting..."
+                        : "Try Again"}
                     </button>
                   ) : null}
                 </>
@@ -684,7 +732,13 @@ const ItemDetails = () => {
                 <button
                   type="button"
                   className="message-button"
-                  onClick={handleMessage}
+                  onClick={() => {
+                    if (!requireLogin()) {
+                      return;
+                    }
+
+                    handleMessage();
+                  }}
                 >
                   <FiMessageSquare />
                   Message
@@ -728,16 +782,20 @@ const ItemDetails = () => {
               <FiPackage />
             </div>
 
-            <h2 id="handover-title">Hand over item?</h2>
+            <h2 id="handover-title">
+              Hand over item?
+            </h2>
 
             <p className="confirmation-modal-message">
-              Are you sure you want to hand over <strong>{item.title}</strong>{" "}
-              to the Lost & Found Department?
+              Are you sure you want to hand over{" "}
+              <strong>{item.title}</strong> to the Lost &
+              Found Department?
             </p>
 
             <p className="confirmation-modal-note">
-              The department will review and confirm the handover. The item's
-              location will change to the Lost & Found Department only after the
+              The department will review and confirm the
+              handover. The item's location will change to
+              the Lost & Found Department only after the
               department confirms receipt.
             </p>
 
@@ -759,7 +817,9 @@ const ItemDetails = () => {
               >
                 <FiCheckCircle />
 
-                {handoverLoading ? "Submitting..." : "Hand over to Department"}
+                {handoverLoading
+                  ? "Submitting..."
+                  : "Hand over to Department"}
               </button>
             </div>
           </div>
@@ -798,11 +858,14 @@ const ItemDetails = () => {
               <FiCheckCircle />
             </div>
 
-            <h2 id="report-found-title">Report this item as found?</h2>
+            <h2 id="report-found-title">
+              Report this item as found?
+            </h2>
 
             <p>
-              If you have found this item, the person who reported it will be
-              notified and you will be able to message each other.
+              If you have found this item, the person who
+              reported it will be notified and you will be
+              able to message each other.
             </p>
 
             <div className="report-found-actions">
@@ -824,7 +887,9 @@ const ItemDetails = () => {
                 }}
                 disabled={reportingFound}
               >
-                {reportingFound ? "Reporting..." : "Yes, I Found It"}
+                {reportingFound
+                  ? "Reporting..."
+                  : "Yes, I Found It"}
               </button>
             </div>
           </div>
