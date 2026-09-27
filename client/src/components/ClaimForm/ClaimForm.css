@@ -1,6 +1,11 @@
+/* =========================================
+   CLAIM FORM OVERLAY
+========================================= */
+
 .claim-form-overlay {
   position: fixed;
   inset: 0;
+
   z-index: 1000;
 
   display: flex;
@@ -10,7 +15,14 @@
   padding: 24px;
 
   background: rgba(15, 23, 42, 0.55);
+
+  overflow: hidden;
 }
+
+
+/* =========================================
+   CLAIM FORM MODAL
+========================================= */
 
 .claim-form-modal {
   position: relative;
@@ -19,19 +31,30 @@
   max-width: 620px;
   max-height: calc(100vh - 48px);
 
+  overflow-x: hidden;
   overflow-y: auto;
 
   background: #ffffff;
+
   border: 1px solid #e2e8f0;
   border-radius: 16px;
 
   padding: 32px;
 
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+  box-shadow:
+    0 20px 50px rgba(15, 23, 42, 0.18);
+
+  scrollbar-width: thin;
 }
+
+
+/* =========================================
+   CLOSE BUTTON
+========================================= */
 
 .claim-form-close {
   position: absolute;
+
   top: 18px;
   right: 18px;
 
@@ -52,18 +75,30 @@
 
   transition:
     background 0.2s ease,
-    color 0.2s ease;
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .claim-form-close:hover {
   background: #f8fafc;
   color: #17201a;
+  border-color: #cbd5e1;
+}
+
+.claim-form-close:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .claim-form-close svg {
   width: 18px;
   height: 18px;
 }
+
+
+/* =========================================
+   HEADER ICON
+========================================= */
 
 .claim-form-icon {
   width: 48px;
@@ -86,30 +121,46 @@
   height: 24px;
 }
 
+
+/* =========================================
+   HEADER
+========================================= */
+
 .claim-form-header {
-  padding-right: 40px;
+  padding-right: 48px;
+
   margin-bottom: 28px;
 }
 
 .claim-form-header h2 {
   margin: 0 0 8px;
 
+  color: #17201a;
+
   font-size: 24px;
   font-weight: 700;
-
-  color: #17201a;
+  line-height: 1.3;
 }
 
 .claim-form-header p {
   margin: 0;
 
   color: #64748b;
+
+  font-size: 14px;
   line-height: 1.6;
+
+  overflow-wrap: anywhere;
 }
 
 .claim-form-header strong {
   color: #17201a;
 }
+
+
+/* =========================================
+   FORM FIELD
+========================================= */
 
 .claim-form-field {
   margin-bottom: 22px;
@@ -118,14 +169,15 @@
 .claim-form-field label {
   display: flex;
   align-items: center;
+
   gap: 6px;
 
   margin-bottom: 10px;
 
+  color: #17201a;
+
   font-size: 14px;
   font-weight: 600;
-
-  color: #17201a;
 }
 
 .claim-form-field label > span:first-of-type {
@@ -136,35 +188,51 @@
   margin-left: auto;
 
   color: #64748b;
+
   font-size: 12px;
   font-weight: 500;
 }
 
+
+/* =========================================
+   FIELD DESCRIPTION
+========================================= */
+
 .claim-form-field-heading {
   display: flex;
   align-items: flex-start;
+
   gap: 8px;
 
   margin-bottom: 10px;
 
   color: #64748b;
+
   font-size: 13px;
   line-height: 1.5;
 }
 
 .claim-form-field-heading svg {
   flex-shrink: 0;
+
   margin-top: 2px;
 
   color: #166534;
 }
 
+
+/* =========================================
+   TEXTAREA
+========================================= */
+
 .claim-form-field textarea {
   width: 100%;
 
-  resize: vertical;
-
   min-height: 100px;
+
+  display: block;
+
+  resize: vertical;
 
   padding: 12px 14px;
 
@@ -175,6 +243,7 @@
   color: #17201a;
 
   font-family: inherit;
+
   font-size: 14px;
   line-height: 1.5;
 
@@ -183,6 +252,8 @@
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
+
+  box-sizing: border-box;
 }
 
 .claim-form-field textarea:focus {
@@ -205,12 +276,19 @@
   text-align: right;
 
   color: #94a3b8;
+
   font-size: 11px;
 }
+
+
+/* =========================================
+   UPLOAD INFORMATION
+========================================= */
 
 .claim-form-upload-info {
   display: flex;
   align-items: flex-start;
+
   gap: 10px;
 
   padding: 14px;
@@ -224,36 +302,50 @@
 }
 
 .claim-form-upload-info > svg {
-  flex-shrink: 0;
-
   width: 20px;
   height: 20px;
+
+  flex-shrink: 0;
 
   color: #166534;
 }
 
 .claim-form-upload-info div {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
+
   gap: 3px;
 }
 
 .claim-form-upload-info strong {
-  font-size: 13px;
   color: #17201a;
+
+  font-size: 13px;
 }
 
 .claim-form-upload-info span {
-  font-size: 12px;
   color: #64748b;
+
+  font-size: 12px;
 }
 
+
+/* =========================================
+   UPLOAD BUTTON
+========================================= */
+
 .claim-form-upload-button {
+  min-height: 40px;
+
   display: inline-flex !important;
   align-items: center;
+  justify-content: center;
+
   gap: 8px;
 
-  padding: 10px 14px;
+  padding: 0 14px;
 
   border: 1px solid #166534;
   border-radius: 8px;
@@ -268,28 +360,39 @@
 
   transition:
     background 0.2s ease,
-    color 0.2s ease;
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .claim-form-upload-button:hover {
   background: #dcfce7;
+  border-color: #14532d;
 }
 
 .claim-form-upload-button input {
   display: none;
 }
 
+
+/* =========================================
+   SELECTED FILES
+========================================= */
+
 .claim-form-files {
   display: flex;
   flex-direction: column;
+
   gap: 8px;
 
   margin-top: 12px;
 }
 
 .claim-form-file {
+  min-width: 0;
+
   display: flex;
   align-items: center;
+
   gap: 8px;
 
   padding: 9px 12px;
@@ -303,20 +406,32 @@
 }
 
 .claim-form-file svg {
+  width: 16px;
+  height: 16px;
+
   flex-shrink: 0;
+
   color: #166534;
 }
 
 .claim-form-file span {
+  min-width: 0;
+
   overflow: hidden;
 
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+
+/* =========================================
+   INFORMATION NOTE
+========================================= */
+
 .claim-form-note {
   display: flex;
   align-items: flex-start;
+
   gap: 10px;
 
   padding: 14px;
@@ -330,6 +445,9 @@
 }
 
 .claim-form-note svg {
+  width: 17px;
+  height: 17px;
+
   flex-shrink: 0;
 
   margin-top: 2px;
@@ -338,6 +456,8 @@
 }
 
 .claim-form-note p {
+  min-width: 0;
+
   margin: 0;
 
   color: #64748b;
@@ -346,9 +466,16 @@
   line-height: 1.5;
 }
 
+
+/* =========================================
+   FORM ACTIONS
+========================================= */
+
 .claim-form-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+
   gap: 10px;
 
   padding-top: 4px;
@@ -361,6 +488,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   gap: 8px;
 
   padding: 0 18px;
@@ -368,6 +496,7 @@
   border-radius: 8px;
 
   font-family: inherit;
+
   font-size: 14px;
   font-weight: 600;
 
@@ -375,7 +504,8 @@
 
   transition:
     background 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .claim-form-cancel {
@@ -387,6 +517,7 @@
 
 .claim-form-cancel:hover {
   background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .claim-form-submit {
@@ -398,6 +529,7 @@
 
 .claim-form-submit:hover {
   background: #14532d;
+  border-color: #14532d;
 }
 
 .claim-form-cancel:disabled,
@@ -410,28 +542,311 @@
 .claim-form-cancel svg {
   width: 17px;
   height: 17px;
+
+  flex-shrink: 0;
 }
 
-@media (max-width: 640px) {
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 700px) {
+
   .claim-form-overlay {
-    padding: 12px;
+    padding: 16px;
   }
 
   .claim-form-modal {
-    max-height: calc(100vh - 24px);
-    padding: 24px 20px;
+    max-width: 100%;
+
+    max-height: calc(100vh - 32px);
+
+    padding: 28px 24px;
+
+    border-radius: 14px;
+  }
+
+  .claim-form-header {
+    padding-right: 44px;
+
+    margin-bottom: 24px;
   }
 
   .claim-form-header h2 {
-    font-size: 21px;
+    font-size: 22px;
+  }
+
+  .claim-form-field {
+    margin-bottom: 20px;
+  }
+
+  .claim-form-note {
+    margin-bottom: 20px;
+  }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+  .claim-form-overlay {
+    align-items: center;
+
+    padding: 10px;
+  }
+
+  .claim-form-modal {
+    width: 100%;
+
+    max-height: calc(100vh - 20px);
+
+    padding: 24px 18px;
+
+    border-radius: 14px;
+  }
+
+  .claim-form-close {
+    top: 12px;
+    right: 12px;
+
+    width: 36px;
+    height: 36px;
+  }
+
+  .claim-form-icon {
+    width: 44px;
+    height: 44px;
+
+    margin-bottom: 14px;
+
+    border-radius: 11px;
+  }
+
+  .claim-form-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .claim-form-header {
+    padding-right: 42px;
+
+    margin-bottom: 22px;
+  }
+
+  .claim-form-header h2 {
+    margin-bottom: 7px;
+
+    font-size: 20px;
+  }
+
+  .claim-form-header p {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .claim-form-field {
+    margin-bottom: 19px;
+  }
+
+  .claim-form-field label {
+    font-size: 13px;
+  }
+
+  .claim-form-field label .optional {
+    font-size: 11px;
+  }
+
+  .claim-form-field-heading {
+    font-size: 12px;
+
+    line-height: 1.5;
+  }
+
+  .claim-form-field textarea {
+    min-height: 105px;
+
+    padding: 11px 12px;
+
+    font-size: 13px;
+  }
+
+  .claim-form-field > small {
+    font-size: 10px;
+  }
+
+  .claim-form-upload-info {
+    padding: 12px;
+
+    gap: 9px;
+  }
+
+  .claim-form-upload-info > svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .claim-form-upload-info strong {
+    font-size: 12px;
+  }
+
+  .claim-form-upload-info span {
+    font-size: 11px;
+  }
+
+  .claim-form-upload-button {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    min-height: 42px;
+  }
+
+  .claim-form-file {
+    padding: 9px 10px;
+
+    font-size: 12px;
+  }
+
+  .claim-form-note {
+    padding: 12px;
+
+    gap: 8px;
+
+    margin-bottom: 20px;
+  }
+
+  .claim-form-note svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .claim-form-note p {
+    font-size: 11px;
+    line-height: 1.55;
   }
 
   .claim-form-actions {
     flex-direction: column-reverse;
+
+    align-items: stretch;
+
+    gap: 8px;
   }
 
   .claim-form-cancel,
   .claim-form-submit {
     width: 100%;
+
+    min-height: 44px;
+  }
+}
+
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 400px) {
+
+  .claim-form-overlay {
+    padding: 7px;
+  }
+
+  .claim-form-modal {
+    max-height: calc(100vh - 14px);
+
+    padding: 22px 15px;
+
+    border-radius: 12px;
+  }
+
+  .claim-form-close {
+    top: 9px;
+    right: 9px;
+
+    width: 34px;
+    height: 34px;
+  }
+
+  .claim-form-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .claim-form-header {
+    padding-right: 38px;
+
+    margin-bottom: 20px;
+  }
+
+  .claim-form-header h2 {
+    font-size: 19px;
+  }
+
+  .claim-form-header p {
+    font-size: 12px;
+  }
+
+  .claim-form-field {
+    margin-bottom: 17px;
+  }
+
+  .claim-form-field textarea {
+    min-height: 100px;
+
+    font-size: 12px;
+  }
+
+  .claim-form-upload-info {
+    padding: 10px;
+  }
+
+  .claim-form-note {
+    padding: 10px;
+  }
+
+  .claim-form-note p {
+    font-size: 10px;
+  }
+}
+
+
+/* =========================================
+   VERY SMALL MOBILE
+========================================= */
+
+@media (max-width: 340px) {
+
+  .claim-form-modal {
+    padding: 20px 13px;
+  }
+
+  .claim-form-header h2 {
+    font-size: 18px;
+  }
+
+  .claim-form-header p {
+    font-size: 11px;
+  }
+
+  .claim-form-field-heading {
+    font-size: 11px;
+  }
+
+  .claim-form-upload-info strong {
+    font-size: 11px;
+  }
+
+  .claim-form-upload-info span {
+    font-size: 10px;
+  }
+
+  .claim-form-cancel,
+  .claim-form-submit {
+    font-size: 13px;
   }
 }
