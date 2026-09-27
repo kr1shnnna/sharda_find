@@ -1,31 +1,35 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import {
   FiAlertCircle,
   FiCheckCircle,
-  FiClipboard,
+  FiChevronRight,
   FiClock,
-  FiExternalLink,
+  FiEye,
   FiPackage,
   FiRefreshCw,
+  FiSearch,
+  FiUser,
   FiX,
 } from "react-icons/fi";
+
+import { FaHandHolding } from "react-icons/fa";
 
 import toast from "react-hot-toast";
 
 import api from "../../api/axios";
-
 import AdminHeader from "../../components/AdminHeader/AdminHeader";
-
-import { io } from "socket.io-client";
 
 import "./AdminDashboard.css";
 
-const SOCKET_URL = "http://localhost:5000";
 
-/* =========================
+/* ==================================================
    Helpers
-========================= */
+================================================== */
 
 const formatDate = (dateString) => {
   if (!dateString) {
@@ -45,6 +49,28 @@ const formatDate = (dateString) => {
   });
 };
 
+
+const formatDateTime = (dateString) => {
+  if (!dateString) {
+    return "Date unavailable";
+  }
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date unavailable";
+  }
+
+  return date.toLocaleString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
+
+
 const formatCategory = (category) => {
   if (!category) {
     return "Other";
@@ -52,19 +78,28 @@ const formatCategory = (category) => {
 
   return category
     .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map(
+      (word) =>
+        word.charAt(0).toUpperCase() +
+        word.slice(1)
+    )
     .join(" ");
 };
 
-const formatItemType = (type) => {
+
+const formatType = (type) => {
   if (!type) {
     return "Unknown";
   }
 
-  return type.charAt(0).toUpperCase() + type.slice(1);
+  return (
+    type.charAt(0).toUpperCase() +
+    type.slice(1)
+  );
 };
 
-const formatItemLocation = (location) => {
+
+const formatLocation = (location) => {
   if (location === "with-finder") {
     return "With Finder";
   }
@@ -73,331 +108,396 @@ const formatItemLocation = (location) => {
     return "Lost & Found Department";
   }
 
-  return "Location unavailable";
+  return "Not specified";
 };
 
-const getImageUrl = (image) => {
-  if (typeof image === "string") {
-    return image;
+
+const formatStatus = (status) => {
+  if (!status) {
+    return "Unknown";
   }
 
-  if (image?.url) {
-    return image.url;
-  }
-
-  return "";
+  return status
+    .split("-")
+    .map(
+      (word) =>
+        word.charAt(0).toUpperCase() +
+        word.slice(1)
+    )
+    .join(" ");
 };
 
-/* =========================
+
+/* ==================================================
    Component
-========================= */
+================================================== */
 
 const AdminDashboard = () => {
-  /* =========================
-     Dashboard State
-  ========================= */
-
-  const [claims, setClaims] = useState([]);
-  const [handovers, setHandovers] = useState([]);
+  const [cases, setCases] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  /* =========================
-     Claim Review State
-  ========================= */
+  const [activeTab, setActiveTab] = useState("overview");
 
-  const [selectedClaim, setSelectedClaim] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const [reviewNote, setReviewNote] = useState("");
+  const [selectedCase, setSelectedCase] = useState(null);
+  const [caseLoading, setCaseLoading] = useState(false);
 
-  const [reviewNoteError, setReviewNoteError] = useState("");
+  const [returningItem, setReturningItem] = useState(false);
 
-  const [reviewingClaim, setReviewingClaim] = useState(false);
 
-  /* =========================
-     Handover Review State
-  ========================= */
+  /* ==================================================
+     Fetch Cases
+  ================================================== */
 
-  const [selectedHandover, setSelectedHandover] = useState(null);
-
-  const [handoverReviewNote, setHandoverReviewNote] = useState("");
-
-  const [handoverReviewNoteError, setHandoverReviewNoteError] = useState("");
-
-  const [reviewingHandover, setReviewingHandover] = useState(false);
-
-  /* =========================
-     Fetch Dashboard Data
-  ========================= */
-
-  const fetchDashboardData = async () => {
+  const fetchCases = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const [claimsResponse, handoversResponse] = await Promise.all([
-        api.get("/admin/claims"),
-        api.get("/admin/handovers"),
-      ]);
+      const response = await api.get("/admin/cases");
 
-      setClaims(claimsResponse.data?.claims || claimsResponse.data?.data || []);
-
-      setHandovers(
-        handoversResponse.data?.handovers || handoversResponse.data?.data || [],
+      setCases(
+        response.data?.cases || []
       );
     } catch (error) {
-      console.error("Unable to load admin dashboard:", error);
+      console.error(
+        "Unable to load admin cases:",
+        error
+      );
 
       setError(
-        error.response?.data?.message || "Unable to load the admin dashboard.",
+        error.response?.data?.message ||
+          "Unable to load admin cases."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchHandovers = async () => {
-    try {
-      const response = await api.get("/admin/handovers");
-
-      setHandovers(response.data?.handovers || response.data?.data || []);
-    } catch (error) {
-      console.error("Unable to refresh handovers:", error);
-    }
-  };
-
-  // initial fetch of dashboard data
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
 
   useEffect(() => {
-    const handleAdminNotification = (event) => {
-      const notification = event.detail;
-
-      if (notification?.type === "handover-submitted") {
-        fetchHandovers();
-      }
-    };
-
-    window.addEventListener("admin-new-notification", handleAdminNotification);
-
-    return () => {
-      window.removeEventListener(
-        "admin-new-notification",
-        handleAdminNotification,
-      );
-    };
+    fetchCases();
   }, []);
 
-  // real time handover notifications
-  useEffect(() => {
-    const token = localStorage.getItem("adminToken");
 
-    if (!token) {
-      return;
-    }
-
-    const socket = io(SOCKET_URL, {
-      auth: {
-        token,
-      },
-    });
-
-    socket.on("connect", () => {
-      console.log("Admin dashboard socket connected:", socket.id);
-    });
-
-    socket.on("new-notification", (data) => {
-      const notification = data?.notification;
-
-      if (notification?.type === "handover-submitted") {
-        fetchHandovers();
-      }
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("Admin dashboard socket error:", error.message);
-    });
-
-    return () => {
-      socket.off("new-notification");
-      socket.disconnect();
-    };
-  }, []);
-
-  /* =========================
-     Filter Pending Data
-  ========================= */
-
-  const pendingClaims = useMemo(() => {
-    return claims.filter((claim) => claim.status === "pending");
-  }, [claims]);
-
-  const pendingHandovers = useMemo(() => {
-    return handovers.filter((handover) => handover.status === "pending");
-  }, [handovers]);
-
-  /* =========================
-     Summary Statistics
-  ========================= */
+  /* ==================================================
+     Statistics
+  ================================================== */
 
   const statistics = useMemo(() => {
+    const totalCases = cases.length;
+
+    const pendingClaims = cases.reduce(
+      (count, currentCase) =>
+        count +
+        currentCase.claims.filter(
+          (claim) =>
+            claim.status === "pending"
+        ).length,
+      0
+    );
+
+    const pendingHandovers = cases.reduce(
+      (count, currentCase) =>
+        count +
+        currentCase.handovers.filter(
+          (handover) =>
+            handover.status === "pending"
+        ).length,
+      0
+    );
+
+    const atDepartment = cases.filter(
+      (currentCase) =>
+        currentCase.item?.itemLocation ===
+          "lost-found-department" &&
+        currentCase.item?.status !== "returned"
+    ).length;
+
+    const returned = cases.filter(
+      (currentCase) =>
+        currentCase.item?.status === "returned"
+    ).length;
+
     return {
-      totalClaims: claims.length,
-
-      pendingClaims: pendingClaims.length,
-
-      pendingHandovers: pendingHandovers.length,
+      totalCases,
+      pendingClaims,
+      pendingHandovers,
+      atDepartment,
+      returned,
     };
-  }, [claims, pendingClaims, pendingHandovers]);
+  }, [cases]);
 
-  /* =========================
-     Claim Review
-  ========================= */
 
-  const handleOpenClaimReview = (claim) => {
-    setSelectedClaim(claim);
+  /* ==================================================
+     Needs Attention
+  ================================================== */
 
-    setReviewNote("");
+  const attentionCases = useMemo(() => {
+    return cases.filter((currentCase) => {
+      const hasPendingClaim =
+        currentCase.claims.some(
+          (claim) =>
+            claim.status === "pending"
+        );
 
-    setReviewNoteError("");
+      const hasPendingHandover =
+        currentCase.handovers.some(
+          (handover) =>
+            handover.status === "pending"
+        );
+
+      return (
+        hasPendingClaim ||
+        hasPendingHandover
+      );
+    });
+  }, [cases]);
+
+
+  /* ==================================================
+     Search
+  ================================================== */
+
+  const filteredCases = useMemo(() => {
+    const search = searchTerm
+      .trim()
+      .toLowerCase();
+
+    if (!search) {
+      return cases;
+    }
+
+    return cases.filter((currentCase) => {
+      const item =
+        currentCase.item;
+
+      const title =
+        item?.title?.toLowerCase() || "";
+
+      const location =
+        item?.location?.toLowerCase() || "";
+
+      const category =
+        item?.category?.toLowerCase() || "";
+
+      const reporter =
+        item?.reportedBy?.name?.toLowerCase() || "";
+
+      return (
+        title.includes(search) ||
+        location.includes(search) ||
+        category.includes(search) ||
+        reporter.includes(search)
+      );
+    });
+  }, [cases, searchTerm]);
+
+
+  /* ==================================================
+     Open Case
+  ================================================== */
+
+  const handleOpenCase = async (itemId) => {
+    try {
+      setCaseLoading(true);
+
+      const response = await api.get(
+        `/admin/cases/${itemId}`
+      );
+
+      setSelectedCase(
+        response.data?.case || null
+      );
+    } catch (error) {
+      console.error(
+        "Unable to load case:",
+        error
+      );
+
+      toast.error(
+        error.response?.data?.message ||
+          "Unable to load case details."
+      );
+    } finally {
+      setCaseLoading(false);
+    }
   };
 
-  const handleCloseClaimReview = () => {
-    if (reviewingClaim) {
+
+  const handleCloseCase = () => {
+    if (returningItem) {
       return;
     }
 
-    setSelectedClaim(null);
-
-    setReviewNote("");
-
-    setReviewNoteError("");
+    setSelectedCase(null);
   };
 
-  const handleReviewClaim = async (decision) => {
-    if (!selectedClaim) {
+
+  /* ==================================================
+     Give Item To Owner
+  ================================================== */
+
+  const handleReturnItem = async () => {
+    if (!selectedCase?.item?._id) {
       return;
     }
-
-    if (decision === "rejected" && !reviewNote.trim()) {
-      setReviewNoteError("Please provide a reason for rejecting this claim.");
-
-      return;
-    }
-
-    setReviewNoteError("");
 
     try {
-      setReviewingClaim(true);
+      setReturningItem(true);
 
-      await api.patch(`/admin/claims/${selectedClaim._id}`, {
-        decision,
-        reviewNote: reviewNote.trim(),
-      });
+      await api.patch(
+        `/admin/items/${selectedCase.item._id}/return`
+      );
 
       toast.success(
-        decision === "approved"
-          ? "Claim approved successfully."
-          : "Claim rejected successfully.",
+        "Item returned to the owner successfully."
       );
 
-      setSelectedClaim(null);
+      const response = await api.get(
+        `/admin/cases/${selectedCase.item._id}`
+      );
 
-      setReviewNote("");
+      setSelectedCase(
+        response.data?.case || null
+      );
 
-      setReviewNoteError("");
-
-      await fetchDashboardData();
+      await fetchCases();
     } catch (error) {
-      console.error("Unable to review claim:", error);
-
-      const message =
-        error.response?.data?.message || "Unable to review the claim.";
-
-      toast.error(message);
-    } finally {
-      setReviewingClaim(false);
-    }
-  };
-
-  /* =========================
-     Handover Review
-  ========================= */
-
-  const handleOpenHandoverReview = (handover) => {
-    setSelectedHandover(handover);
-
-    setHandoverReviewNote("");
-
-    setHandoverReviewNoteError("");
-  };
-
-  const handleCloseHandoverReview = () => {
-    if (reviewingHandover) {
-      return;
-    }
-
-    setSelectedHandover(null);
-
-    setHandoverReviewNote("");
-
-    setHandoverReviewNoteError("");
-  };
-
-  const handleReviewHandover = async (status) => {
-    if (!selectedHandover) {
-      return;
-    }
-
-    if (status === "rejected" && !handoverReviewNote.trim()) {
-      setHandoverReviewNoteError(
-        "Please provide a reason for rejecting this handover.",
+      console.error(
+        "Unable to return item:",
+        error
       );
 
-      return;
+      toast.error(
+        error.response?.data?.message ||
+          "Unable to return item."
+      );
+    } finally {
+      setReturningItem(false);
+    }
+  };
+
+
+  /* ==================================================
+     Build Timeline
+  ================================================== */
+
+  const buildTimeline = (currentCase) => {
+    if (!currentCase) {
+      return [];
     }
 
-    setHandoverReviewNoteError("");
+    const timeline = [];
 
-    try {
-      setReviewingHandover(true);
+    const item = currentCase.item;
 
-      await api.patch(`/admin/handovers/${selectedHandover._id}`, {
-        status,
-        note: handoverReviewNote.trim(),
+    if (item?.createdAt) {
+      timeline.push({
+        date: item.createdAt,
+        title: "Item Posted",
+        description:
+          `${item.reportedBy?.name || "Student"} posted this item.`,
+        icon: "item",
       });
-
-      toast.success(
-        status === "confirmed"
-          ? "Handover confirmed successfully."
-          : "Handover rejected successfully.",
-      );
-
-      setSelectedHandover(null);
-
-      setHandoverReviewNote("");
-
-      setHandoverReviewNoteError("");
-
-      await fetchDashboardData();
-    } catch (error) {
-      console.error("Unable to review handover:", error);
-
-      const message =
-        error.response?.data?.message || "Unable to review the handover.";
-
-      toast.error(message);
-    } finally {
-      setReviewingHandover(false);
     }
+
+    currentCase.handovers?.forEach(
+      (handover) => {
+        timeline.push({
+          date: handover.createdAt,
+          title: "Handover Requested",
+          description:
+            `${handover.submittedBy?.name || "Student"} requested department handover.`,
+          icon: "handover",
+        });
+
+        if (handover.status !== "pending") {
+          timeline.push({
+            date:
+              handover.reviewedAt ||
+              handover.updatedAt,
+            title:
+              handover.status === "confirmed"
+                ? "Department Handover Confirmed"
+                : "Department Handover Rejected",
+            description:
+              handover.status === "confirmed"
+                ? "The Lost & Found Department confirmed receipt of the item."
+                : handover.note ||
+                  "The department could not confirm receipt.",
+            icon:
+              handover.status === "confirmed"
+                ? "success"
+                : "rejected",
+          });
+        }
+      }
+    );
+
+    currentCase.claims?.forEach(
+      (claim) => {
+        timeline.push({
+          date: claim.createdAt,
+          title: "Claim Submitted",
+          description:
+            `${claim.claimant?.name || "Student"} submitted an ownership claim.`,
+          icon: "claim",
+        });
+
+        if (claim.status !== "pending") {
+          timeline.push({
+            date:
+              claim.updatedAt ||
+              claim.createdAt,
+            title:
+              claim.status === "approved"
+                ? "Claim Approved"
+                : "Claim Rejected",
+            description:
+              claim.status === "approved"
+                ? "The ownership claim was approved."
+                : claim.reviewNote ||
+                  "The ownership claim was rejected.",
+            icon:
+              claim.status === "approved"
+                ? "success"
+                : "rejected",
+          });
+        }
+      }
+    );
+
+    if (item?.departmentReturnedAt) {
+      timeline.push({
+        date: item.departmentReturnedAt,
+        title: "Item Returned",
+        description:
+          `Item given to ${
+            item.departmentReturnedTo?.name ||
+            "the approved claimant"
+          } by ${
+            item.departmentReturnedBy?.name ||
+            "an administrator"
+          }.`,
+        icon: "returned",
+      });
+    }
+
+    return timeline.sort(
+      (a, b) =>
+        new Date(a.date) -
+        new Date(b.date)
+    );
   };
 
-  /* =========================
-     Loading State
-  ========================= */
+
+  /* ==================================================
+     Loading
+  ================================================== */
 
   if (loading) {
     return (
@@ -406,80 +506,94 @@ const AdminDashboard = () => {
 
         <main className="admin-dashboard-container">
           <div className="admin-dashboard-loading">
-            <FiRefreshCw className="admin-loading-icon" />
+            <FiRefreshCw
+              className="admin-loading-icon"
+            />
 
-            <p>Loading admin dashboard...</p>
+            <p>
+              Loading admin dashboard...
+            </p>
           </div>
         </main>
       </div>
     );
   }
 
-  /* =========================
-     Dashboard
-  ========================= */
+
+  /* ==================================================
+     Render
+  ================================================== */
 
   return (
     <div className="admin-dashboard-page">
       <AdminHeader />
 
       <main className="admin-dashboard-container">
-        {/* =========================
-            Dashboard Heading
-        ========================= */}
+
+        {/* Header */}
 
         <div className="admin-dashboard-heading">
           <div>
-            <h1>Admin Dashboard</h1>
+            <h1>
+              Lost &amp; Found Administration
+            </h1>
 
-            <p>Review and manage claims and department handover requests.</p>
+            <p>
+              Manage cases, verify claims,
+              and track item movement.
+            </p>
           </div>
 
           <button
             type="button"
             className="admin-refresh-button"
-            onClick={fetchDashboardData}
+            onClick={fetchCases}
           >
             <FiRefreshCw />
 
-            <span>Refresh</span>
+            <span>
+              Refresh
+            </span>
           </button>
         </div>
 
-        {/* =========================
-            Error
-        ========================= */}
+
+        {/* Error */}
 
         {error && (
-          <div className="admin-dashboard-error" role="alert">
+          <div
+            className="admin-dashboard-error"
+            role="alert"
+          >
             <FiAlertCircle />
 
-            <span>{error}</span>
+            <span>
+              {error}
+            </span>
           </div>
         )}
 
-        {/* =========================
-            Summary Cards
-        ========================= */}
+
+        {/* Statistics */}
 
         <div className="admin-summary-grid">
-          {/* Total Claims */}
 
           <div className="admin-summary-card">
             <div className="admin-summary-icon">
-              <FiClipboard />
+              <FiPackage />
             </div>
 
             <div className="admin-summary-content">
-              <span className="admin-summary-label">Total Claims</span>
+              <span className="admin-summary-label">
+                Total Cases
+              </span>
 
               <strong className="admin-summary-value">
-                {statistics.totalClaims}
+                {statistics.totalCases}
               </strong>
             </div>
           </div>
 
-          {/* Pending Claims */}
 
           <div className="admin-summary-card">
             <div className="admin-summary-icon admin-summary-icon-warning">
@@ -487,7 +601,9 @@ const AdminDashboard = () => {
             </div>
 
             <div className="admin-summary-content">
-              <span className="admin-summary-label">Pending Claims</span>
+              <span className="admin-summary-label">
+                Pending Claims
+              </span>
 
               <strong className="admin-summary-value">
                 {statistics.pendingClaims}
@@ -495,7 +611,23 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Pending Handovers */}
+
+          <div className="admin-summary-card">
+            <div className="admin-summary-icon admin-summary-icon-warning">
+              <FaHandHolding />
+            </div>
+
+            <div className="admin-summary-content">
+              <span className="admin-summary-label">
+                Pending Handovers
+              </span>
+
+              <strong className="admin-summary-value">
+                {statistics.pendingHandovers}
+              </strong>
+            </div>
+          </div>
+
 
           <div className="admin-summary-card">
             <div className="admin-summary-icon admin-summary-icon-package">
@@ -503,652 +635,776 @@ const AdminDashboard = () => {
             </div>
 
             <div className="admin-summary-content">
-              <span className="admin-summary-label">Pending Handovers</span>
+              <span className="admin-summary-label">
+                At Department
+              </span>
 
               <strong className="admin-summary-value">
-                {statistics.pendingHandovers}
+                {statistics.atDepartment}
               </strong>
             </div>
           </div>
+
+
+          <div className="admin-summary-card">
+            <div className="admin-summary-icon">
+              <FiCheckCircle />
+            </div>
+
+            <div className="admin-summary-content">
+              <span className="admin-summary-label">
+                Returned
+              </span>
+
+              <strong className="admin-summary-value">
+                {statistics.returned}
+              </strong>
+            </div>
+          </div>
+
         </div>
 
-        {/* =========================
-            Pending Claims
-        ========================= */}
 
-        <section className="admin-dashboard-section">
-          <div className="admin-section-header">
-            <div>
-              <h2>Pending Claims</h2>
+        {/* Navigation */}
 
-              <p>Claims waiting for department review.</p>
-            </div>
+        <div className="admin-dashboard-tabs">
 
-            <span className="admin-section-count">
-              {statistics.pendingClaims}
-            </span>
-          </div>
-
-          {pendingClaims.length === 0 ? (
-            <div className="admin-empty-state">
-              <FiCheckCircle />
-
-              <p>No pending claims.</p>
-            </div>
-          ) : (
-            <div className="admin-table-wrapper">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-
-                    <th>Claimant</th>
-
-                    <th>Category</th>
-
-                    <th>Submitted</th>
-
-                    <th>Action</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {pendingClaims.map((claim) => (
-                    <tr key={claim._id}>
-                      <td>
-                        <div className="admin-table-item">
-                          <strong>
-                            {claim.item?.title || "Item unavailable"}
-                          </strong>
-
-                          <span>{formatItemType(claim.item?.type)}</span>
-                        </div>
-                      </td>
-
-                      <td>
-                        <div className="admin-table-user">
-                          <strong>{claim.claimant?.name || "Student"}</strong>
-
-                          <span>
-                            {claim.claimant?.email || "Email unavailable"}
-                          </span>
-                        </div>
-                      </td>
-
-                      <td>{formatCategory(claim.item?.category)}</td>
-
-                      <td>{formatDate(claim.createdAt)}</td>
-
-                      <td>
-                        <button
-                          type="button"
-                          className="admin-table-action"
-                          onClick={() => handleOpenClaimReview(claim)}
-                        >
-                          Review
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
-        {/* =========================
-            Pending Handovers
-        ========================= */}
-
-        <section className="admin-dashboard-section">
-          <div className="admin-section-header">
-            <div>
-              <h2>Pending Handovers</h2>
-
-              <p>
-                Requests to hand items over to the Lost &amp; Found Department.
-              </p>
-            </div>
-
-            <span className="admin-section-count">
-              {statistics.pendingHandovers}
-            </span>
-          </div>
-
-          {pendingHandovers.length === 0 ? (
-            <div className="admin-empty-state">
-              <FiCheckCircle />
-
-              <p>No pending handovers.</p>
-            </div>
-          ) : (
-            <div className="admin-table-wrapper">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-
-                    <th>Submitted By</th>
-
-                    <th>Current Location</th>
-
-                    <th>Submitted</th>
-
-                    <th>Action</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {pendingHandovers.map((handover) => (
-                    <tr key={handover._id}>
-                      <td>
-                        <div className="admin-table-item">
-                          <strong>
-                            {handover.item?.title || "Item unavailable"}
-                          </strong>
-
-                          <span>{formatItemType(handover.item?.type)}</span>
-                        </div>
-                      </td>
-
-                      <td>
-                        <div className="admin-table-user">
-                          <strong>
-                            {handover.submittedBy?.name || "Student"}
-                          </strong>
-
-                          <span>
-                            {handover.submittedBy?.email || "Email unavailable"}
-                          </span>
-                        </div>
-                      </td>
-
-                      <td>{formatItemLocation(handover.item?.itemLocation)}</td>
-
-                      <td>{formatDate(handover.createdAt)}</td>
-
-                      <td>
-                        <button
-                          type="button"
-                          className="admin-table-action"
-                          onClick={() => handleOpenHandoverReview(handover)}
-                        >
-                          Review
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      </main>
-
-      {/* ==================================================
-          CLAIM REVIEW MODAL
-      ================================================== */}
-
-      {selectedClaim && (
-        <div
-          className="admin-modal-overlay"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              handleCloseClaimReview();
+          <button
+            type="button"
+            className={
+              activeTab === "overview"
+                ? "admin-dashboard-tab active"
+                : "admin-dashboard-tab"
             }
-          }}
-        >
-          <div
-            className="admin-claim-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="claim-review-title"
+            onClick={() =>
+              setActiveTab("overview")
+            }
           >
-            {/* Modal Header */}
+            Overview
+          </button>
 
-            <div className="admin-modal-header">
-              <div>
-                <h2 id="claim-review-title">Claim Review</h2>
+          <button
+            type="button"
+            className={
+              activeTab === "attention"
+                ? "admin-dashboard-tab active"
+                : "admin-dashboard-tab"
+            }
+            onClick={() =>
+              setActiveTab("attention")
+            }
+          >
+            Needs Attention
+            {attentionCases.length > 0 && (
+              <span className="admin-tab-count">
+                {attentionCases.length}
+              </span>
+            )}
+          </button>
 
-                <p>Review the ownership claim before making a decision.</p>
-              </div>
+          <button
+            type="button"
+            className={
+              activeTab === "cases"
+                ? "admin-dashboard-tab active"
+                : "admin-dashboard-tab"
+            }
+            onClick={() =>
+              setActiveTab("cases")
+            }
+          >
+            All Cases
+          </button>
 
-              <button
-                type="button"
-                className="admin-modal-close"
-                onClick={handleCloseClaimReview}
-                disabled={reviewingClaim}
-                aria-label="Close claim review"
-              >
-                <FiX />
-              </button>
-            </div>
+        </div>
 
-            {/* Claim Details */}
 
-            <div className="admin-claim-details">
-              <div className="admin-claim-detail">
-                <span className="admin-detail-label">Item</span>
+        {/* ==================================================
+            OVERVIEW
+        ================================================== */}
 
-                <strong>
-                  {selectedClaim.item?.title || "Item unavailable"}
-                </strong>
-              </div>
+        {activeTab === "overview" && (
+          <>
+            <section className="admin-dashboard-section">
 
-              <div className="admin-claim-detail">
-                <span className="admin-detail-label">Claimant</span>
+              <div className="admin-section-header">
+                <div>
+                  <h2>
+                    Needs Attention
+                  </h2>
 
-                <strong>{selectedClaim.claimant?.name || "Student"}</strong>
-              </div>
+                  <p>
+                    Cases that currently require
+                    an administrator action.
+                  </p>
+                </div>
 
-              <div className="admin-claim-detail">
-                <span className="admin-detail-label">Category</span>
-
-                <strong>{formatCategory(selectedClaim.item?.category)}</strong>
-              </div>
-
-              <div className="admin-claim-detail">
-                <span className="admin-detail-label">Submitted</span>
-
-                <strong>{formatDate(selectedClaim.createdAt)}</strong>
-              </div>
-            </div>
-
-            {/* Claimant Information */}
-
-            <div className="admin-review-section">
-              <div className="admin-review-section-heading">
-                <h3>Claimant Information</h3>
-              </div>
-
-              <div className="admin-table-user">
-                <strong>{selectedClaim.claimant?.name || "Student"}</strong>
-
-                <span>
-                  {selectedClaim.claimant?.email || "Email unavailable"}
+                <span className="admin-section-count">
+                  {attentionCases.length}
                 </span>
               </div>
-            </div>
 
-            {/* Ownership Proof */}
 
-            <div className="admin-review-section">
-              <div className="admin-review-section-heading">
-                <h3>Ownership Proof</h3>
-              </div>
+              {attentionCases.length === 0 ? (
+                <div className="admin-empty-state">
+                  <FiCheckCircle />
 
-              <div className="admin-ownership-proof">
-                {selectedClaim.ownershipProof || "No ownership proof provided."}
-              </div>
-            </div>
-
-            {/* Evidence Images */}
-
-            <div className="admin-review-section">
-              <div className="admin-review-section-heading">
-                <h3>Evidence Images</h3>
-
-                {Array.isArray(selectedClaim.evidenceImages) &&
-                  selectedClaim.evidenceImages.length > 0 && (
-                    <span>{selectedClaim.evidenceImages.length}</span>
-                  )}
-              </div>
-
-              {Array.isArray(selectedClaim.evidenceImages) &&
-              selectedClaim.evidenceImages.length > 0 ? (
-                <div className="admin-evidence-grid">
-                  {selectedClaim.evidenceImages.map((image, index) => {
-                    const imageUrl = getImageUrl(image);
-
-                    if (!imageUrl) {
-                      return null;
-                    }
-
-                    return (
-                      <a
-                        key={`${imageUrl}-${index}`}
-                        href={imageUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="admin-evidence-image"
-                      >
-                        <img src={imageUrl} alt={`Evidence ${index + 1}`} />
-
-                        <span>
-                          <FiExternalLink />
-                        </span>
-                      </a>
-                    );
-                  })}
+                  <p>
+                    Nothing requires your attention.
+                  </p>
                 </div>
               ) : (
-                <div className="admin-no-evidence">
-                  No evidence images were provided.
+                <div className="admin-case-grid">
+
+                  {attentionCases
+                    .slice(0, 6)
+                    .map((currentCase) => (
+                      <CaseCard
+                        key={
+                          currentCase.item?._id
+                        }
+                        currentCase={currentCase}
+                        onOpen={() =>
+                          handleOpenCase(
+                            currentCase.item._id
+                          )
+                        }
+                      />
+                    ))}
+
                 </div>
               )}
-            </div>
 
-            {/* Review Note */}
+            </section>
+          </>
+        )}
 
-            <div className="admin-review-section">
-              <label
-                htmlFor="claim-review-note"
-                className="admin-review-note-label"
-              >
-                <span>Review Note</span>
 
-                <span className="admin-required-note">
-                  Required when rejecting
-                </span>
-              </label>
+        {/* ==================================================
+            NEEDS ATTENTION
+        ================================================== */}
 
-              <textarea
-                id="claim-review-note"
-                value={reviewNote}
-                onChange={(event) => {
-                  setReviewNote(event.target.value);
+        {activeTab === "attention" && (
+          <section className="admin-dashboard-section">
 
-                  if (event.target.value.trim()) {
-                    setReviewNoteError("");
-                  }
-                }}
-                placeholder="Add a note about your decision..."
-                rows={4}
-                disabled={reviewingClaim}
-                aria-describedby="claim-review-note-help"
-                aria-invalid={Boolean(reviewNoteError)}
-              />
+            <div className="admin-section-header">
+              <div>
+                <h2>
+                  Cases Requiring Action
+                </h2>
 
-              <p id="claim-review-note-help" className="admin-review-note-help">
-                A review note is required when rejecting a claim.
-              </p>
-
-              {reviewNoteError && (
-                <p className="admin-review-note-error" role="alert">
-                  {reviewNoteError}
+                <p>
+                  Pending claims and department
+                  handover requests.
                 </p>
-              )}
+              </div>
+
+              <span className="admin-section-count">
+                {attentionCases.length}
+              </span>
             </div>
 
-            {/* Modal Actions */}
 
-            <div className="admin-modal-actions">
-              <button
-                type="button"
-                className="admin-modal-cancel"
-                onClick={handleCloseClaimReview}
-                disabled={reviewingClaim}
-              >
-                Cancel
-              </button>
+            {attentionCases.length === 0 ? (
+              <div className="admin-empty-state">
+                <FiCheckCircle />
 
-              <button
-                type="button"
-                className="admin-modal-reject"
-                onClick={() => handleReviewClaim("rejected")}
-                disabled={reviewingClaim}
-              >
-                {reviewingClaim ? "Processing..." : "Reject Claim"}
-              </button>
+                <p>
+                  No cases require attention.
+                </p>
+              </div>
+            ) : (
+              <div className="admin-case-grid">
 
-              <button
-                type="button"
-                className="admin-modal-approve"
-                onClick={() => handleReviewClaim("approved")}
-                disabled={reviewingClaim}
-              >
-                {reviewingClaim ? "Processing..." : "Approve Claim"}
-              </button>
+                {attentionCases.map(
+                  (currentCase) => (
+                    <CaseCard
+                      key={
+                        currentCase.item?._id
+                      }
+                      currentCase={currentCase}
+                      onOpen={() =>
+                        handleOpenCase(
+                          currentCase.item._id
+                        )
+                      }
+                    />
+                  )
+                )}
+
+              </div>
+            )}
+
+          </section>
+        )}
+
+
+        {/* ==================================================
+            ALL CASES
+        ================================================== */}
+
+        {activeTab === "cases" && (
+          <section className="admin-dashboard-section">
+
+            <div className="admin-section-header">
+
+              <div>
+                <h2>
+                  All Cases
+                </h2>
+
+                <p>
+                  Complete history of items
+                  handled by the department.
+                </p>
+              </div>
+
+              <span className="admin-section-count">
+                {filteredCases.length}
+              </span>
+
             </div>
-          </div>
-        </div>
-      )}
+
+
+            <div className="admin-case-search">
+              <FiSearch />
+
+              <input
+                type="text"
+                placeholder="Search by item, category, location, or student..."
+                value={searchTerm}
+                onChange={(event) =>
+                  setSearchTerm(
+                    event.target.value
+                  )
+                }
+              />
+            </div>
+
+
+            {filteredCases.length === 0 ? (
+              <div className="admin-empty-state">
+                <FiPackage />
+
+                <p>
+                  No cases found.
+                </p>
+              </div>
+            ) : (
+              <div className="admin-case-list">
+
+                {filteredCases.map(
+                  (currentCase) => (
+                    <CaseRow
+                      key={
+                        currentCase.item?._id
+                      }
+                      currentCase={currentCase}
+                      onOpen={() =>
+                        handleOpenCase(
+                          currentCase.item._id
+                        )
+                      }
+                    />
+                  )
+                )}
+
+              </div>
+            )}
+
+          </section>
+        )}
+
+      </main>
+
 
       {/* ==================================================
-          HANDOVER REVIEW MODAL
+          CASE MODAL
       ================================================== */}
 
-      {selectedHandover && (
+      {selectedCase && (
         <div
           className="admin-modal-overlay"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              handleCloseHandoverReview();
+            if (
+              event.target ===
+              event.currentTarget
+            ) {
+              handleCloseCase();
             }
           }}
         >
+
           <div
-            className="admin-claim-modal"
+            className="admin-case-modal"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="handover-review-title"
           >
-            {/* Modal Header */}
 
             <div className="admin-modal-header">
+
               <div>
-                <h2 id="handover-review-title">Handover Review</h2>
+                <span className="admin-modal-eyebrow">
+                  Case Details
+                </span>
+
+                <h2>
+                  {selectedCase.item?.title ||
+                    "Item"}
+                </h2>
 
                 <p>
-                  Review the request to hand this item over to the Lost &amp;
-                  Found Department.
+                  Complete activity and
+                  ownership history.
                 </p>
               </div>
 
               <button
                 type="button"
                 className="admin-modal-close"
-                onClick={handleCloseHandoverReview}
-                disabled={reviewingHandover}
-                aria-label="Close handover review"
+                onClick={handleCloseCase}
+                disabled={returningItem}
+                aria-label="Close case"
               >
                 <FiX />
               </button>
+
             </div>
 
-            {/* Handover Details */}
 
-            <div className="admin-claim-details">
-              <div className="admin-claim-detail">
-                <span className="admin-detail-label">Item</span>
+            {/* Case summary */}
 
-                <strong>
-                  {selectedHandover.item?.title || "Item unavailable"}
-                </strong>
-              </div>
+            <div className="admin-case-summary">
 
-              <div className="admin-claim-detail">
-                <span className="admin-detail-label">Type</span>
-
-                <strong>{formatItemType(selectedHandover.item?.type)}</strong>
-              </div>
-
-              <div className="admin-claim-detail">
-                <span className="admin-detail-label">Category</span>
-
-                <strong>
-                  {formatCategory(selectedHandover.item?.category)}
-                </strong>
-              </div>
-
-              <div className="admin-claim-detail">
-                <span className="admin-detail-label">Submitted</span>
-
-                <strong>{formatDate(selectedHandover.createdAt)}</strong>
-              </div>
-            </div>
-
-            {/* Submitted By */}
-
-            <div className="admin-review-section">
-              <div className="admin-review-section-heading">
-                <h3>Submitted By</h3>
-              </div>
-
-              <div className="admin-review-person">
-                <div className="admin-review-person-avatar">
-                  {selectedHandover.submittedBy?.name
-                    ?.charAt(0)
-                    .toUpperCase() || "S"}
-                </div>
-
-                <div className="admin-review-person-info">
-                  <strong>
-                    {selectedHandover.submittedBy?.name || "Student"}
-                  </strong>
-
-                  <span>
-                    {selectedHandover.submittedBy?.email || "Email unavailable"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Item Information */}
-
-            <div className="admin-review-section">
-              <div className="admin-review-section-heading">
-                <h3>Item Information</h3>
-              </div>
-
-              <div className="admin-handover-info">
-                <div className="admin-handover-info-item">
-                  <span className="admin-detail-label">Current Location</span>
-
-                  <strong>
-                    {formatItemLocation(selectedHandover.item?.itemLocation)}
-                  </strong>
-                </div>
-
-                <div className="admin-handover-info-item">
-                  <span className="admin-detail-label">Item Location</span>
-
-                  <strong>
-                    {selectedHandover.item?.location || "Location unavailable"}
-                  </strong>
-                </div>
-              </div>
-            </div>
-
-            {/* Item Image */}
-
-            {Array.isArray(selectedHandover.item?.images) &&
-              selectedHandover.item.images.length > 0 && (
-                <div className="admin-review-section">
-                  <div className="admin-review-section-heading">
-                    <h3>Item Image</h3>
-                  </div>
-
-                  <div className="admin-evidence-grid">
-                    {selectedHandover.item.images
-                      .slice(0, 4)
-                      .map((image, index) => {
-                        const imageUrl = getImageUrl(image);
-
-                        if (!imageUrl) {
-                          return null;
-                        }
-
-                        return (
-                          <a
-                            key={`${imageUrl}-${index}`}
-                            href={imageUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="admin-evidence-image"
-                          >
-                            <img src={imageUrl} alt={`Item ${index + 1}`} />
-
-                            <span>
-                              <FiExternalLink />
-                            </span>
-                          </a>
-                        );
-                      })}
-                  </div>
-                </div>
-              )}
-
-            {/* Review Note */}
-
-            <div className="admin-review-section">
-              <label
-                htmlFor="handover-review-note"
-                className="admin-review-note-label"
-              >
-                <span>Review Note</span>
-
-                <span className="admin-required-note">
-                  Required when rejecting
+              <div>
+                <span>
+                  Type
                 </span>
-              </label>
 
-              <textarea
-                id="handover-review-note"
-                value={handoverReviewNote}
-                onChange={(event) => {
-                  setHandoverReviewNote(event.target.value);
+                <strong>
+                  {formatType(
+                    selectedCase.item?.type
+                  )}
+                </strong>
+              </div>
 
-                  if (event.target.value.trim()) {
-                    setHandoverReviewNoteError("");
-                  }
-                }}
-                placeholder="Add a note about your decision..."
-                rows={4}
-                disabled={reviewingHandover}
-                aria-describedby="handover-review-note-help"
-                aria-invalid={Boolean(handoverReviewNoteError)}
-              />
+              <div>
+                <span>
+                  Category
+                </span>
 
-              <p
-                id="handover-review-note-help"
-                className="admin-review-note-help"
-              >
-                A review note is required when rejecting a handover.
-              </p>
+                <strong>
+                  {formatCategory(
+                    selectedCase.item?.category
+                  )}
+                </strong>
+              </div>
 
-              {handoverReviewNoteError && (
-                <p className="admin-review-note-error" role="alert">
-                  {handoverReviewNoteError}
-                </p>
+              <div>
+                <span>
+                  Status
+                </span>
+
+                <strong>
+                  {formatStatus(
+                    selectedCase.item?.status
+                  )}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Location
+                </span>
+
+                <strong>
+                  {formatLocation(
+                    selectedCase.item?.itemLocation
+                  )}
+                </strong>
+              </div>
+
+            </div>
+
+
+            {/* Approved claim */}
+
+            {selectedCase.approvedClaim && (
+              <div className="admin-approved-owner">
+
+                <div className="admin-approved-owner-icon">
+                  <FiCheckCircle />
+                </div>
+
+                <div>
+                  <span>
+                    Approved Claimant
+                  </span>
+
+                  <strong>
+                    {
+                      selectedCase
+                        .approvedClaim
+                        .claimant?.name ||
+                      "Student"
+                    }
+                  </strong>
+
+                  <small>
+                    {
+                      selectedCase
+                        .approvedClaim
+                        .claimant?.email ||
+                      "Email unavailable"
+                    }
+                  </small>
+                </div>
+
+              </div>
+            )}
+
+
+            {/* Timeline */}
+
+            <div className="admin-case-timeline-section">
+
+              <div className="admin-review-section-heading">
+                <h3>
+                  Case Timeline
+                </h3>
+              </div>
+
+
+              <div className="admin-case-timeline">
+
+                {buildTimeline(
+                  selectedCase
+                ).map(
+                  (event, index) => (
+                    <div
+                      className="admin-timeline-item"
+                      key={`${event.title}-${index}`}
+                    >
+
+                      <div className="admin-timeline-marker">
+                        {event.icon === "success" ||
+                        event.icon === "returned" ? (
+                          <FiCheckCircle />
+                        ) : event.icon === "rejected" ? (
+                          <FiX />
+                        ) : event.icon === "handover" ? (
+                          <FaHandHolding />
+                        ) : event.icon === "claim" ? (
+                          <FiUser />
+                        ) : (
+                          <FiPackage />
+                        )}
+                      </div>
+
+
+                      <div className="admin-timeline-content">
+
+                        <div className="admin-timeline-top">
+                          <strong>
+                            {event.title}
+                          </strong>
+
+                          <span>
+                            {formatDateTime(
+                              event.date
+                            )}
+                          </span>
+                        </div>
+
+                        <p>
+                          {event.description}
+                        </p>
+
+                      </div>
+
+                    </div>
+                  )
+                )}
+
+              </div>
+
+            </div>
+
+
+            {/* Return action */}
+
+            {selectedCase.item?.status ===
+              "active" &&
+              selectedCase.item
+                ?.itemLocation ===
+                "lost-found-department" &&
+              selectedCase.approvedClaim && (
+                <div className="admin-case-final-action">
+
+                  <div>
+                    <h3>
+                      Ready for Collection
+                    </h3>
+
+                    <p>
+                      Verify the claimant's
+                      Sharda University ID and
+                      ownership proof before
+                      handing over the item.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="admin-modal-approve"
+                    onClick={handleReturnItem}
+                    disabled={returningItem}
+                  >
+                    <FiCheckCircle />
+
+                    {returningItem
+                      ? "Returning..."
+                      : "Give Item to Owner"}
+                  </button>
+
+                </div>
               )}
-            </div>
 
-            {/* Modal Actions */}
 
-            <div className="admin-modal-actions">
-              <button
-                type="button"
-                className="admin-modal-cancel"
-                onClick={handleCloseHandoverReview}
-                disabled={reviewingHandover}
-              >
-                Cancel
-              </button>
+            {selectedCase.item?.status ===
+              "returned" && (
+                <div className="admin-case-returned">
 
-              <button
-                type="button"
-                className="admin-modal-reject"
-                onClick={() => handleReviewHandover("rejected")}
-                disabled={reviewingHandover}
-              >
-                {reviewingHandover ? "Processing..." : "Reject Handover"}
-              </button>
+                  <FiCheckCircle />
 
-              <button
-                type="button"
-                className="admin-modal-approve"
-                onClick={() => handleReviewHandover("confirmed")}
-                disabled={reviewingHandover}
-              >
-                {reviewingHandover ? "Processing..." : "Confirm Handover"}
-              </button>
-            </div>
+                  <div>
+                    <strong>
+                      Item Returned
+                    </strong>
+
+                    <span>
+                      Returned to{" "}
+                      {
+                        selectedCase.item
+                          .departmentReturnedTo
+                          ?.name ||
+                        "the approved claimant"
+                      }{" "}
+                      on{" "}
+                      {formatDateTime(
+                        selectedCase.item
+                          .departmentReturnedAt
+                      )}
+                    </span>
+                  </div>
+
+                </div>
+              )}
+
           </div>
+
         </div>
       )}
+
+
+      {/* Case loading overlay */}
+
+      {caseLoading && (
+        <div className="admin-case-loading-overlay">
+          <FiRefreshCw />
+
+          <span>
+            Loading case...
+          </span>
+        </div>
+      )}
+
     </div>
   );
 };
+
+
+/* ==================================================
+   Case Card
+================================================== */
+
+const CaseCard = ({
+  currentCase,
+  onOpen,
+}) => {
+  const item = currentCase.item;
+
+  const pendingClaim =
+    currentCase.claims?.find(
+      (claim) =>
+        claim.status === "pending"
+    );
+
+  const pendingHandover =
+    currentCase.handovers?.find(
+      (handover) =>
+        handover.status === "pending"
+    );
+
+  return (
+    <div className="admin-case-card">
+
+      <div className="admin-case-card-top">
+
+        <div>
+          <span className="admin-case-type">
+            {formatType(item?.type)}
+          </span>
+
+          <h3>
+            {item?.title ||
+              "Item unavailable"}
+          </h3>
+        </div>
+
+        <span className="admin-case-status">
+          {item?.status === "returned"
+            ? "Returned"
+            : item?.itemLocation ===
+              "lost-found-department"
+            ? "At Department"
+            : "Active"}
+        </span>
+
+      </div>
+
+
+      <div className="admin-case-card-details">
+
+        <span>
+          {formatCategory(
+            item?.category
+          )}
+        </span>
+
+        <span>
+          {item?.location ||
+            "Location unavailable"}
+        </span>
+
+      </div>
+
+
+      <div className="admin-case-card-alerts">
+
+        {pendingClaim && (
+          <span>
+            <FiClock />
+            Claim pending
+          </span>
+        )}
+
+        {pendingHandover && (
+          <span>
+            <FaHandHolding />
+            Handover pending
+          </span>
+        )}
+
+      </div>
+
+
+      <button
+        type="button"
+        className="admin-case-open-button"
+        onClick={onOpen}
+      >
+        <span>
+          View Case
+        </span>
+
+        <FiChevronRight />
+      </button>
+
+    </div>
+  );
+};
+
+
+/* ==================================================
+   Case Row
+================================================== */
+
+const CaseRow = ({
+  currentCase,
+  onOpen,
+}) => {
+  const item = currentCase.item;
+
+  return (
+    <div className="admin-case-row">
+
+      <div className="admin-case-row-main">
+
+        <div className="admin-case-row-icon">
+          <FiPackage />
+        </div>
+
+        <div className="admin-case-row-info">
+
+          <strong>
+            {item?.title ||
+              "Item unavailable"}
+          </strong>
+
+          <span>
+            {formatType(item?.type)}
+            {" · "}
+            {formatCategory(
+              item?.category
+            )}
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div className="admin-case-row-meta">
+
+        <span>
+          {formatLocation(
+            item?.itemLocation
+          )}
+        </span>
+
+        <span>
+          {formatDate(
+            item?.createdAt
+          )}
+        </span>
+
+      </div>
+
+
+      <div className="admin-case-row-status">
+
+        <span>
+          {formatStatus(
+            item?.status
+          )}
+        </span>
+
+      </div>
+
+
+      <button
+        type="button"
+        className="admin-table-action"
+        onClick={onOpen}
+      >
+        <FiEye />
+        View
+      </button>
+
+    </div>
+  );
+};
+
 
 export default AdminDashboard;
