@@ -1072,3 +1072,87 @@
     width: 100%;
   }
 }
+
+/* =====================================================
+   SHARE ACTIONS
+   ===================================================== */
+
+.share-whatsapp-button,
+.copy-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.share-whatsapp-button svg,
+.copy-link-button svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+/* WhatsApp */
+
+.share-whatsapp-button {
+  color: var(--primary);
+  background-color: var(--primary-light);
+  border: 1px solid #bbf7d0;
+}
+
+.share-whatsapp-button:hover {
+  background-color: #bbf7d0;
+  border-color: #86efac;
+  transform: translateY(-1px);
+}
+
+/* Copy link */
+
+.copy-link-button {
+  color: var(--text-primary);
+  background-color: var(--white);
+  border: 1px solid var(--border);
+}
+
+.copy-link-button:hover {
+  background-color: var(--background);
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+/* Keyboard focus */
+
+.share-whatsapp-button:focus-visible,
+.copy-link-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Disabled state */
+
+.share-whatsapp-button:disabled,
+.copy-link-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 600px) {
+  .share-whatsapp-button,
+  .copy-link-button {
+    width: 100%;
+  }
+}
+
