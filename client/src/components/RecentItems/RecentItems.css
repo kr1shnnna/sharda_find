@@ -111,26 +111,47 @@
   }
 }
 
+
+
 @media (max-width: 600px) {
   .recent-items {
     padding: 60px 0;
   }
 
-  .recent-items-header {
-    align-items: flex-start;
-    flex-direction: column;
+  .recent-items-container {
+    padding: 0 18px;
+  }
 
+  .recent-items-header {
+    flex-direction: column;
+    align-items: center;
     gap: 16px;
+    margin-bottom: 28px;
+    text-align: center;
   }
 
   .recent-items-header h2 {
     font-size: 28px;
   }
 
+  .section-description {
+    max-width: 360px;
+    margin: 0 auto;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .view-all-link {
+    justify-content: center;
+  }
+
   .recent-items-grid {
     grid-template-columns: 1fr;
+    gap: 18px;
   }
 }
+
+
 
 /* --------------------------------
    EMPTY STATE
