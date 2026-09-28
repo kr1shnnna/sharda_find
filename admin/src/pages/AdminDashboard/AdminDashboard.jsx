@@ -126,13 +126,10 @@ const AdminDashboard = () => {
 
   const [returningItem, setReturningItem] = useState(false);
 
-  const [reviewingClaim, setReviewingClaim] = useState(false);
-  const [claimReviewNote, setClaimReviewNote] = useState("");
-  const [claimReviewNoteError, setClaimReviewNoteError] = useState("");
-
   const [reviewingHandover, setReviewingHandover] = useState(false);
   const [handoverReviewNote, setHandoverReviewNote] = useState("");
-  const [handoverReviewNoteError, setHandoverReviewNoteError] = useState("");
+  const [handoverReviewNoteError, setHandoverReviewNoteError] =
+    useState("");
 
   /* ==================================================
      Fetch Cases
@@ -149,7 +146,9 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Unable to load admin cases:", error);
 
-      setError(error.response?.data?.message || "Unable to load admin cases.");
+      setError(
+        error.response?.data?.message || "Unable to load admin cases.",
+      );
     } finally {
       setLoading(false);
     }
@@ -178,17 +177,25 @@ const AdminDashboard = () => {
   const statistics = useMemo(() => {
     const totalCases = cases.length;
 
-    const pendingClaims = cases.reduce(
-      (count, currentCase) =>
-        count +
-        currentCase.claims.filter((claim) => claim.status === "pending").length,
-      0,
-    );
+    /*
+     * Claims are NOT an administrator action.
+     *
+     * Direct-owner flow:
+     *
+     * Claimant
+     *    ↓
+     * Finder
+     *    ↓
+     * Approve / Reject
+     *
+     * Therefore pending claims are intentionally NOT
+     * included in the admin statistics.
+     */
 
     const pendingHandovers = cases.reduce(
       (count, currentCase) =>
         count +
-        currentCase.handovers.filter(
+        (currentCase.handovers || []).filter(
           (handover) => handover.status === "pending",
         ).length,
       0,
@@ -206,7 +213,6 @@ const AdminDashboard = () => {
 
     return {
       totalCases,
-      pendingClaims,
       pendingHandovers,
       atDepartment,
       returned,
@@ -218,17 +224,18 @@ const AdminDashboard = () => {
   ================================================== */
 
   const attentionCases = useMemo(() => {
-    return cases.filter((currentCase) => {
-      const hasPendingClaim = currentCase.claims.some(
-        (claim) => claim.status === "pending",
-      );
+    /*
+     * Only department handovers require administrator
+     * action.
+     *
+     * Pending claims are handled directly by the finder.
+     */
 
-      const hasPendingHandover = currentCase.handovers.some(
+    return cases.filter((currentCase) =>
+      (currentCase.handovers || []).some(
         (handover) => handover.status === "pending",
-      );
-
-      return hasPendingClaim || hasPendingHandover;
-    });
+      ),
+    );
   }, [cases]);
 
   /* ==================================================
@@ -246,11 +253,8 @@ const AdminDashboard = () => {
       const item = currentCase.item;
 
       const title = item?.title?.toLowerCase() || "";
-
       const location = item?.location?.toLowerCase() || "";
-
       const category = item?.category?.toLowerCase() || "";
-
       const reporter = item?.reportedBy?.name?.toLowerCase() || "";
 
       return (
@@ -285,7 +289,7 @@ const AdminDashboard = () => {
   };
 
   const handleCloseCase = () => {
-    if (returningItem || reviewingClaim || reviewingHandover) {
+    if (returningItem || reviewingHandover) {
       return;
     }
 
@@ -308,7 +312,9 @@ const AdminDashboard = () => {
 
       toast.success("Item returned to the owner successfully.");
 
-      const response = await api.get(`/admin/cases/${selectedCase.item._id}`);
+      const response = await api.get(
+        `/admin/cases/${selectedCase.item._id}`,
+      );
 
       setSelectedCase(response.data?.case || null);
 
@@ -316,63 +322,11 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Unable to return item:", error);
 
-      toast.error(error.response?.data?.message || "Unable to return item.");
+      toast.error(
+        error.response?.data?.message || "Unable to return item.",
+      );
     } finally {
       setReturningItem(false);
-    }
-  };
-
-  /* ==================================================
-     Review Claim
-  ================================================== */
-
-  const handleReviewClaim = async (decision) => {
-    const pendingClaim = selectedCase?.claims?.find(
-      (claim) => claim.status === "pending",
-    );
-
-    if (!pendingClaim) {
-      return;
-    }
-
-    if (decision === "rejected" && !claimReviewNote.trim()) {
-      setClaimReviewNoteError(
-        "Please provide a reason for rejecting this claim.",
-      );
-      return;
-    }
-
-    try {
-      setReviewingClaim(true);
-      setClaimReviewNoteError("");
-
-      await api.patch(`/admin/claims/${pendingClaim._id}`, {
-        decision,
-        reviewNote: claimReviewNote.trim(),
-      });
-
-      toast.success(
-        decision === "approved"
-          ? "Claim approved successfully."
-          : "Claim rejected successfully.",
-      );
-
-      setClaimReviewNote("");
-
-      const response = await api.get(
-        `/admin/cases/${selectedCase.item._id}`,
-      );
-
-      setSelectedCase(response.data?.case || null);
-      await fetchCases();
-    } catch (error) {
-      console.error("Unable to review claim:", error);
-
-      toast.error(
-        error.response?.data?.message || "Unable to review the claim.",
-      );
-    } finally {
-      setReviewingClaim(false);
     }
   };
 
@@ -393,6 +347,7 @@ const AdminDashboard = () => {
       setHandoverReviewNoteError(
         "Please provide a reason for rejecting this handover.",
       );
+
       return;
     }
 
@@ -400,10 +355,13 @@ const AdminDashboard = () => {
       setReviewingHandover(true);
       setHandoverReviewNoteError("");
 
-      await api.patch(`/admin/handovers/${pendingHandover._id}`, {
-        status,
-        note: handoverReviewNote.trim(),
-      });
+      await api.patch(
+        `/admin/handovers/${pendingHandover._id}`,
+        {
+          status,
+          note: handoverReviewNote.trim(),
+        },
+      );
 
       toast.success(
         status === "confirmed"
@@ -418,12 +376,14 @@ const AdminDashboard = () => {
       );
 
       setSelectedCase(response.data?.case || null);
+
       await fetchCases();
     } catch (error) {
       console.error("Unable to review handover:", error);
 
       toast.error(
-        error.response?.data?.message || "Unable to review the handover.",
+        error.response?.data?.message ||
+          "Unable to review the handover.",
       );
     } finally {
       setReviewingHandover(false);
@@ -443,73 +403,128 @@ const AdminDashboard = () => {
 
     const item = currentCase.item;
 
+    /* -----------------------------------------------
+       Item Posted
+    ------------------------------------------------ */
+
     if (item?.createdAt) {
       timeline.push({
         date: item.createdAt,
         title: "Item Posted",
-        description: `${item.reportedBy?.name || "Student"} posted this item.`,
+        description: `${
+          item.reportedBy?.name || "Student"
+        } posted this item.`,
         icon: "item",
       });
     }
+
+    /* -----------------------------------------------
+       Department Handovers
+    ------------------------------------------------ */
 
     currentCase.handovers?.forEach((handover) => {
       timeline.push({
         date: handover.createdAt,
         title: "Handover Requested",
-        description: `${handover.submittedBy?.name || "Student"} requested department handover.`,
+        description: `${
+          handover.submittedBy?.name || "Student"
+        } requested department handover.`,
         icon: "handover",
       });
 
       if (handover.status !== "pending") {
         timeline.push({
-          date: handover.reviewedAt || handover.updatedAt,
+          date:
+            handover.reviewedAt ||
+            handover.updatedAt ||
+            handover.createdAt,
+
           title:
             handover.status === "confirmed"
               ? "Department Handover Confirmed"
               : "Department Handover Rejected",
+
           description:
             handover.status === "confirmed"
               ? "The Lost & Found Department confirmed receipt of the item."
-              : handover.note || "The department could not confirm receipt.",
-          icon: handover.status === "confirmed" ? "success" : "rejected",
+              : handover.note ||
+                "The department could not confirm receipt.",
+
+          icon:
+            handover.status === "confirmed"
+              ? "success"
+              : "rejected",
         });
       }
     });
+
+    /* -----------------------------------------------
+       Ownership Claims
+
+       Claims are displayed only as history.
+
+       Admin does NOT approve/reject them.
+       Finder handles the direct-owner claim flow.
+    ------------------------------------------------ */
 
     currentCase.claims?.forEach((claim) => {
       timeline.push({
         date: claim.createdAt,
         title: "Claim Submitted",
-        description: `${claim.claimant?.name || "Student"} submitted an ownership claim.`,
+        description: `${
+          claim.claimant?.name || "Student"
+        } submitted an ownership claim.`,
         icon: "claim",
       });
 
       if (claim.status !== "pending") {
         timeline.push({
           date: claim.updatedAt || claim.createdAt,
+
           title:
-            claim.status === "approved" ? "Claim Approved" : "Claim Rejected",
+            claim.status === "approved"
+              ? "Claim Approved"
+              : "Claim Rejected",
+
           description:
             claim.status === "approved"
-              ? "The ownership claim was approved."
-              : claim.reviewNote || "The ownership claim was rejected.",
-          icon: claim.status === "approved" ? "success" : "rejected",
+              ? "The finder approved the ownership claim."
+              : claim.reviewNote ||
+                "The finder rejected the ownership claim.",
+
+          icon:
+            claim.status === "approved"
+              ? "success"
+              : "rejected",
         });
       }
     });
 
+    /* -----------------------------------------------
+       Item Returned
+    ------------------------------------------------ */
+
     if (item?.departmentReturnedAt) {
       timeline.push({
         date: item.departmentReturnedAt,
+
         title: "Item Returned",
+
         description: `Item given to ${
-          item.departmentReturnedTo?.name || "the approved claimant"
-        } by ${item.departmentReturnedBy?.name || "an administrator"}.`,
+          item.departmentReturnedTo?.name ||
+          "the approved claimant"
+        } by ${
+          item.departmentReturnedBy?.name ||
+          "an administrator"
+        }.`,
+
         icon: "returned",
       });
     }
 
-    return timeline.sort((a, b) => new Date(a.date) - new Date(b.date));
+    return timeline.sort(
+      (a, b) => new Date(a.date) - new Date(b.date),
+    );
   };
 
   /* ==================================================
@@ -624,7 +639,9 @@ const AdminDashboard = () => {
 
           <div className="admin-sidebar-footer">
             <div className="admin-sidebar-user">
-              <div className="admin-sidebar-avatar">A</div>
+              <div className="admin-sidebar-avatar">
+                A
+              </div>
 
               <div>
                 <strong>Administrator</strong>
@@ -635,171 +652,182 @@ const AdminDashboard = () => {
         </aside>
 
         <main className="admin-dashboard-container">
-        {/* Header */}
+          {/* Header */}
 
-        <div className="admin-dashboard-heading">
-          <div className="admin-heading-content">
-            <span className="admin-heading-eyebrow">
-              Administration
-            </span>
+          <div className="admin-dashboard-heading">
+            <div className="admin-heading-content">
+              <span className="admin-heading-eyebrow">
+                Administration
+              </span>
 
-            <h1>Lost &amp; Found Dashboard</h1>
+              <h1>Lost &amp; Found Dashboard</h1>
 
-            <p>
-              Manage claims, handovers, and department cases from one place.
-            </p>
+              <p>
+                Manage department handovers and Lost &amp; Found
+                cases from one place.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="admin-refresh-button"
+              onClick={fetchCases}
+            >
+              <FiRefreshCw />
+
+              <span>Refresh</span>
+            </button>
           </div>
 
-          <button
-            type="button"
-            className="admin-refresh-button"
-            onClick={fetchCases}
-          >
-            <FiRefreshCw />
+          {/* Error */}
 
-            <span>Refresh</span>
-          </button>
-        </div>
+          {error && (
+            <div
+              className="admin-dashboard-error"
+              role="alert"
+            >
+              <FiAlertCircle />
 
-        {/* Error */}
+              <span>{error}</span>
+            </div>
+          )}
 
-        {error && (
-          <div className="admin-dashboard-error" role="alert">
-            <FiAlertCircle />
+          {/* Statistics */}
 
-            <span>{error}</span>
-          </div>
-        )}
+          <div className="admin-summary-grid">
+            {/* Total Cases */}
 
-        {/* Statistics */}
+            <div className="admin-summary-card">
+              <div className="admin-summary-icon">
+                <FiPackage />
+              </div>
 
-        <div className="admin-summary-grid">
-          <div className="admin-summary-card">
-            <div className="admin-summary-icon">
-              <FiPackage />
+              <div className="admin-summary-content">
+                <span className="admin-summary-label">
+                  Total Cases
+                </span>
+
+                <strong className="admin-summary-value">
+                  {statistics.totalCases}
+                </strong>
+              </div>
             </div>
 
-            <div className="admin-summary-content">
-              <span className="admin-summary-label">Total Cases</span>
+            {/* Pending Handovers */}
 
-              <strong className="admin-summary-value">
-                {statistics.totalCases}
-              </strong>
-            </div>
-          </div>
+            <div className="admin-summary-card">
+              <div className="admin-summary-icon admin-summary-icon-warning">
+                <FaHandHolding />
+              </div>
 
-          <div className="admin-summary-card">
-            <div className="admin-summary-icon admin-summary-icon-warning">
-              <FiClock />
-            </div>
+              <div className="admin-summary-content">
+                <span className="admin-summary-label">
+                  Pending Handovers
+                </span>
 
-            <div className="admin-summary-content">
-              <span className="admin-summary-label">Pending Claims</span>
-
-              <strong className="admin-summary-value">
-                {statistics.pendingClaims}
-              </strong>
-            </div>
-          </div>
-
-          <div className="admin-summary-card">
-            <div className="admin-summary-icon admin-summary-icon-warning">
-              <FaHandHolding />
+                <strong className="admin-summary-value">
+                  {statistics.pendingHandovers}
+                </strong>
+              </div>
             </div>
 
-            <div className="admin-summary-content">
-              <span className="admin-summary-label">Pending Handovers</span>
+            {/* At Department */}
 
-              <strong className="admin-summary-value">
-                {statistics.pendingHandovers}
-              </strong>
-            </div>
-          </div>
+            <div className="admin-summary-card">
+              <div className="admin-summary-icon admin-summary-icon-package">
+                <FiPackage />
+              </div>
 
-          <div className="admin-summary-card">
-            <div className="admin-summary-icon admin-summary-icon-package">
-              <FiPackage />
-            </div>
+              <div className="admin-summary-content">
+                <span className="admin-summary-label">
+                  At Department
+                </span>
 
-            <div className="admin-summary-content">
-              <span className="admin-summary-label">At Department</span>
-
-              <strong className="admin-summary-value">
-                {statistics.atDepartment}
-              </strong>
-            </div>
-          </div>
-
-          <div className="admin-summary-card">
-            <div className="admin-summary-icon">
-              <FiCheckCircle />
+                <strong className="admin-summary-value">
+                  {statistics.atDepartment}
+                </strong>
+              </div>
             </div>
 
-            <div className="admin-summary-content">
-              <span className="admin-summary-label">Returned</span>
+            {/* Returned */}
 
-              <strong className="admin-summary-value">
-                {statistics.returned}
-              </strong>
+            <div className="admin-summary-card">
+              <div className="admin-summary-icon">
+                <FiCheckCircle />
+              </div>
+
+              <div className="admin-summary-content">
+                <span className="admin-summary-label">
+                  Returned
+                </span>
+
+                <strong className="admin-summary-value">
+                  {statistics.returned}
+                </strong>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Navigation */}
+          {/* Navigation */}
 
-        <div className="admin-dashboard-tabs">
-          <button
-            type="button"
-            className={
-              activeTab === "overview"
-                ? "admin-dashboard-tab active"
-                : "admin-dashboard-tab"
-            }
-            onClick={() => setActiveTab("overview")}
-          >
-            Overview
-          </button>
+          <div className="admin-dashboard-tabs">
+            <button
+              type="button"
+              className={
+                activeTab === "overview"
+                  ? "admin-dashboard-tab active"
+                  : "admin-dashboard-tab"
+              }
+              onClick={() => setActiveTab("overview")}
+            >
+              Overview
+            </button>
 
-          <button
-            type="button"
-            className={
-              activeTab === "attention"
-                ? "admin-dashboard-tab active"
-                : "admin-dashboard-tab"
-            }
-            onClick={() => setActiveTab("attention")}
-          >
-            Needs Attention
-            {attentionCases.length > 0 && (
-              <span className="admin-tab-count">{attentionCases.length}</span>
-            )}
-          </button>
+            <button
+              type="button"
+              className={
+                activeTab === "attention"
+                  ? "admin-dashboard-tab active"
+                  : "admin-dashboard-tab"
+              }
+              onClick={() => setActiveTab("attention")}
+            >
+              Needs Attention
 
-          <button
-            type="button"
-            className={
-              activeTab === "cases"
-                ? "admin-dashboard-tab active"
-                : "admin-dashboard-tab"
-            }
-            onClick={() => setActiveTab("cases")}
-          >
-            All Cases
-          </button>
-        </div>
+              {attentionCases.length > 0 && (
+                <span className="admin-tab-count">
+                  {attentionCases.length}
+                </span>
+              )}
+            </button>
 
-        {/* ==================================================
-            OVERVIEW
-        ================================================== */}
+            <button
+              type="button"
+              className={
+                activeTab === "cases"
+                  ? "admin-dashboard-tab active"
+                  : "admin-dashboard-tab"
+              }
+              onClick={() => setActiveTab("cases")}
+            >
+              All Cases
+            </button>
+          </div>
 
-        {activeTab === "overview" && (
-          <>
+          {/* ==================================================
+              OVERVIEW
+          ================================================== */}
+
+          {activeTab === "overview" && (
             <section className="admin-dashboard-section">
               <div className="admin-section-header">
                 <div>
                   <h2>Needs Attention</h2>
 
-                  <p>Cases that currently require an administrator action.</p>
+                  <p>
+                    Department handovers that currently
+                    require administrator action.
+                  </p>
                 </div>
 
                 <span className="admin-section-count">
@@ -811,110 +839,134 @@ const AdminDashboard = () => {
                 <div className="admin-empty-state">
                   <FiCheckCircle />
 
-                  <p>Nothing requires your attention.</p>
+                  <p>
+                    Nothing requires your attention.
+                  </p>
                 </div>
               ) : (
                 <div className="admin-case-grid">
-                  {attentionCases.slice(0, 6).map((currentCase) => (
+                  {attentionCases
+                    .slice(0, 6)
+                    .map((currentCase) => (
+                      <CaseCard
+                        key={currentCase.item?._id}
+                        currentCase={currentCase}
+                        onOpen={() =>
+                          handleOpenCase(
+                            currentCase.item._id,
+                          )
+                        }
+                      />
+                    ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* ==================================================
+              NEEDS ATTENTION
+          ================================================== */}
+
+          {activeTab === "attention" && (
+            <section className="admin-dashboard-section">
+              <div className="admin-section-header">
+                <div>
+                  <h2>Cases Requiring Action</h2>
+
+                  <p>
+                    Pending department handover requests.
+                  </p>
+                </div>
+
+                <span className="admin-section-count">
+                  {attentionCases.length}
+                </span>
+              </div>
+
+              {attentionCases.length === 0 ? (
+                <div className="admin-empty-state">
+                  <FiCheckCircle />
+
+                  <p>
+                    No cases require attention.
+                  </p>
+                </div>
+              ) : (
+                <div className="admin-case-grid">
+                  {attentionCases.map((currentCase) => (
                     <CaseCard
                       key={currentCase.item?._id}
                       currentCase={currentCase}
-                      onOpen={() => handleOpenCase(currentCase.item._id)}
+                      onOpen={() =>
+                        handleOpenCase(
+                          currentCase.item._id,
+                        )
+                      }
                     />
                   ))}
                 </div>
               )}
             </section>
-          </>
-        )}
+          )}
 
-        {/* ==================================================
-            NEEDS ATTENTION
-        ================================================== */}
+          {/* ==================================================
+              ALL CASES
+          ================================================== */}
 
-        {activeTab === "attention" && (
-          <section className="admin-dashboard-section">
-            <div className="admin-section-header">
-              <div>
-                <h2>Cases Requiring Action</h2>
+          {activeTab === "cases" && (
+            <section className="admin-dashboard-section">
+              <div className="admin-section-header">
+                <div>
+                  <h2>All Cases</h2>
 
-                <p>Pending claims and department handover requests.</p>
+                  <p>
+                    Complete history of items handled by
+                    the department.
+                  </p>
+                </div>
+
+                <span className="admin-section-count">
+                  {filteredCases.length}
+                </span>
               </div>
 
-              <span className="admin-section-count">
-                {attentionCases.length}
-              </span>
-            </div>
+              <div className="admin-case-search">
+                <FiSearch />
 
-            {attentionCases.length === 0 ? (
-              <div className="admin-empty-state">
-                <FiCheckCircle />
-
-                <p>No cases require attention.</p>
-              </div>
-            ) : (
-              <div className="admin-case-grid">
-                {attentionCases.map((currentCase) => (
-                  <CaseCard
-                    key={currentCase.item?._id}
-                    currentCase={currentCase}
-                    onOpen={() => handleOpenCase(currentCase.item._id)}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* ==================================================
-            ALL CASES
-        ================================================== */}
-
-        {activeTab === "cases" && (
-          <section className="admin-dashboard-section">
-            <div className="admin-section-header">
-              <div>
-                <h2>All Cases</h2>
-
-                <p>Complete history of items handled by the department.</p>
+                <input
+                  type="text"
+                  placeholder="Search by item, category, location, or student..."
+                  value={searchTerm}
+                  onChange={(event) =>
+                    setSearchTerm(event.target.value)
+                  }
+                />
               </div>
 
-              <span className="admin-section-count">
-                {filteredCases.length}
-              </span>
-            </div>
+              {filteredCases.length === 0 ? (
+                <div className="admin-empty-state">
+                  <FiPackage />
 
-            <div className="admin-case-search">
-              <FiSearch />
-
-              <input
-                type="text"
-                placeholder="Search by item, category, location, or student..."
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-              />
-            </div>
-
-            {filteredCases.length === 0 ? (
-              <div className="admin-empty-state">
-                <FiPackage />
-
-                <p>No cases found.</p>
-              </div>
-            ) : (
-              <div className="admin-case-list">
-                {filteredCases.map((currentCase) => (
-                  <CaseRow
-                    key={currentCase.item?._id}
-                    currentCase={currentCase}
-                    onOpen={() => handleOpenCase(currentCase.item._id)}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-      </main>
+                  <p>No cases found.</p>
+                </div>
+              ) : (
+                <div className="admin-case-list">
+                  {filteredCases.map((currentCase) => (
+                    <CaseRow
+                      key={currentCase.item?._id}
+                      currentCase={currentCase}
+                      onOpen={() =>
+                        handleOpenCase(
+                          currentCase.item._id,
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+        </main>
       </div>
 
       {/* ==================================================
@@ -930,58 +982,82 @@ const AdminDashboard = () => {
             }
           }}
         >
-          <div className="admin-case-modal" role="dialog" aria-modal="true">
+          <div
+            className="admin-case-modal"
+            role="dialog"
+            aria-modal="true"
+          >
             <div className="admin-modal-header">
               <div>
-                <span className="admin-modal-eyebrow">Case Details</span>
+                <span className="admin-modal-eyebrow">
+                  Case Details
+                </span>
 
-                <h2>{selectedCase.item?.title || "Item"}</h2>
+                <h2>
+                  {selectedCase.item?.title || "Item"}
+                </h2>
 
-                <p>Complete activity and ownership history.</p>
+                <p>
+                  Complete activity and ownership history.
+                </p>
               </div>
 
               <button
                 type="button"
                 className="admin-modal-close"
                 onClick={handleCloseCase}
-                disabled={returningItem}
+                disabled={
+                  returningItem || reviewingHandover
+                }
                 aria-label="Close case"
               >
                 <FiX />
               </button>
             </div>
 
-            {/* Case summary */}
+            {/* Case Summary */}
 
             <div className="admin-case-summary">
               <div>
                 <span>Type</span>
 
-                <strong>{formatType(selectedCase.item?.type)}</strong>
+                <strong>
+                  {formatType(selectedCase.item?.type)}
+                </strong>
               </div>
 
               <div>
                 <span>Category</span>
 
-                <strong>{formatCategory(selectedCase.item?.category)}</strong>
+                <strong>
+                  {formatCategory(
+                    selectedCase.item?.category,
+                  )}
+                </strong>
               </div>
 
               <div>
                 <span>Status</span>
 
-                <strong>{formatStatus(selectedCase.item?.status)}</strong>
+                <strong>
+                  {formatStatus(
+                    selectedCase.item?.status,
+                  )}
+                </strong>
               </div>
 
               <div>
                 <span>Location</span>
 
                 <strong>
-                  {formatLocation(selectedCase.item?.itemLocation)}
+                  {formatLocation(
+                    selectedCase.item?.itemLocation,
+                  )}
                 </strong>
               </div>
             </div>
 
-            {/* Approved claim */}
+            {/* Approved Claim Information */}
 
             {selectedCase.approvedClaim && (
               <div className="admin-approved-owner">
@@ -993,21 +1069,25 @@ const AdminDashboard = () => {
                   <span>Approved Claimant</span>
 
                   <strong>
-                    {selectedCase.approvedClaim.claimant?.name || "Student"}
+                    {selectedCase.approvedClaim.claimant
+                      ?.name || "Student"}
                   </strong>
 
                   <small>
-                    {selectedCase.approvedClaim.claimant?.email ||
-                      "Email unavailable"}
+                    {selectedCase.approvedClaim.claimant
+                      ?.email || "Email unavailable"}
                   </small>
                 </div>
               </div>
             )}
 
-            {/* Pending Handover Action */}
+            {/* ==================================================
+                Pending Department Handover
+            ================================================== */}
 
             {selectedCase.handovers?.some(
-              (handover) => handover.status === "pending",
+              (handover) =>
+                handover.status === "pending",
             ) && (
               <div className="admin-action-panel admin-action-panel-warning">
                 <div className="admin-action-panel-icon">
@@ -1019,12 +1099,16 @@ const AdminDashboard = () => {
                     Department Handover Request
                   </span>
 
-                  <h3>Confirm that the department received this item</h3>
+                  <h3>
+                    Confirm that the department received
+                    this item
+                  </h3>
 
                   <p>
-                    The student has reported handing over this item to the
-                    Lost &amp; Found Department. Confirm only after the item has
-                    actually been received.
+                    The student has reported handing over
+                    this item to the Lost &amp; Found
+                    Department. Confirm only after the
+                    item has actually been received.
                   </p>
 
                   <label
@@ -1032,6 +1116,7 @@ const AdminDashboard = () => {
                     className="admin-review-note-label"
                   >
                     <span>Admin Note</span>
+
                     <span className="admin-required-note">
                       Required when rejecting
                     </span>
@@ -1041,19 +1126,31 @@ const AdminDashboard = () => {
                     id="handover-review-note"
                     value={handoverReviewNote}
                     onChange={(event) => {
-                      setHandoverReviewNote(event.target.value);
-                      if (event.target.value.trim()) {
-                        setHandoverReviewNoteError("");
+                      setHandoverReviewNote(
+                        event.target.value,
+                      );
+
+                      if (
+                        event.target.value.trim()
+                      ) {
+                        setHandoverReviewNoteError(
+                          "",
+                        );
                       }
                     }}
                     placeholder="Add a note about this handover..."
                     rows={3}
                     disabled={reviewingHandover}
-                    aria-invalid={Boolean(handoverReviewNoteError)}
+                    aria-invalid={Boolean(
+                      handoverReviewNoteError,
+                    )}
                   />
 
                   {handoverReviewNoteError && (
-                    <p className="admin-review-note-error" role="alert">
+                    <p
+                      className="admin-review-note-error"
+                      role="alert"
+                    >
                       {handoverReviewNoteError}
                     </p>
                   )}
@@ -1062,19 +1159,30 @@ const AdminDashboard = () => {
                     <button
                       type="button"
                       className="admin-modal-reject"
-                      onClick={() => handleReviewHandover("rejected")}
+                      onClick={() =>
+                        handleReviewHandover(
+                          "rejected",
+                        )
+                      }
                       disabled={reviewingHandover}
                     >
-                      {reviewingHandover ? "Processing..." : "Reject Handover"}
+                      {reviewingHandover
+                        ? "Processing..."
+                        : "Reject Handover"}
                     </button>
 
                     <button
                       type="button"
                       className="admin-modal-approve"
-                      onClick={() => handleReviewHandover("confirmed")}
+                      onClick={() =>
+                        handleReviewHandover(
+                          "confirmed",
+                        )
+                      }
                       disabled={reviewingHandover}
                     >
                       <FiCheckCircle />
+
                       {reviewingHandover
                         ? "Processing..."
                         : "Confirm Handover"}
@@ -1084,12 +1192,18 @@ const AdminDashboard = () => {
               </div>
             )}
 
-            {/* Pending Claim Action */}
+            {/* ==================================================
+                Ownership Claim Information
 
-            {selectedCase.claims?.some(
-              (claim) => claim.status === "pending",
-            ) && (
-              <div className="admin-action-panel admin-action-panel-claim">
+                IMPORTANT:
+                There is intentionally NO approve/reject
+                action here.
+
+                The finder handles the claim directly.
+            ================================================== */}
+
+            {selectedCase.claims?.length > 0 && (
+              <div className="admin-case-info-panel">
                 <div className="admin-action-panel-icon">
                   <FiUser />
                 </div>
@@ -1099,96 +1213,17 @@ const AdminDashboard = () => {
                     Ownership Claim
                   </span>
 
-                  <h3>Review this student's claim</h3>
+                  <h3>
+                    Claim activity is handled by the finder
+                  </h3>
 
-                  {(() => {
-                    const claim = selectedCase.claims.find(
-                      (currentClaim) => currentClaim.status === "pending",
-                    );
-
-                    return (
-                      <>
-                        <div className="admin-claim-review-grid">
-                          <div>
-                            <span>Claimant</span>
-                            <strong>
-                              {claim?.claimant?.name || "Student"}
-                            </strong>
-                            <small>
-                              {claim?.claimant?.email || "Email unavailable"}
-                            </small>
-                          </div>
-
-                          <div>
-                            <span>Ownership Proof</span>
-                            <p>
-                              {claim?.ownershipProof ||
-                                "No ownership proof provided."}
-                            </p>
-                          </div>
-                        </div>
-
-                        {claim?.message && (
-                          <div className="admin-claim-message">
-                            <span>Claimant Message</span>
-                            <p>{claim.message}</p>
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
-
-                  <label
-                    htmlFor="claim-review-note"
-                    className="admin-review-note-label"
-                  >
-                    <span>Admin Review Note</span>
-                    <span className="admin-required-note">
-                      Required when rejecting
-                    </span>
-                  </label>
-
-                  <textarea
-                    id="claim-review-note"
-                    value={claimReviewNote}
-                    onChange={(event) => {
-                      setClaimReviewNote(event.target.value);
-                      if (event.target.value.trim()) {
-                        setClaimReviewNoteError("");
-                      }
-                    }}
-                    placeholder="Explain your decision..."
-                    rows={3}
-                    disabled={reviewingClaim}
-                    aria-invalid={Boolean(claimReviewNoteError)}
-                  />
-
-                  {claimReviewNoteError && (
-                    <p className="admin-review-note-error" role="alert">
-                      {claimReviewNoteError}
-                    </p>
-                  )}
-
-                  <div className="admin-action-buttons">
-                    <button
-                      type="button"
-                      className="admin-modal-reject"
-                      onClick={() => handleReviewClaim("rejected")}
-                      disabled={reviewingClaim}
-                    >
-                      {reviewingClaim ? "Processing..." : "Reject Claim"}
-                    </button>
-
-                    <button
-                      type="button"
-                      className="admin-modal-approve"
-                      onClick={() => handleReviewClaim("approved")}
-                      disabled={reviewingClaim}
-                    >
-                      <FiCheckCircle />
-                      {reviewingClaim ? "Processing..." : "Approve Claim"}
-                    </button>
-                  </div>
+                  <p>
+                    Ownership claims for found items are
+                    reviewed directly by the student who
+                    posted the item. The Lost &amp; Found
+                    Department does not approve or reject
+                    these direct-owner claims.
+                  </p>
                 </div>
               </div>
             )}
@@ -1201,51 +1236,69 @@ const AdminDashboard = () => {
               </div>
 
               <div className="admin-case-timeline">
-                {buildTimeline(selectedCase).map((event, index) => (
-                  <div
-                    className="admin-timeline-item"
-                    key={`${event.title}-${index}`}
-                  >
-                    <div className="admin-timeline-marker">
-                      {event.icon === "success" || event.icon === "returned" ? (
-                        <FiCheckCircle />
-                      ) : event.icon === "rejected" ? (
-                        <FiX />
-                      ) : event.icon === "handover" ? (
-                        <FaHandHolding />
-                      ) : event.icon === "claim" ? (
-                        <FiUser />
-                      ) : (
-                        <FiPackage />
-                      )}
-                    </div>
-
-                    <div className="admin-timeline-content">
-                      <div className="admin-timeline-top">
-                        <strong>{event.title}</strong>
-
-                        <span>{formatDateTime(event.date)}</span>
+                {buildTimeline(selectedCase).map(
+                  (event, index) => (
+                    <div
+                      className="admin-timeline-item"
+                      key={`${event.title}-${index}`}
+                    >
+                      <div className="admin-timeline-marker">
+                        {event.icon === "success" ||
+                        event.icon === "returned" ? (
+                          <FiCheckCircle />
+                        ) : event.icon === "rejected" ? (
+                          <FiX />
+                        ) : event.icon === "handover" ? (
+                          <FaHandHolding />
+                        ) : event.icon === "claim" ? (
+                          <FiUser />
+                        ) : (
+                          <FiPackage />
+                        )}
                       </div>
 
-                      <p>{event.description}</p>
+                      <div className="admin-timeline-content">
+                        <div className="admin-timeline-top">
+                          <strong>
+                            {event.title}
+                          </strong>
+
+                          <span>
+                            {formatDateTime(
+                              event.date,
+                            )}
+                          </span>
+                        </div>
+
+                        <p>
+                          {event.description}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ),
+                )}
               </div>
             </div>
 
-            {/* Return action */}
+            {/* ==================================================
+                Department Return Action
+
+                This remains an admin action because the
+                item is physically at the department.
+            ================================================== */}
 
             {selectedCase.item?.status === "active" &&
-              selectedCase.item?.itemLocation === "lost-found-department" &&
+              selectedCase.item?.itemLocation ===
+                "lost-found-department" &&
               selectedCase.approvedClaim && (
                 <div className="admin-case-final-action">
                   <div>
                     <h3>Ready for Collection</h3>
 
                     <p>
-                      Verify the claimant's Sharda University ID and ownership
-                      proof before handing over the item.
+                      Verify the claimant's Sharda
+                      University ID and ownership proof
+                      before handing over the item.
                     </p>
                   </div>
 
@@ -1257,12 +1310,17 @@ const AdminDashboard = () => {
                   >
                     <FiCheckCircle />
 
-                    {returningItem ? "Returning..." : "Give Item to Owner"}
+                    {returningItem
+                      ? "Returning..."
+                      : "Give Item to Owner"}
                   </button>
                 </div>
               )}
 
-            {selectedCase.item?.status === "returned" && (
+            {/* Returned */}
+
+            {selectedCase.item?.status ===
+              "returned" && (
               <div className="admin-case-returned">
                 <FiCheckCircle />
 
@@ -1271,9 +1329,14 @@ const AdminDashboard = () => {
 
                   <span>
                     Returned to{" "}
-                    {selectedCase.item.departmentReturnedTo?.name ||
+                    {selectedCase.item
+                      .departmentReturnedTo?.name ||
                       "the approved claimant"}{" "}
-                    on {formatDateTime(selectedCase.item.departmentReturnedAt)}
+                    on{" "}
+                    {formatDateTime(
+                      selectedCase.item
+                        .departmentReturnedAt,
+                    )}
                   </span>
                 </div>
               </div>
@@ -1282,7 +1345,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Case loading overlay */}
+      {/* Case Loading Overlay */}
 
       {caseLoading && (
         <div className="admin-case-loading-overlay">
@@ -1302,10 +1365,6 @@ const AdminDashboard = () => {
 const CaseCard = ({ currentCase, onOpen }) => {
   const item = currentCase.item;
 
-  const pendingClaim = currentCase.claims?.find(
-    (claim) => claim.status === "pending",
-  );
-
   const pendingHandover = currentCase.handovers?.find(
     (handover) => handover.status === "pending",
   );
@@ -1314,34 +1373,37 @@ const CaseCard = ({ currentCase, onOpen }) => {
     <div className="admin-case-card">
       <div className="admin-case-card-top">
         <div>
-          <span className="admin-case-type">{formatType(item?.type)}</span>
+          <span className="admin-case-type">
+            {formatType(item?.type)}
+          </span>
 
-          <h3>{item?.title || "Item unavailable"}</h3>
+          <h3>
+            {item?.title || "Item unavailable"}
+          </h3>
         </div>
 
         <span className="admin-case-status">
           {item?.status === "returned"
             ? "Returned"
-            : item?.itemLocation === "lost-found-department"
+            : item?.itemLocation ===
+                "lost-found-department"
               ? "At Department"
               : "Active"}
         </span>
       </div>
 
       <div className="admin-case-card-details">
-        <span>{formatCategory(item?.category)}</span>
+        <span>
+          {formatCategory(item?.category)}
+        </span>
 
-        <span>{item?.location || "Location unavailable"}</span>
+        <span>
+          {item?.location ||
+            "Location unavailable"}
+        </span>
       </div>
 
       <div className="admin-case-card-alerts">
-        {pendingClaim && (
-          <span>
-            <FiClock />
-            Claim pending
-          </span>
-        )}
-
         {pendingHandover && (
           <span>
             <FaHandHolding />
@@ -1350,7 +1412,11 @@ const CaseCard = ({ currentCase, onOpen }) => {
         )}
       </div>
 
-      <button type="button" className="admin-case-open-button" onClick={onOpen}>
+      <button
+        type="button"
+        className="admin-case-open-button"
+        onClick={onOpen}
+      >
         <span>View Case</span>
 
         <FiChevronRight />
@@ -1374,7 +1440,9 @@ const CaseRow = ({ currentCase, onOpen }) => {
         </div>
 
         <div className="admin-case-row-info">
-          <strong>{item?.title || "Item unavailable"}</strong>
+          <strong>
+            {item?.title || "Item unavailable"}
+          </strong>
 
           <span>
             {formatType(item?.type)}
@@ -1385,16 +1453,28 @@ const CaseRow = ({ currentCase, onOpen }) => {
       </div>
 
       <div className="admin-case-row-meta">
-        <span>{formatLocation(item?.itemLocation)}</span>
+        <span>
+          {formatLocation(
+            item?.itemLocation,
+          )}
+        </span>
 
-        <span>{formatDate(item?.createdAt)}</span>
+        <span>
+          {formatDate(item?.createdAt)}
+        </span>
       </div>
 
       <div className="admin-case-row-status">
-        <span>{formatStatus(item?.status)}</span>
+        <span>
+          {formatStatus(item?.status)}
+        </span>
       </div>
 
-      <button type="button" className="admin-table-action" onClick={onOpen}>
+      <button
+        type="button"
+        className="admin-table-action"
+        onClick={onOpen}
+      >
         <FiEye />
         View
       </button>
