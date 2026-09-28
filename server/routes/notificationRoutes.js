@@ -4,6 +4,7 @@ const {
   getMyNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  markConversationMessageNotificationsAsRead,
 } = require("../controllers/notificationController");
 
 const { protect } = require("../middleware/authMiddleware");
@@ -23,5 +24,12 @@ router.patch(
   protect,
   markAllNotificationsAsRead
 );
+
+router.patch(
+  "/conversation/:conversationId/read",
+  protect,
+  markConversationMessageNotificationsAsRead
+);
+
 
 module.exports = router;

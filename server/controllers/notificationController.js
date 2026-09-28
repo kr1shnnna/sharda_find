@@ -58,6 +58,33 @@ const markNotificationAsRead = async (req, res) => {
   }
 };
 
+const markConversationMessageNotificationsAsRead = async (req, res) => {
+  try {
+    const result = await Notification.updateMany(
+      {
+        recipient: req.user._id,
+        conversation: req.params.conversationId,
+        type: "new-message",
+        read: false,
+      },
+      {
+        $set: { read: true },
+      },
+    );
+
+    return res.status(200).json({
+      message: "Conversation message notifications marked as read",
+      updatedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error("Mark conversation notifications as read error:", error);
+
+    return res.status(500).json({
+      message: "Unable to update conversation notifications",
+    });
+  }
+};
+
 const markAllNotificationsAsRead = async (req, res) => {
   try {
     const result = await Notification.updateMany(
@@ -67,7 +94,7 @@ const markAllNotificationsAsRead = async (req, res) => {
       },
       {
         $set: { read: true },
-      }
+      },
     );
 
     res.status(200).json({
@@ -87,4 +114,5 @@ module.exports = {
   getMyNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  markConversationMessageNotificationsAsRead,
 };

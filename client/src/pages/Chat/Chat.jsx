@@ -132,12 +132,14 @@ const Chat = () => {
 
   const markMessagesAsRead = async () => {
     try {
-      await api.patch(`/messages/conversation/${conversationId}/read`);
+      await Promise.all([
+        api.patch(`/messages/conversation/${conversationId}/read`),
+        api.patch(`/notifications/conversation/${conversationId}/read`),
+      ]);
     } catch (error) {
-      console.error("Mark messages as read error:", error);
+      console.error("Mark conversation as read error:", error);
     }
   };
-
   /*
    * Load initial chat data
    */
@@ -196,9 +198,7 @@ const Chat = () => {
     });
 
     socket.on("new-message", (newMessage) => {
-      if (
-        newMessage?.conversation?.toString() !== conversationId.toString()
-      ) {
+      if (newMessage?.conversation?.toString() !== conversationId.toString()) {
         return;
       }
 
@@ -539,17 +539,14 @@ const Chat = () => {
 
   const isFinder =
     conversationItem?.type === "lost"
-      ? conversationItem?.foundBy?.toString() ===
-        currentUserId?.toString()
+      ? conversationItem?.foundBy?.toString() === currentUserId?.toString()
       : conversationItem?.type === "found"
-        ? conversationItem?.reportedBy?.toString() ===
-          currentUserId?.toString()
+        ? conversationItem?.reportedBy?.toString() === currentUserId?.toString()
         : false;
 
   const isOwner =
     conversationItem?.type === "lost"
-      ? conversationItem?.reportedBy?.toString() ===
-        currentUserId?.toString()
+      ? conversationItem?.reportedBy?.toString() === currentUserId?.toString()
       : conversationItem?.type === "found"
         ? conversation?.claim?.claimant?.toString() ===
           currentUserId?.toString()
@@ -711,9 +708,7 @@ const Chat = () => {
                 return (
                   <div
                     key={message._id}
-                    className={`message-row ${
-                      ownMessage ? "own" : "other"
-                    }`}
+                    className={`message-row ${ownMessage ? "own" : "other"}`}
                   >
                     <div
                       className={`message-bubble ${
@@ -775,9 +770,7 @@ const Chat = () => {
               <button
                 type="button"
                 className="chat-confirmation-close"
-                onClick={() =>
-                  !handoverLoading && setConfirmationModal(null)
-                }
+                onClick={() => !handoverLoading && setConfirmationModal(null)}
                 aria-label="Close confirmation"
                 title="Close"
                 disabled={handoverLoading}

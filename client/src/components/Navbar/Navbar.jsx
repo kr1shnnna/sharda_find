@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
 import { FaLeaf } from "react-icons/fa";
@@ -13,11 +14,7 @@ import {
   FiX,
 } from "react-icons/fi";
 
-import {
-  Link,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
@@ -27,11 +24,7 @@ import "./Navbar.css";
 const SOCKET_URL = "http://localhost:5000";
 
 const Navbar = () => {
-  const {
-    user,
-    isAuthenticated,
-    logout,
-  } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -41,35 +34,55 @@ const Navbar = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   /*
-   * Fetch unread notification count
-   * from the database.
+   * Keep the latest pathname available to the socket listener
+   * without recreating the socket whenever the route changes.
    */
+  const pathnameRef = useRef(location.pathname);
+
   useEffect(() => {
+    pathnameRef.current = location.pathname;
+  }, [location.pathname]);
+
+  /*
+   * Fetch unread notification count from the database.
+   */
+  const fetchUnreadNotifications = async () => {
     if (!isAuthenticated) {
       setUnreadCount(0);
       return;
     }
 
-    const fetchUnreadNotifications = async () => {
-      try {
-        const response = await api.get("/notifications");
+    try {
+      const response = await api.get("/notifications");
 
-        setUnreadCount(
-          response.data?.unreadCount || 0
-        );
-      } catch (error) {
-        console.error(
-          "Fetch notification count error:",
-          error
-        );
-      }
-    };
+      setUnreadCount(response.data?.unreadCount || 0);
+    } catch (error) {
+      console.error(
+        "Fetch notification count error:",
+        error
+      );
+    }
+  };
 
+  /*
+   * Fetch unread count when:
+   * - user logs in
+   * - user changes route
+   *
+   * This makes sure the Navbar reflects the actual
+   * database state instead of relying only on local state.
+   */
+  useEffect(() => {
     fetchUnreadNotifications();
   }, [isAuthenticated, location.pathname]);
 
   /*
-   * Real-time notification listener
+   * Real-time notification listener.
+   *
+   * IMPORTANT:
+   * The socket is created only once while the user is
+   * authenticated. We do NOT recreate it every time
+   * the route changes.
    */
   useEffect(() => {
     if (!isAuthenticated) {
@@ -95,16 +108,82 @@ const Navbar = () => {
       );
     });
 
-    socket.on("new-notification", (notification) => {
-      console.log(
-        "New notification received:",
-        notification
-      );
+    socket.on(
+      "new-notification",
+      async (notification) => {
+        console.log(
+          "New notification received:",
+          notification
+        );
 
-      setUnreadCount(
-        (previousCount) => previousCount + 1
-      );
-    });
+        const currentPath = pathnameRef.current;
+
+        const isInsideConversation =
+          currentPath.startsWith("/messages/");
+
+        const currentConversationId =
+          isInsideConversation
+            ? currentPath.split("/messages/")[1]
+            : null;
+
+        const notificationConversationId =
+          notification?.conversation
+            ? String(
+                notification.conversation?._id ||
+                  notification.conversation
+              )
+            : null;
+
+        /*
+         * NEW MESSAGE
+         *
+         * If the user is currently inside the exact
+         * conversation where the message arrived,
+         * do NOT show a notification badge.
+         */
+        if (
+          notification?.type === "new-message" &&
+          currentConversationId &&
+          notificationConversationId &&
+          notificationConversationId ===
+            String(currentConversationId)
+        ) {
+          try {
+            /*
+             * Mark this exact notification as read.
+             */
+            if (notification?._id) {
+              await api.patch(
+                `/notifications/${notification._id}/read`
+              );
+            }
+
+            /*
+             * Refresh the count from MongoDB.
+             *
+             * This is important because the notification
+             * has now become read.
+             */
+            await fetchUnreadNotifications();
+          } catch (error) {
+            console.error(
+              "Unable to mark message notification as read:",
+              error
+            );
+          }
+
+          return;
+        }
+
+        /*
+         * If the user is NOT inside this conversation,
+         * show the unread badge.
+         */
+        setUnreadCount(
+          (previousCount) => previousCount + 1
+        );
+      }
+    );
 
     socket.on("connect_error", (error) => {
       console.error(
@@ -115,6 +194,42 @@ const Navbar = () => {
 
     return () => {
       socket.disconnect();
+    };
+  }, [isAuthenticated]);
+
+  /*
+   * Listen for notification pages telling Navbar
+   * that a notification has been marked as read.
+   */
+  useEffect(() => {
+    const handleNotificationRead = () => {
+      fetchUnreadNotifications();
+    };
+
+    const handleNotificationsAllRead = () => {
+      setUnreadCount(0);
+    };
+
+    window.addEventListener(
+      "notification-read",
+      handleNotificationRead
+    );
+
+    window.addEventListener(
+      "notifications-all-read",
+      handleNotificationsAllRead
+    );
+
+    return () => {
+      window.removeEventListener(
+        "notification-read",
+        handleNotificationRead
+      );
+
+      window.removeEventListener(
+        "notifications-all-read",
+        handleNotificationsAllRead
+      );
     };
   }, [isAuthenticated]);
 
@@ -147,7 +262,6 @@ const Navbar = () => {
   return (
     <header className="navbar">
       <div className="navbar-container">
-
         {/* Logo */}
         <Link
           to="/"
@@ -191,7 +305,6 @@ const Navbar = () => {
 
         {/* Desktop Right Side */}
         <div className="navbar-actions">
-
           {isAuthenticated ? (
             <div className="navbar-user">
 
@@ -241,7 +354,6 @@ const Navbar = () => {
 
                 {menuOpen && (
                   <div className="navbar-user-dropdown">
-
                     <Link
                       to="/dashboard"
                       className="user-dropdown-item"
@@ -294,11 +406,9 @@ const Navbar = () => {
                       <FiLogOut />
                       <span>Logout</span>
                     </button>
-
                   </div>
                 )}
               </div>
-
             </div>
           ) : (
             <>
@@ -317,7 +427,6 @@ const Navbar = () => {
               </Link>
             </>
           )}
-
         </div>
 
         {/* Mobile Menu Button */}
@@ -336,22 +445,23 @@ const Navbar = () => {
           }
           aria-expanded={mobileMenuOpen}
         >
-          {mobileMenuOpen ? <FiX /> : <FiMenu />}
+          {mobileMenuOpen ? (
+            <FiX />
+          ) : (
+            <FiMenu />
+          )}
         </button>
-
       </div>
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="navbar-mobile-menu">
-
           <nav className="navbar-mobile-links">
 
             {/* Logged-in account section */}
             {isAuthenticated && (
               <>
                 <div className="navbar-mobile-user">
-
                   <div className="navbar-mobile-user-icon">
                     <FiUser />
                   </div>
@@ -365,7 +475,6 @@ const Navbar = () => {
                       Student
                     </span>
                   </div>
-
                 </div>
 
                 <div className="navbar-mobile-divider" />
@@ -376,7 +485,9 @@ const Navbar = () => {
             <Link
               to="/browse"
               className={`navbar-mobile-link ${
-                isActive("/browse") ? "active" : ""
+                isActive("/browse")
+                  ? "active"
+                  : ""
               }`}
               onClick={closeMobileMenu}
             >
@@ -470,7 +581,6 @@ const Navbar = () => {
                 <div className="navbar-mobile-divider" />
 
                 <div className="navbar-mobile-auth">
-
                   <Link
                     to="/login"
                     className="navbar-login-button"
@@ -486,13 +596,10 @@ const Navbar = () => {
                   >
                     Register
                   </Link>
-
                 </div>
               </>
             )}
-
           </nav>
-
         </div>
       )}
     </header>
@@ -500,3 +607,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
