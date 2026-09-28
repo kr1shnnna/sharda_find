@@ -1164,6 +1164,611 @@
 
 
 /* =========================================
+   FINDER CLAIM NOTIFICATION
+========================================= */
+
+.my-item-claim-button {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 14px;
+  padding: 11px 12px;
+
+  border: 1px solid #fde68a;
+  border-radius: 9px;
+
+  background: #fffbeb;
+  color: #92400e;
+
+  font-family: inherit;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.my-item-claim-button:hover {
+  background: #fef3c7;
+  border-color: #fcd34d;
+}
+
+.my-item-claim-button:active {
+  transform: translateY(1px);
+}
+
+.my-item-claim-icon {
+  width: 30px;
+  height: 30px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 7px;
+
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.my-item-claim-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.my-item-claim-text {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  flex: 1;
+}
+
+.my-item-claim-text strong {
+  color: #92400e;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.my-item-claim-text small {
+  color: #a16207;
+
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.my-item-claim-button > svg {
+  width: 15px;
+  height: 15px;
+
+  flex-shrink: 0;
+}
+
+
+/* =========================================
+   FINDER CLAIM REVIEW MODAL
+========================================= */
+
+.claim-review-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(15, 23, 42, 0.58);
+
+  overflow-y: auto;
+
+  animation: claimReviewOverlayIn 0.2s ease;
+}
+
+.claim-review-modal {
+  position: relative;
+
+  width: 100%;
+  max-width: 620px;
+  max-height: calc(100vh - 40px);
+
+  overflow-y: auto;
+
+  padding: 30px;
+
+  background: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: 16px;
+
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.2);
+
+  animation: claimReviewModalIn 0.25s ease;
+}
+
+.claim-review-close {
+  position: absolute;
+
+  top: 16px;
+  right: 16px;
+
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+  color: var(--text-secondary);
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.claim-review-close:hover {
+  background: #f1f5f9;
+  color: var(--text-primary);
+}
+
+.claim-review-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.claim-review-close svg {
+  width: 19px;
+  height: 19px;
+}
+
+
+/* HEADER */
+
+.claim-review-icon {
+  width: 46px;
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 14px;
+
+  border-radius: 12px;
+
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.claim-review-icon svg {
+  width: 23px;
+  height: 23px;
+}
+
+.claim-review-header {
+  padding-right: 42px;
+  margin-bottom: 22px;
+}
+
+.claim-review-label {
+  margin-bottom: 5px;
+
+  color: var(--primary);
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.claim-review-header h2 {
+  margin-bottom: 7px;
+
+  color: var(--text-primary);
+
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.claim-review-header p:last-child {
+  color: var(--text-secondary);
+
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+
+/* ITEM */
+
+.claim-review-item {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 22px;
+  padding: 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: #f8fafc;
+}
+
+.claim-review-item img {
+  width: 62px;
+  height: 62px;
+
+  flex-shrink: 0;
+
+  object-fit: cover;
+
+  border-radius: 8px;
+}
+
+.claim-review-item div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.claim-review-item span {
+  color: var(--text-secondary);
+
+  font-size: 10px;
+}
+
+.claim-review-item strong {
+  overflow: hidden;
+
+  color: var(--text-primary);
+
+  font-size: 14px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.claim-review-item small {
+  color: var(--text-secondary);
+
+  font-size: 11px;
+}
+
+
+/* SECTIONS */
+
+.claim-review-section {
+  margin-bottom: 18px;
+}
+
+.claim-review-section-title {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 8px;
+
+  color: var(--text-primary);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.claim-review-section-title svg {
+  width: 15px;
+  height: 15px;
+
+  color: var(--primary);
+}
+
+
+/* CLAIMANT */
+
+.claim-review-person {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  padding: 12px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: var(--white);
+}
+
+.claim-review-person strong {
+  color: var(--text-primary);
+
+  font-size: 13px;
+}
+
+.claim-review-person span {
+  color: var(--text-secondary);
+
+  font-size: 12px;
+}
+
+
+/* PROOF / MESSAGE */
+
+.claim-review-box {
+  padding: 13px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: #f8fafc;
+
+  color: #475569;
+
+  font-size: 13px;
+  line-height: 1.6;
+
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+
+/* EVIDENCE */
+
+.claim-review-evidence {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+.claim-review-evidence a {
+  display: block;
+
+  overflow: hidden;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: #f8fafc;
+}
+
+.claim-review-evidence img {
+  width: 100%;
+  height: 150px;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition: transform 0.2s ease;
+}
+
+.claim-review-evidence a:hover img {
+  transform: scale(1.03);
+}
+
+
+/* NOTE */
+
+.claim-review-note {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 9px;
+
+  margin: 20px 0;
+
+  padding: 12px 14px;
+
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+
+  background: #eff6ff;
+}
+
+.claim-review-note svg {
+  flex-shrink: 0;
+
+  margin-top: 2px;
+
+  width: 16px;
+  height: 16px;
+
+  color: #2563eb;
+}
+
+.claim-review-note p {
+  margin: 0;
+
+  color: #475569;
+
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+
+/* ACTIONS */
+
+.claim-review-actions {
+  display: flex;
+
+  gap: 10px;
+
+  padding-top: 4px;
+}
+
+.claim-review-reject,
+.claim-review-approve {
+  min-height: 42px;
+
+  flex: 1;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 0 16px;
+
+  border-radius: 8px;
+
+  font-family: inherit;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.claim-review-reject {
+  border: 1px solid #fecaca;
+
+  background: #fff;
+
+  color: #b91c1c;
+}
+
+.claim-review-reject:hover {
+  background: #fef2f2;
+
+  border-color: #fca5a5;
+}
+
+.claim-review-approve {
+  border: 1px solid var(--primary);
+
+  background: var(--primary);
+
+  color: var(--white);
+}
+
+.claim-review-approve:hover {
+  background: var(--primary-dark);
+
+  border-color: var(--primary-dark);
+}
+
+.claim-review-reject:disabled,
+.claim-review-approve:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+.claim-review-reject svg,
+.claim-review-approve svg {
+  width: 16px;
+  height: 16px;
+}
+
+
+/* =========================================
+   CLAIM MODAL ANIMATIONS
+========================================= */
+
+@keyframes claimReviewOverlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes claimReviewModalIn {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(12px)
+      scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+
+/* =========================================
+   CLAIM MODAL RESPONSIVE
+========================================= */
+
+@media (max-width: 600px) {
+  .claim-review-overlay {
+    align-items: flex-start;
+
+    padding: 12px;
+  }
+
+  .claim-review-modal {
+    max-height: calc(100vh - 24px);
+
+    padding: 24px 18px;
+  }
+
+  .claim-review-header h2 {
+    font-size: 20px;
+  }
+
+  .claim-review-item img {
+    width: 54px;
+    height: 54px;
+  }
+
+  .claim-review-evidence {
+    grid-template-columns: 1fr;
+  }
+
+  .claim-review-evidence img {
+    height: 180px;
+  }
+
+  .claim-review-actions {
+    flex-direction: column-reverse;
+  }
+
+  .claim-review-reject,
+  .claim-review-approve {
+    width: 100%;
+  }
+}
+
+
+/* =========================================
    LARGE TABLET
 ========================================= */
 
@@ -1525,3 +2130,5 @@
     font-size: 14px;
   }
 }
+
+
