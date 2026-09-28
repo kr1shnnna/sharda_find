@@ -312,8 +312,8 @@ return res.status(500).json({
   claim.reviewedBy =
   req.user._id;
 
-  claim.reviewNote =
-  req.body.reviewNote?.trim() || "";
+  claim.reviewNote = "";
+ 
 
   await claim.save();
 
@@ -432,8 +432,8 @@ return res.status(500).json({
   claim.reviewedBy =
   req.user._id;
 
-  claim.reviewNote =
-  req.body.reviewNote?.trim() || "";
+  claim.reviewNote ="";
+
 
   await claim.save();
 

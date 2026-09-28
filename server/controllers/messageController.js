@@ -74,11 +74,9 @@ message: "Item not found",
   };
   }
 
-```
 const claim = await Claim.findById(conversation.claim);
-```
 
-```
+
 if (!claim) {
   return {
     allowed: false,
@@ -104,7 +102,7 @@ return {
   item,
   claim,
 };
-```
+
 
 }
 
