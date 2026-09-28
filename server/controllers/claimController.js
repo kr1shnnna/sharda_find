@@ -7,7 +7,6 @@ const createClaim = async (req, res) => {
 try {
 const { itemId, ownershipProof, message } = req.body;
 
-```
 if (!itemId || !ownershipProof) {
   return res.status(400).json({
     message: "Item ID and ownership proof are required",
@@ -131,25 +130,21 @@ return res.status(201).json({
     "Claim submitted successfully. The finder will review your claim.",
   claim,
 });
-```
+
 
 } catch (error) {
 console.error("Create claim error:", error);
 
-```
+
 return res.status(500).json({
   message: "Unable to submit claim",
   error: error.message,
 });
-```
+
 
 }
 };
 
-/*
-
-* Get claims submitted by the currently logged-in user.
-  */
   const getMyClaims = async (req, res) => {
   try {
   const claims = await Claim.find({
