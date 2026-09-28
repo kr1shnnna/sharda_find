@@ -47,15 +47,11 @@ const Chat = () => {
 
   const [confirmationModal, setConfirmationModal] = useState(null);
 
-
-
   const messagesContainerRef = useRef(null);
 
   const textareaRef = useRef(null);
 
   const socketRef = useRef(null);
-
-  
 
   const getUserId = () => {
     return user?._id || user?.id;
@@ -187,10 +183,6 @@ const Chat = () => {
 
     socketRef.current = socket;
 
-    /*
-     * Socket connected
-     */
-
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
 
@@ -199,20 +191,14 @@ const Chat = () => {
       socket.emit("join-conversation", conversationId);
     });
 
-    /*
-     * Successfully joined conversation
-     */
-
     socket.on("conversation-joined", (data) => {
       console.log("Joined conversation:", data.conversationId);
     });
 
-    /*
-     * Receive new message
-     */
-
     socket.on("new-message", (newMessage) => {
-      if (newMessage?.conversation?.toString() !== conversationId.toString()) {
+      if (
+        newMessage?.conversation?.toString() !== conversationId.toString()
+      ) {
         return;
       }
 
@@ -228,20 +214,10 @@ const Chat = () => {
         return [...previousMessages, newMessage];
       });
 
-      /*
-       * If the other user sends a message
-       * while this chat is open, mark it
-       * as read.
-       */
-
       if (newMessage.sender?._id?.toString() !== getUserId()?.toString()) {
         markMessagesAsRead();
       }
     });
-
-    /*
-     * Server rejected conversation join
-     */
 
     socket.on("conversation-error", (data) => {
       console.error("Conversation socket error:", data?.message);
@@ -249,27 +225,15 @@ const Chat = () => {
       setSocketError(data?.message || "Unable to join conversation.");
     });
 
-    /*
-     * Socket authentication error
-     */
-
     socket.on("connect_error", (error) => {
       console.error("Socket connection error:", error.message);
 
       setSocketError("Real-time connection could not be established.");
     });
 
-    /*
-     * Socket disconnected
-     */
-
     socket.on("disconnect", (reason) => {
       console.log("Socket disconnected:", reason);
     });
-
-    /*
-     * Cleanup
-     */
 
     return () => {
       socket.emit("leave-conversation", conversationId);
@@ -296,17 +260,15 @@ const Chat = () => {
    * Scroll to latest message
    */
 
- 
   useEffect(() => {
-  const container = messagesContainerRef.current;
+    const container = messagesContainerRef.current;
 
-  if (!container) {
-    return;
-  }
+    if (!container) {
+      return;
+    }
 
-  container.scrollTop = container.scrollHeight;
-}, [messages]);
-
+    container.scrollTop = container.scrollHeight;
+  }, [messages]);
 
   /*
    * Finder handover
@@ -405,14 +367,6 @@ const Chat = () => {
       );
 
       const newMessage = response.data?.data;
-
-      /*
-       * Add our own message immediately.
-       *
-       * The server also emits this message
-       * through Socket.IO, so we check the
-       * message ID to prevent duplication.
-       */
 
       if (newMessage) {
         setMessages((previousMessages) => {
@@ -547,7 +501,6 @@ const Chat = () => {
                 onClick={handleBack}
               >
                 <FiArrowLeft />
-
                 <span>Back to Messages</span>
               </button>
 
@@ -557,7 +510,6 @@ const Chat = () => {
                 onClick={loadChat}
               >
                 <FiRefreshCw />
-
                 <span>Try again</span>
               </button>
             </div>
@@ -575,13 +527,33 @@ const Chat = () => {
 
   const conversationItem = conversation?.item;
 
+  /*
+   * LOST:
+   *   finder = foundBy
+   *   owner  = reportedBy
+   *
+   * FOUND:
+   *   founder/holder = reportedBy
+   *   owner          = claim.claimant
+   */
+
   const isFinder =
-    conversationItem?.type === "lost" &&
-    conversationItem?.foundBy?.toString() === currentUserId?.toString();
+    conversationItem?.type === "lost"
+      ? conversationItem?.foundBy?.toString() ===
+        currentUserId?.toString()
+      : conversationItem?.type === "found"
+        ? conversationItem?.reportedBy?.toString() ===
+          currentUserId?.toString()
+        : false;
 
   const isOwner =
-    conversationItem?.type === "lost" &&
-    conversationItem?.reportedBy?.toString() === currentUserId?.toString();
+    conversationItem?.type === "lost"
+      ? conversationItem?.reportedBy?.toString() ===
+        currentUserId?.toString()
+      : conversationItem?.type === "found"
+        ? conversation?.claim?.claimant?.toString() ===
+          currentUserId?.toString()
+        : false;
 
   return (
     <main className="chat-page">
@@ -631,7 +603,8 @@ const Chat = () => {
         {/* Finder handover */}
 
         {isFinder &&
-          conversationItem?.status === "active" &&
+          (conversationItem?.status === "active" ||
+            conversationItem?.status === "claim-pending") &&
           !conversationItem?.finderHandedOver && (
             <div className="chat-handover-section">
               <div className="chat-handover-content">
@@ -663,7 +636,8 @@ const Chat = () => {
         {/* Owner confirmation */}
 
         {isOwner &&
-          conversationItem?.status === "active" &&
+          (conversationItem?.status === "active" ||
+            conversationItem?.status === "claim-pending") &&
           conversationItem?.finderHandedOver &&
           !conversationItem?.returnConfirmedByOwner && (
             <div className="chat-handover-section">
@@ -676,8 +650,8 @@ const Chat = () => {
                   <h3>Did you receive the item?</h3>
 
                   <p>
-                    The finder has confirmed handing over the item. Confirm once
-                    you have received it.
+                    The founder has confirmed handing over the item. Confirm
+                    once you have received it.
                   </p>
                 </div>
               </div>
@@ -737,7 +711,9 @@ const Chat = () => {
                 return (
                   <div
                     key={message._id}
-                    className={`message-row ${ownMessage ? "own" : "other"}`}
+                    className={`message-row ${
+                      ownMessage ? "own" : "other"
+                    }`}
                   >
                     <div
                       className={`message-bubble ${
@@ -753,7 +729,6 @@ const Chat = () => {
                   </div>
                 );
               })}
-              
             </div>
           )}
         </section>
@@ -800,7 +775,9 @@ const Chat = () => {
               <button
                 type="button"
                 className="chat-confirmation-close"
-                onClick={() => !handoverLoading && setConfirmationModal(null)}
+                onClick={() =>
+                  !handoverLoading && setConfirmationModal(null)
+                }
                 aria-label="Close confirmation"
                 title="Close"
                 disabled={handoverLoading}
@@ -825,7 +802,7 @@ const Chat = () => {
               <p>
                 {confirmationModal === "finder"
                   ? "Please confirm that you have physically handed the item over to the owner."
-                  : "Please confirm that you have received the item from the finder."}
+                  : "Please confirm that you have received the item from the founder."}
               </p>
 
               <div className="chat-confirmation-actions">
