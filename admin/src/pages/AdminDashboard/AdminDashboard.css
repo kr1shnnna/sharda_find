@@ -2624,3 +2624,283 @@
   }
 }
 
+/* ==================================================
+   L&F DEPARTMENT CASE POLISH
+   ================================================== */
+
+/* Department location badge */
+.admin-case-location-department {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  width: fit-content;
+  max-width: 100%;
+
+  margin-top: 4px;
+  padding: 6px 9px;
+
+  color: #475569;
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.admin-case-location-department svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+
+/* ==================================================
+   Department / claimant relationship panel
+   ================================================== */
+
+.admin-department-claim-panel {
+  margin-top: 16px;
+  padding: 14px 16px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.admin-department-claim-panel-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  margin-bottom: 10px;
+}
+
+.admin-department-claim-panel-header svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+
+  margin-top: 1px;
+  color: var(--primary);
+}
+
+.admin-department-claim-panel-header div {
+  min-width: 0;
+}
+
+.admin-department-claim-panel-header strong {
+  display: block;
+
+  margin: 0 0 3px;
+
+  color: var(--text-primary);
+
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.admin-department-claim-panel-header span {
+  display: block;
+
+  color: var(--text-secondary);
+
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+
+/* ==================================================
+   Claimant information
+   ================================================== */
+
+.admin-department-claimant {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 11px;
+
+  background: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.admin-department-claimant-avatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--primary);
+  background: var(--primary-light);
+
+  border-radius: 50%;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-department-claimant-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-department-claimant-info strong {
+  overflow: hidden;
+
+  color: var(--text-primary);
+
+  font-size: 11px;
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-department-claimant-info span {
+  overflow: hidden;
+
+  color: var(--text-secondary);
+
+  font-size: 10px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ==================================================
+   Department claim notice
+   ================================================== */
+
+.admin-department-claim-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+
+  margin-top: 10px;
+  padding: 10px 11px;
+
+  color: #475569;
+  background: #f1f5f9;
+
+  border-radius: 7px;
+
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.admin-department-claim-notice svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+
+  margin-top: 1px;
+}
+
+
+/* ==================================================
+   Department review action
+   ================================================== */
+
+.admin-department-review-panel {
+  margin: 18px 24px 0;
+  padding: 16px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.admin-department-review-panel h3 {
+  margin: 0 0 5px;
+
+  color: var(--text-primary);
+
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.admin-department-review-panel p {
+  margin: 0;
+
+  color: var(--text-secondary);
+
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+
+/* ==================================================
+   Hide unnecessary founder/finder language
+   visually when department is handling item
+   ================================================== */
+
+.admin-department-context {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  width: fit-content;
+
+  padding: 5px 8px;
+
+  color: var(--primary);
+  background: var(--primary-light);
+
+  border-radius: 6px;
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.admin-department-context svg {
+  width: 12px;
+  height: 12px;
+}
+
+
+/* ==================================================
+   Responsive
+   ================================================== */
+
+@media (max-width: 900px) {
+  .admin-department-review-panel {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .admin-department-claim-panel {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-department-claimant {
+    align-items: flex-start;
+  }
+
+  .admin-department-claim-panel-header {
+    gap: 8px;
+  }
+
+  .admin-department-review-panel {
+    margin-left: 12px;
+    margin-right: 12px;
+    padding: 13px;
+  }
+}
+
