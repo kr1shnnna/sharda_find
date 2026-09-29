@@ -2132,3 +2132,514 @@
 }
 
 
+/* =========================================
+CLAIM REVIEW ERROR
+========================================= */
+
+.claim-review-error {
+display: flex;
+align-items: flex-start;
+gap: 10px;
+
+margin: 18px 0;
+padding: 12px 14px;
+
+border: 1px solid #fecaca;
+border-radius: 9px;
+
+background: #fef2f2;
+color: #b91c1c;
+}
+
+.claim-review-error > svg {
+width: 17px;
+height: 17px;
+
+flex-shrink: 0;
+margin-top: 1px;
+}
+
+.claim-review-error p {
+flex: 1;
+
+margin: 0;
+
+color: #991b1b;
+
+font-size: 12px;
+line-height: 1.5;
+}
+
+.claim-review-error button {
+width: 26px;
+height: 26px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+flex-shrink: 0;
+
+padding: 0;
+
+border: none;
+border-radius: 6px;
+
+background: transparent;
+color: #b91c1c;
+
+cursor: pointer;
+
+transition:
+background-color 0.2s ease,
+color 0.2s ease;
+}
+
+.claim-review-error button:hover {
+background: #fee2e2;
+color: #991b1b;
+}
+
+.claim-review-error button svg {
+width: 15px;
+height: 15px;
+}
+
+/* =========================================
+CLAIM CONFIRMATION PANEL
+========================================= */
+
+.claim-review-confirmation {
+margin-top: 20px;
+padding: 18px;
+
+border: 1px solid var(--border);
+border-radius: 12px;
+
+background: #f8fafc;
+
+animation: claimConfirmationIn 0.2s ease;
+}
+
+.claim-review-confirmation-icon {
+width: 42px;
+height: 42px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+margin-bottom: 12px;
+
+border-radius: 10px;
+
+background: var(--primary-light);
+color: var(--primary);
+}
+
+.claim-review-confirmation-icon svg {
+width: 21px;
+height: 21px;
+}
+
+.claim-review-confirmation-content h3 {
+margin: 0 0 6px;
+
+color: var(--text-primary);
+
+font-size: 16px;
+font-weight: 700;
+line-height: 1.4;
+}
+
+.claim-review-confirmation-content p {
+margin: 0;
+
+color: var(--text-secondary);
+
+font-size: 12px;
+line-height: 1.55;
+}
+
+/* =========================================
+CLAIM CONFIRMATION ACTIONS
+========================================= */
+
+.claim-review-confirmation-actions {
+display: flex;
+align-items: center;
+justify-content: flex-end;
+
+gap: 9px;
+
+margin-top: 16px;
+}
+
+.claim-review-confirmation-cancel,
+.claim-review-confirmation-approve,
+.claim-review-confirmation-reject {
+min-height: 38px;
+
+display: inline-flex;
+align-items: center;
+justify-content: center;
+
+gap: 6px;
+
+padding: 0 14px;
+
+border-radius: 7px;
+
+font-family: inherit;
+font-size: 12px;
+font-weight: 600;
+
+cursor: pointer;
+
+transition:
+background-color 0.2s ease,
+border-color 0.2s ease,
+color 0.2s ease,
+transform 0.15s ease;
+}
+
+/* CANCEL */
+
+.claim-review-confirmation-cancel {
+border: 1px solid var(--border);
+
+background: var(--white);
+color: var(--text-secondary);
+}
+
+.claim-review-confirmation-cancel:hover {
+background: #f1f5f9;
+border-color: #cbd5e1;
+color: var(--text-primary);
+}
+
+/* APPROVE */
+
+.claim-review-confirmation-approve {
+border: 1px solid var(--primary);
+
+background: var(--primary);
+color: var(--white);
+}
+
+.claim-review-confirmation-approve:hover {
+background: var(--primary-dark);
+border-color: var(--primary-dark);
+}
+
+/* REJECT */
+
+.claim-review-confirmation-reject {
+border: 1px solid #dc2626;
+
+background: #dc2626;
+color: var(--white);
+}
+
+.claim-review-confirmation-reject:hover {
+background: #b91c1c;
+border-color: #b91c1c;
+}
+
+/* ICONS */
+
+.claim-review-confirmation-actions svg {
+width: 14px;
+height: 14px;
+}
+
+/* DISABLED */
+
+.claim-review-confirmation-cancel:disabled,
+.claim-review-confirmation-approve:disabled,
+.claim-review-confirmation-reject:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+}
+
+/* CLICK FEEDBACK */
+
+.claim-review-confirmation-cancel:active,
+.claim-review-confirmation-approve:active,
+.claim-review-confirmation-reject:active {
+transform: translateY(1px);
+}
+
+/* =========================================
+CLAIM CONFIRMATION ANIMATION
+========================================= */
+
+@keyframes claimConfirmationIn {
+from {
+opacity: 0;
+transform: translateY(6px);
+}
+
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+/* =========================================
+CLAIM CONFIRMATION MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+.claim-review-confirmation {
+padding: 15px;
+}
+
+.claim-review-confirmation-actions {
+flex-direction: column-reverse;
+align-items: stretch;
+}
+
+.claim-review-confirmation-cancel,
+.claim-review-confirmation-approve,
+.claim-review-confirmation-reject {
+width: 100%;
+}
+}
+
+
+/* =========================================================
+   SUCCESS / ERROR FEEDBACK MODAL
+   ========================================================= */
+
+.feedback-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(4px);
+
+  animation: feedbackOverlayIn 0.18s ease-out;
+}
+
+.feedback-modal {
+  position: relative;
+
+  width: min(460px, 100%);
+  padding: 32px;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.18),
+    0 8px 24px rgba(15, 23, 42, 0.08);
+
+  text-align: center;
+
+  animation: feedbackModalIn 0.2s ease-out;
+}
+
+.feedback-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: transparent;
+  color: #64748b;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.feedback-modal-close:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.feedback-modal-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Icon */
+
+.feedback-modal-icon {
+  width: 64px;
+  height: 64px;
+
+  margin: 0 auto 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 18px;
+}
+
+.feedback-modal-icon svg {
+  width: 34px;
+  height: 34px;
+}
+
+/* Success */
+
+.feedback-modal-success .feedback-modal-icon {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* Error */
+
+.feedback-modal-error .feedback-modal-icon {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Heading */
+
+.feedback-modal h2 {
+  margin: 0 0 10px;
+
+  color: #17231c;
+
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+/* Message */
+
+.feedback-modal p {
+  margin: 0 auto;
+
+  max-width: 380px;
+
+  color: #64748b;
+
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Okay button */
+
+.feedback-modal-button {
+  width: 100%;
+
+  margin-top: 26px;
+  padding: 12px 20px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #176b3a;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.feedback-modal-button:hover {
+  background: #12582f;
+
+  box-shadow: 0 6px 16px rgba(23, 107, 58, 0.2);
+}
+
+.feedback-modal-button:active {
+  transform: translateY(1px);
+}
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes feedbackOverlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes feedbackModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 520px) {
+  .feedback-modal-overlay {
+    padding: 16px;
+  }
+
+  .feedback-modal {
+    width: 100%;
+    padding: 28px 22px 22px;
+    border-radius: 16px;
+  }
+
+  .feedback-modal-icon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 17px;
+    border-radius: 16px;
+  }
+
+  .feedback-modal-icon svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .feedback-modal h2 {
+    font-size: 21px;
+  }
+
+  .feedback-modal p {
+    font-size: 14px;
+  }
+
+  .feedback-modal-button {
+    margin-top: 22px;
+  }
+}

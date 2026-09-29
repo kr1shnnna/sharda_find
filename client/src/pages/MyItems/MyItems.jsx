@@ -76,7 +76,10 @@ const getCategoryLabel = (category) => {
 
   return category
     .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map(
+      (word) =>
+        word.charAt(0).toUpperCase() + word.slice(1),
+    )
     .join(" ");
 };
 
@@ -107,14 +110,26 @@ const MyItems = () => {
 
   const [error, setError] = useState("");
 
-  const [handoverLoading, setHandoverLoading] = useState(null);
-  const [ownerHandoverLoading, setOwnerHandoverLoading] = useState(null);
+  const [handoverLoading, setHandoverLoading] =
+    useState(null);
 
-  const [confirmationModal, setConfirmationModal] = useState(null);
+  const [ownerHandoverLoading, setOwnerHandoverLoading] =
+    useState(null);
+
+  const [confirmationModal, setConfirmationModal] =
+    useState(null);
 
   // Finder claim review modal
   const [claimModal, setClaimModal] = useState(null);
-  const [claimActionLoading, setClaimActionLoading] = useState(null);
+  const [claimActionLoading, setClaimActionLoading] =
+    useState(null);
+
+  // Custom confirmation / feedback modals
+  const [ownerHandoverModal, setOwnerHandoverModal] =
+    useState(null);
+
+  const [feedbackModal, setFeedbackModal] =
+    useState(null);
 
   const fetchMyItems = async () => {
     try {
@@ -144,7 +159,10 @@ const MyItems = () => {
 
       setClaims(response.data?.claims || []);
     } catch (error) {
-      console.error("Fetch claims on my items error:", error);
+      console.error(
+        "Fetch claims on my items error:",
+        error,
+      );
 
       /*
        * Do not make the whole My Items page fail if the
@@ -166,13 +184,16 @@ const MyItems = () => {
   const getPendingClaimForItem = (itemId) => {
     return claims.find(
       (claim) =>
-        claim.item?._id?.toString() === itemId?.toString() &&
+        claim.item?._id?.toString() ===
+          itemId?.toString() &&
         claim.status === "pending",
     );
   };
 
   const openClaimModal = async (item) => {
-    const existingClaim = getPendingClaimForItem(item._id);
+    const existingClaim = getPendingClaimForItem(
+      item._id,
+    );
 
     if (existingClaim) {
       setClaimModal(existingClaim);
@@ -182,20 +203,30 @@ const MyItems = () => {
     try {
       setClaimsLoading(true);
 
-      const response = await api.get("/claims/my-items");
+      const response = await api.get(
+        "/claims/my-items",
+      );
 
-      const updatedClaims = response.data?.claims || [];
+      const updatedClaims =
+        response.data?.claims || [];
 
       setClaims(updatedClaims);
 
       const claim = updatedClaims.find(
         (claimItem) =>
-          claimItem.item?._id?.toString() === item._id?.toString() &&
+          claimItem.item?._id?.toString() ===
+            item._id?.toString() &&
           claimItem.status === "pending",
       );
 
       if (!claim) {
-        alert("No pending claim was found for this item.");
+        setFeedbackModal({
+          type: "error",
+          title: "No Pending Claim",
+          message:
+            "No pending claim was found for this item.",
+        });
+
         return;
       }
 
@@ -203,10 +234,13 @@ const MyItems = () => {
     } catch (error) {
       console.error("Fetch claim error:", error);
 
-      alert(
-        error.response?.data?.message ||
+      setFeedbackModal({
+        type: "error",
+        title: "Unable to Load Claim",
+        message:
+          error.response?.data?.message ||
           "Unable to load the claim. Please try again.",
-      );
+      });
     } finally {
       setClaimsLoading(false);
     }
@@ -220,40 +254,73 @@ const MyItems = () => {
     setClaimModal(null);
   };
 
-  const handleClaimAction = async (claimId, action) => {
+  /*
+   * Finder approves/rejects a claim.
+   *
+   * IMPORTANT:
+   * No window.confirm() and no browser alert().
+   */
+  const handleClaimAction = async (
+    claimId,
+    action,
+  ) => {
     if (!claimId) {
       return;
     }
 
-    const actionText = action === "approve" ? "approve" : "reject";
-
-    const confirmed = window.confirm(
-      `Are you sure you want to ${actionText} this claim?`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
+    const actionText =
+      action === "approve"
+        ? "approve"
+        : "reject";
 
     try {
       setClaimActionLoading(action);
 
       if (action === "approve") {
-        await api.patch(`/claims/${claimId}/approve`);
+        await api.patch(
+          `/claims/${claimId}/approve`,
+        );
       } else {
-        await api.patch(`/claims/${claimId}/reject`);
+        await api.patch(
+          `/claims/${claimId}/reject`,
+        );
       }
 
       setClaimModal(null);
 
       await refreshPageData();
-    } catch (error) {
-      console.error(`${action} claim error:`, error);
 
-      alert(
-        error.response?.data?.message ||
-          `Unable to ${actionText} the claim. Please try again.`,
+      setFeedbackModal({
+        type: "success",
+
+        title:
+          action === "approve"
+            ? "Claim Approved"
+            : "Claim Rejected",
+
+        message:
+          action === "approve"
+            ? "The claimant has been notified and messaging is now available."
+            : "The claimant has been notified that their claim was rejected.",
+      });
+    } catch (error) {
+      console.error(
+        `${action} claim error:`,
+        error,
       );
+
+      setFeedbackModal({
+        type: "error",
+
+        title:
+          action === "approve"
+            ? "Unable to Approve Claim"
+            : "Unable to Reject Claim",
+
+        message:
+          error.response?.data?.message ||
+          `Unable to ${actionText} the claim. Please try again.`,
+      });
     } finally {
       setClaimActionLoading(null);
     }
@@ -282,12 +349,21 @@ const MyItems = () => {
       }
     };
 
-    document.addEventListener("keydown", handleEscape);
+    document.addEventListener(
+      "keydown",
+      handleEscape,
+    );
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener(
+        "keydown",
+        handleEscape,
+      );
     };
-  }, [confirmationModal, handoverLoading]);
+  }, [
+    confirmationModal,
+    handoverLoading,
+  ]);
 
   useEffect(() => {
     if (!claimModal) {
@@ -300,13 +376,76 @@ const MyItems = () => {
       }
     };
 
-    document.addEventListener("keydown", handleEscape);
+    document.addEventListener(
+      "keydown",
+      handleEscape,
+    );
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener(
+        "keydown",
+        handleEscape,
+      );
     };
-  }, [claimModal, claimActionLoading]);
+  }, [
+    claimModal,
+    claimActionLoading,
+  ]);
 
+  useEffect(() => {
+    if (!ownerHandoverModal) {
+      return;
+    }
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        closeOwnerHandoverConfirmation();
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleEscape,
+    );
+
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        handleEscape,
+      );
+    };
+  }, [
+    ownerHandoverModal,
+    ownerHandoverLoading,
+  ]);
+
+  useEffect(() => {
+    if (!feedbackModal) {
+      return;
+    }
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setFeedbackModal(null);
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleEscape,
+    );
+
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        handleEscape,
+      );
+    };
+  }, [feedbackModal]);
+
+  /*
+   * Department handover
+   */
   const handleHandover = async () => {
     if (!confirmationModal) {
       return;
@@ -317,45 +456,95 @@ const MyItems = () => {
     try {
       setHandoverLoading(itemId);
 
-      await api.post(`/handovers/${itemId}`);
+      await api.post(
+        `/handovers/${itemId}`,
+      );
 
       setConfirmationModal(null);
 
       await fetchMyItems();
     } catch (error) {
-      console.error("Report handover error:", error);
-
-      alert(
-        error.response?.data?.message ||
-          "Unable to report handover. Please try again.",
+      console.error(
+        "Report handover error:",
+        error,
       );
+
+      setFeedbackModal({
+        type: "error",
+        title: "Unable to Report Handover",
+        message:
+          error.response?.data?.message ||
+          "Unable to report handover. Please try again.",
+      });
     } finally {
       setHandoverLoading(null);
     }
   };
 
-  const handleOwnerHandover = async (itemId) => {
-    const confirmed = window.confirm(
-      "Have you handed this item over to the owner?",
-    );
-
-    if (!confirmed) {
+  /*
+   * Owner handover confirmation.
+   *
+   * This replaces window.confirm().
+   */
+  const openOwnerHandoverConfirmation = (
+    itemId,
+  ) => {
+    if (!itemId) {
       return;
     }
+
+    setOwnerHandoverModal(itemId);
+  };
+
+  const closeOwnerHandoverConfirmation = () => {
+    if (ownerHandoverLoading) {
+      return;
+    }
+
+    setOwnerHandoverModal(null);
+  };
+
+  /*
+   * Finder confirms that the item was physically
+   * handed over to the owner.
+   */
+  const handleOwnerHandover = async () => {
+    if (!ownerHandoverModal) {
+      return;
+    }
+
+    const itemId = ownerHandoverModal;
 
     try {
       setOwnerHandoverLoading(itemId);
 
-      await api.patch(`/items/${itemId}/confirm-handover`);
+      await api.patch(
+        `/items/${itemId}/confirm-handover`,
+      );
+
+      setOwnerHandoverModal(null);
 
       await fetchMyItems();
-    } catch (error) {
-      console.error("Confirm owner handover error:", error);
 
-      alert(
-        error.response?.data?.message ||
-          "Unable to confirm the handover. Please try again.",
+      setFeedbackModal({
+        type: "success",
+        title: "Handover Confirmed",
+        message:
+          "The item has been marked as handed over to the owner.",
+      });
+    } catch (error) {
+      console.error(
+        "Confirm owner handover error:",
+        error,
       );
+
+      setFeedbackModal({
+        type: "error",
+        title: "Unable to Confirm Handover",
+        message:
+          error.response?.data?.message ||
+          "Unable to confirm the handover. Please try again.",
+      });
     } finally {
       setOwnerHandoverLoading(null);
     }
@@ -370,7 +559,9 @@ const MyItems = () => {
       return items;
     }
 
-    return items.filter((item) => item.type === activeFilter);
+    return items.filter(
+      (item) => item.type === activeFilter,
+    );
   }, [items, activeFilter]);
 
   const handleFilterChange = (filter) => {
@@ -392,13 +583,17 @@ const MyItems = () => {
           >
             <div
               className="claim-review-modal"
-              onClick={(event) => event.stopPropagation()}
+              onClick={(event) =>
+                event.stopPropagation()
+              }
             >
               <button
                 type="button"
                 className="claim-review-close"
                 onClick={closeClaimModal}
-                disabled={Boolean(claimActionLoading)}
+                disabled={Boolean(
+                  claimActionLoading,
+                )}
                 aria-label="Close"
               >
                 <FiX />
@@ -418,8 +613,9 @@ const MyItems = () => {
                 </h2>
 
                 <p>
-                  Someone believes this item belongs to them.
-                  Review their proof before making a decision.
+                  Someone believes this item belongs
+                  to them. Review their proof before
+                  making a decision.
                 </p>
               </div>
 
@@ -427,8 +623,13 @@ const MyItems = () => {
 
               <div className="claim-review-item">
                 <img
-                  src={getImageUrl(claimModal.item || {})}
-                  alt={claimModal.item?.title || "Item"}
+                  src={getImageUrl(
+                    claimModal.item || {},
+                  )}
+                  alt={
+                    claimModal.item?.title ||
+                    "Item"
+                  }
                   onError={(event) => {
                     event.currentTarget.src =
                       "https://placehold.co/800x600/f1f5f9/64748b?text=No+Image";
@@ -439,12 +640,16 @@ const MyItems = () => {
                   <span>Item</span>
 
                   <strong>
-                    {claimModal.item?.title || "Unknown item"}
+                    {claimModal.item?.title ||
+                      "Unknown item"}
                   </strong>
 
                   <small>
                     {claimModal.item?.category
-                      ? getCategoryLabel(claimModal.item.category)
+                      ? getCategoryLabel(
+                          claimModal.item
+                            .category,
+                        )
                       : "Category unavailable"}
                   </small>
                 </div>
@@ -491,7 +696,9 @@ const MyItems = () => {
                 <div className="claim-review-section">
                   <div className="claim-review-section-title">
                     <FiFileText />
-                    <span>Additional Message</span>
+                    <span>
+                      Additional Message
+                    </span>
                   </div>
 
                   <div className="claim-review-box">
@@ -502,12 +709,17 @@ const MyItems = () => {
 
               {/* EVIDENCE */}
 
-              {Array.isArray(claimModal.evidenceImages) &&
-                claimModal.evidenceImages.length > 0 && (
+              {Array.isArray(
+                claimModal.evidenceImages,
+              ) &&
+                claimModal.evidenceImages
+                  .length > 0 && (
                   <div className="claim-review-section">
                     <div className="claim-review-section-title">
                       <FiImage />
-                      <span>Evidence Images</span>
+                      <span>
+                        Evidence Images
+                      </span>
                     </div>
 
                     <div className="claim-review-evidence">
@@ -524,7 +736,9 @@ const MyItems = () => {
                           >
                             <img
                               src={image.url}
-                              alt={`Evidence ${index + 1}`}
+                              alt={`Evidence ${
+                                index + 1
+                              }`}
                             />
                           </a>
                         ),
@@ -539,10 +753,11 @@ const MyItems = () => {
                 <FiAlertCircle />
 
                 <p>
-                  Only approve the claim if you are satisfied
-                  that the person can prove ownership. After
-                  approval, you can communicate with them
-                  through messaging and arrange the handover.
+                  Only approve the claim if you are
+                  satisfied that the person can prove
+                  ownership. After approval, you can
+                  communicate with them through
+                  messaging and arrange the handover.
                 </p>
               </div>
 
@@ -558,11 +773,14 @@ const MyItems = () => {
                       "reject",
                     )
                   }
-                  disabled={Boolean(claimActionLoading)}
+                  disabled={Boolean(
+                    claimActionLoading,
+                  )}
                 >
                   <FiX />
 
-                  {claimActionLoading === "reject"
+                  {claimActionLoading ===
+                  "reject"
                     ? "Rejecting..."
                     : "Reject Claim"}
                 </button>
@@ -576,11 +794,14 @@ const MyItems = () => {
                       "approve",
                     )
                   }
-                  disabled={Boolean(claimActionLoading)}
+                  disabled={Boolean(
+                    claimActionLoading,
+                  )}
                 >
                   <FiCheck />
 
-                  {claimActionLoading === "approve"
+                  {claimActionLoading ===
+                  "approve"
                     ? "Approving..."
                     : "Approve Claim"}
                 </button>
@@ -607,7 +828,9 @@ const MyItems = () => {
               <button
                 type="button"
                 className="confirmation-modal-close"
-                onClick={closeHandoverConfirmation}
+                onClick={
+                  closeHandoverConfirmation
+                }
                 disabled={handoverLoading}
                 aria-label="Close"
               >
@@ -629,17 +852,20 @@ const MyItems = () => {
               </p>
 
               <p className="confirmation-modal-note">
-                The department will review and confirm the
-                handover. The item's location will change to
-                the Lost & Found Department only after the
-                department confirms receipt.
+                The department will review and confirm
+                the handover. The item's location will
+                change to the Lost & Found Department
+                only after the department confirms
+                receipt.
               </p>
 
               <div className="confirmation-modal-actions">
                 <button
                   type="button"
                   className="confirmation-modal-cancel"
-                  onClick={closeHandoverConfirmation}
+                  onClick={
+                    closeHandoverConfirmation
+                  }
                   disabled={handoverLoading}
                 >
                   Cancel
@@ -662,6 +888,145 @@ const MyItems = () => {
           </div>
         )}
 
+        {/* =====================================================
+            OWNER HANDOVER CONFIRMATION MODAL
+        ====================================================== */}
+
+        {ownerHandoverModal && (
+          <div
+            className="confirmation-modal-overlay"
+            onClick={
+              closeOwnerHandoverConfirmation
+            }
+          >
+            <div
+              className="confirmation-modal"
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+            >
+              <button
+                type="button"
+                className="confirmation-modal-close"
+                onClick={
+                  closeOwnerHandoverConfirmation
+                }
+                disabled={Boolean(
+                  ownerHandoverLoading,
+                )}
+                aria-label="Close"
+              >
+                <FiX />
+              </button>
+
+              <div className="confirmation-modal-icon">
+                <FiCheckCircle />
+              </div>
+
+              <h2>Confirm handover?</h2>
+
+              <p className="confirmation-modal-message">
+                Have you handed this item over to
+                the owner?
+              </p>
+
+              <p className="confirmation-modal-note">
+                Only confirm this after you have
+                actually handed the item to the person
+                who claimed it.
+              </p>
+
+              <div className="confirmation-modal-actions">
+                <button
+                  type="button"
+                  className="confirmation-modal-cancel"
+                  onClick={
+                    closeOwnerHandoverConfirmation
+                  }
+                  disabled={Boolean(
+                    ownerHandoverLoading,
+                  )}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="confirmation-modal-confirm"
+                  onClick={handleOwnerHandover}
+                  disabled={Boolean(
+                    ownerHandoverLoading,
+                  )}
+                >
+                  <FiCheckCircle />
+
+                  {ownerHandoverLoading
+                    ? "Confirming..."
+                    : "Confirm Handover"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =====================================================
+            SUCCESS / ERROR FEEDBACK MODAL
+        ====================================================== */}
+
+        {feedbackModal && (
+          <div
+            className="feedback-modal-overlay"
+            onClick={() =>
+              setFeedbackModal(null)
+            }
+          >
+            <div
+              className={`feedback-modal ${
+                feedbackModal.type === "error"
+                  ? "feedback-modal-error"
+                  : "feedback-modal-success"
+              }`}
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+            >
+              <button
+                type="button"
+                className="feedback-modal-close"
+                onClick={() =>
+                  setFeedbackModal(null)
+                }
+                aria-label="Close"
+              >
+                <FiX />
+              </button>
+
+              <div className="feedback-modal-icon">
+                {feedbackModal.type ===
+                "error" ? (
+                  <FiAlertCircle />
+                ) : (
+                  <FiCheckCircle />
+                )}
+              </div>
+
+              <h2>{feedbackModal.title}</h2>
+
+              <p>{feedbackModal.message}</p>
+
+              <button
+                type="button"
+                className="feedback-modal-button"
+                onClick={() =>
+                  setFeedbackModal(null)
+                }
+              >
+                Okay
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* HEADER */}
 
         <div className="my-items-header">
@@ -673,8 +1038,8 @@ const MyItems = () => {
             <h1>My Items</h1>
 
             <p className="my-items-description">
-              Manage the lost and found items you have
-              reported.
+              Manage the lost and found items you
+              have reported.
             </p>
           </div>
 
@@ -706,12 +1071,15 @@ const MyItems = () => {
                 key={filter.value}
                 type="button"
                 className={`my-items-filter ${
-                  activeFilter === filter.value
+                  activeFilter ===
+                  filter.value
                     ? "active"
                     : ""
                 }`}
                 onClick={() =>
-                  handleFilterChange(filter.value)
+                  handleFilterChange(
+                    filter.value,
+                  )
                 }
               >
                 {filter.label}
@@ -745,14 +1113,15 @@ const MyItems = () => {
             ))}
           </div>
 
-          {!loading && items.length > 0 && (
-            <span className="my-items-count">
-              {filteredItems.length}{" "}
-              {filteredItems.length === 1
-                ? "item"
-                : "items"}
-            </span>
-          )}
+          {!loading &&
+            items.length > 0 && (
+              <span className="my-items-count">
+                {filteredItems.length}{" "}
+                {filteredItems.length === 1
+                  ? "item"
+                  : "items"}
+              </span>
+            )}
         </div>
 
         {/* LOADING */}
@@ -791,7 +1160,9 @@ const MyItems = () => {
               <FiAlertCircle />
             </div>
 
-            <h2>Unable to load your items</h2>
+            <h2>
+              Unable to load your items
+            </h2>
 
             <p>{error}</p>
 
@@ -819,7 +1190,8 @@ const MyItems = () => {
               <h2>No items reported yet</h2>
 
               <p>
-                Items that you report will appear here.
+                Items that you report will appear
+                here.
               </p>
 
               <div className="empty-state-actions">
@@ -853,7 +1225,9 @@ const MyItems = () => {
                 <FiPackage />
               </div>
 
-              <h2>No {activeFilter} items</h2>
+              <h2>
+                No {activeFilter} items
+              </h2>
 
               <p>
                 You haven't reported any{" "}
@@ -891,7 +1265,9 @@ const MyItems = () => {
                     currentUserId?.toString();
 
                 const pendingClaim =
-                  getPendingClaimForItem(item._id);
+                  getPendingClaimForItem(
+                    item._id,
+                  );
 
                 const statusClass =
                   statusClasses[item.status] ||
@@ -1028,7 +1404,7 @@ const MyItems = () => {
                                   item._id
                                 }
                                 onClick={() =>
-                                  handleOwnerHandover(
+                                  openOwnerHandoverConfirmation(
                                     item._id,
                                   )
                                 }
@@ -1086,13 +1462,15 @@ const MyItems = () => {
                                       ? "Submitting..."
                                       : "Hand over to L&F Department"}
                                   </button>
-                                ) : item.handover.status ===
+                                ) : item.handover
+                                    .status ===
                                   "pending" ? (
                                   <span className="my-item-handover-status pending">
                                     <FiAlertCircle />
                                     Waiting for Department
                                   </span>
-                                ) : item.handover.status ===
+                                ) : item.handover
+                                    .status ===
                                   "rejected" ? (
                                   <div className="my-item-handover-rejected">
                                     <span className="my-item-handover-status rejected">
