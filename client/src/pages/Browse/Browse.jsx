@@ -88,34 +88,6 @@ const Browse = () => {
         : dateA - dateB;
     });
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString(
-      "en-IN",
-      {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }
-    );
-  };
-
-  const getItemForCard = (item) => {
-    return {
-      ...item,
-
-      // Backend _id → ItemCard id
-      id: item._id,
-
-      // Backend itemDate → ItemCard date
-      date: formatDate(item.itemDate),
-
-      // Backend images[] → ItemCard image
-      image:
-        item.images?.[0]?.url ||
-        "https://placehold.co/800x500/f1f5f9/64748b?text=No+Image",
-    };
-  };
-
   return (
     <main className="browse-page">
       <div className="browse-container">
@@ -367,7 +339,7 @@ const Browse = () => {
               {filteredItems.map((item) => (
                 <ItemCard
                   key={item._id}
-                  item={getItemForCard(item)}
+                  item={item}
                 />
               ))}
             </div>

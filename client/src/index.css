@@ -33,6 +33,21 @@ body {
   color: var(--text-primary);
 }
 
+.section-label {
+  margin-bottom: 8px;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.section-description {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 button,
 input,
 textarea,

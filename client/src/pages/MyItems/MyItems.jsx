@@ -1134,16 +1134,16 @@ const MyItems = () => {
                   className="my-item-skeleton"
                   key={index}
                 >
-                  <div className="skeleton-image" />
+                  <div className="my-items-skeleton-image" />
 
-                  <div className="skeleton-content">
-                    <div className="skeleton-line title" />
-                    <div className="skeleton-line" />
-                    <div className="skeleton-line short" />
+                  <div className="my-items-skeleton-content">
+                    <div className="my-items-skeleton-line title" />
+                    <div className="my-items-skeleton-line" />
+                    <div className="my-items-skeleton-line short" />
 
-                    <div className="skeleton-footer">
-                      <div className="skeleton-small" />
-                      <div className="skeleton-button" />
+                    <div className="my-items-skeleton-footer">
+                      <div className="my-items-skeleton-small" />
+                      <div className="my-items-skeleton-button" />
                     </div>
                   </div>
                 </div>

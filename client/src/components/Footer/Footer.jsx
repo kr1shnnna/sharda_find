@@ -37,11 +37,11 @@ const Footer = () => {
               Browse Items
             </Link>
 
-            <Link to="/how-it-works">
+            <Link to="/#how-it-works">
               How It Works
             </Link>
 
-            <Link to="/about">
+            <Link to="/#about">
               About
             </Link>
           </div>
@@ -96,15 +96,6 @@ const Footer = () => {
             © 2026 ShardaFind. Built for the Sharda University community.
           </p>
 
-          <div className="footer-bottom-links">
-            <Link to="/privacy">
-              Privacy
-            </Link>
-
-            <Link to="/terms">
-              Terms
-            </Link>
-          </div>
         </div>
 
       </div>

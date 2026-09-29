@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FiArrowLeft,
@@ -38,7 +38,6 @@ const ReportItem = ({ type = "lost" }) => {
     category: "",
     location: "",
     itemDate: "",
-    itemLocation: "with-finder",
   });
 
   const [images, setImages] = useState([]);
@@ -50,10 +49,14 @@ const ReportItem = ({ type = "lost" }) => {
   /*
    * Create temporary preview URLs whenever images change.
    */
-  const imagePreviews = images.map((image) => ({
-    file: image,
-    url: URL.createObjectURL(image),
-  }));
+  const imagePreviews = useMemo(
+    () =>
+      images.map((image) => ({
+        file: image,
+        url: URL.createObjectURL(image),
+      })),
+    [images],
+  );
 
   /*
    * Clean up preview URLs when component unmounts
@@ -67,7 +70,7 @@ const ReportItem = ({ type = "lost" }) => {
         URL.revokeObjectURL(url);
       });
     };
-  }, [images]);
+  }, [imagePreviews]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;

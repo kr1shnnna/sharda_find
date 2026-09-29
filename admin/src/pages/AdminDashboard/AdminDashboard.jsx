@@ -1363,7 +1363,8 @@ Render
             review panel appears above.
         ================================================== */}
 
-            {selectedCase.claims?.length > 0 && (
+            {selectedCase.claims?.length > 0 && 
+              selectedCase.item?.itemLocation !=="lost-found-department" &&(
               <div className="admin-case-info-panel">
                 <div className="admin-action-panel-icon">
                   <FiUser />

@@ -87,19 +87,19 @@ const RecentItems = () => {
                 className="item-card-skeleton"
                 key={item}
               >
-                <div className="skeleton-image"></div>
+                <div className="recent-items-skeleton-image"></div>
 
-                <div className="skeleton-content">
-                  <div className="skeleton-title"></div>
+                <div className="recent-items-skeleton-content">
+                  <div className="recent-items-skeleton-title"></div>
 
-                  <div className="skeleton-info"></div>
+                  <div className="recent-items-skeleton-info"></div>
 
-                  <div className="skeleton-info short"></div>
+                  <div className="recent-items-skeleton-info short"></div>
 
-                  <div className="skeleton-footer">
-                    <div className="skeleton-category"></div>
+                  <div className="recent-items-skeleton-footer">
+                    <div className="recent-items-skeleton-category"></div>
 
-                    <div className="skeleton-button"></div>
+                    <div className="recent-items-skeleton-button"></div>
                   </div>
                 </div>
               </div>

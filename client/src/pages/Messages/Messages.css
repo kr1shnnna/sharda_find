@@ -432,7 +432,7 @@
   border-radius: var(--radius-lg);
 }
 
-.skeleton-avatar {
+.messages-skeleton-avatar {
   width: 48px;
   height: 48px;
 
@@ -443,12 +443,12 @@
   border-radius: 50%;
 }
 
-.skeleton-content {
+.messages-skeleton-content {
   min-width: 0;
   flex: 1;
 }
 
-.skeleton-name {
+.messages-skeleton-name {
   width: 140px;
   height: 15px;
 
@@ -459,7 +459,7 @@
   border-radius: 5px;
 }
 
-.skeleton-message {
+.messages-skeleton-message {
   width: 65%;
   height: 13px;
 
@@ -468,7 +468,7 @@
   border-radius: 5px;
 }
 
-.skeleton-time {
+.messages-skeleton-time {
   width: 55px;
   height: 12px;
 
@@ -871,20 +871,20 @@
     border-radius: 14px;
   }
 
-  .skeleton-avatar {
+  .messages-skeleton-avatar {
     width: 44px;
     height: 44px;
   }
 
-  .skeleton-name {
+  .messages-skeleton-name {
     width: 125px;
   }
 
-  .skeleton-message {
+  .messages-skeleton-message {
     width: 70%;
   }
 
-  .skeleton-time {
+  .messages-skeleton-time {
     width: 48px;
   }
 }
@@ -1060,22 +1060,22 @@
     border-radius: 12px;
   }
 
-  .skeleton-avatar {
+  .messages-skeleton-avatar {
     width: 42px;
     height: 42px;
   }
 
-  .skeleton-name {
+  .messages-skeleton-name {
     width: 115px;
     height: 14px;
   }
 
-  .skeleton-message {
+  .messages-skeleton-message {
     width: 75%;
     height: 12px;
   }
 
-  .skeleton-time {
+  .messages-skeleton-time {
     width: 42px;
     height: 11px;
   }

@@ -269,24 +269,24 @@ const MyClaims = () => {
                   key={index}
                 >
                   <div className="claim-skeleton-header">
-                    <div className="skeleton-line claim-title" />
-                    <div className="skeleton-status" />
+                    <div className="my-claims-skeleton-line claim-title" />
+                    <div className="my-claims-skeleton-status" />
                   </div>
 
                   <div className="claim-skeleton-meta">
-                    <div className="skeleton-line" />
-                    <div className="skeleton-line short" />
+                    <div className="my-claims-skeleton-line" />
+                    <div className="my-claims-skeleton-line short" />
                   </div>
 
                   <div className="claim-skeleton-section">
-                    <div className="skeleton-line small" />
-                    <div className="skeleton-line" />
-                    <div className="skeleton-line medium" />
+                    <div className="my-claims-skeleton-line small" />
+                    <div className="my-claims-skeleton-line" />
+                    <div className="my-claims-skeleton-line medium" />
                   </div>
 
                   <div className="claim-skeleton-footer">
-                    <div className="skeleton-line category" />
-                    <div className="skeleton-button" />
+                    <div className="my-claims-skeleton-line category" />
+                    <div className="my-claims-skeleton-button" />
                   </div>
                 </div>
               )

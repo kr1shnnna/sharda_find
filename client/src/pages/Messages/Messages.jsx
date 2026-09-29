@@ -172,14 +172,14 @@ const Messages = () => {
                 className="conversation-skeleton"
                 key={item}
               >
-                <div className="skeleton-avatar" />
+                <div className="messages-skeleton-avatar" />
 
-                <div className="skeleton-content">
-                  <div className="skeleton-name" />
-                  <div className="skeleton-message" />
+                <div className="messages-skeleton-content">
+                  <div className="messages-skeleton-name" />
+                  <div className="messages-skeleton-message" />
                 </div>
 
-                <div className="skeleton-time" />
+                <div className="messages-skeleton-time" />
               </div>
             ))}
           </div>

@@ -95,6 +95,7 @@ const getNotificationIcon = (type) => {
       return FiXCircle;
 
     case "item-found":
+    case "item-returned":
       return FiCheckCircle;
 
     case "new-message":
@@ -266,6 +267,7 @@ const Notifications = () => {
         case "handover-submitted":
         case "handover-confirmed":
         case "handover-rejected":
+        case "item-returned":
           navigate("/my-items");
           break;
 
